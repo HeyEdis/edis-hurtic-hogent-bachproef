@@ -1,51 +1,47 @@
 %---------- Inleiding ---------------------------------------------------------
 
-% TODO: Is dit voorstel gebaseerd op een paper van Research Methods die je
-% vorig jaar hebt ingediend? Heb je daarbij eventueel samengewerkt met een
-% andere student?
-% Zo ja, haal dan de tekst hieronder uit commentaar en pas aan.
-
-%\paragraph{Opmerking}
-
-% Dit voorstel is gebaseerd op het onderzoeksvoorstel dat werd geschreven in het
-% kader van het vak Research Methods dat ik (vorig/dit) academiejaar heb
-% uitgewerkt (met medesturent VOORNAAM NAAM als mede-auteur).
-% 
-
 \section{Inleiding}%
 \label{sec:inleiding}
 
-Waarover zal je bachelorproef gaan? Introduceer het thema en zorg dat volgende zaken zeker duidelijk aanwezig zijn:
-
+Human Resources zit in een transitie waarbij het manueel onderhouden van een competentieprofiel is vervangen door een geautomatiseerd proces. De integratie van Artificiële Intelligentie in HRM is een cruciale ontwikkeling gericht op het verhogen van efficiënte personeelsplannen en hogere individuele talentontwikkeling. Hiervoor is data van het vaardigheidsniveau van werknemers vereist. \autocite{Tenakwah2025}.
+\bigskip
+De doelgroep zijn non-desk medewerkers of arbeiders uit elke sector, specifiek de 100+ werknemers van de client Mtechplus. Maar het up-to-date houden van dit profiel wordt niet altijd gedaan voor arbeiders. Bij arbeiders is vaak geen cv aanwezig of is het enorm verouderd en de HR afdeling kan dit niet altijd voor elke werknemer bijhouden.\bigskip 
+In dit onderzoek wordt zich gericht op de digitale kloof tussen arbeiders en de strategische doelen van de onderneming. Om dit te onderhouden is door de opdrachtgever een implementatie met WhatsApp voorgesteld, doordat 70\% van de mensen in België hiermee vertrouwd is. De impact voor de arbeider is hierdoor minimaal, aangezien enkel een telefoon met WhatsApp vereist is.
+\bigskip
+De focus van de oplossing is het sturen van werknemers in hun groei en het dichten van vaardigheidskloven binnen hun huidige functie, door ze te matchen met opleidingen of senior profielen. Dit initiatief is strikt gericht op talentontwikkeling en personeelsplanning geen werving of ontslag.  
+\bigskip
+De werkwijze is als volgt: het bedrijf kiest zelf welke medewerkers worden toegevoegd aan de chat. De medewerker wordt toegevoegd aan een chat waarin die een bericht krijgt van de chatbot met de vraag om een cv te uploaden. Als deze ontbreekt worden bijvragen gesteld, zoals wat hun rol of verricht werk is. Op basis hiervan wordt een profiel opgemaakt: de informatie wordt naar de AI engine van TalentGuide gestuurd, als het profiel niet compleet is kunnen vaardigheden uit de skill engine toegevoegd worden via het online platform. Eenmaal het profiel compleet is wordt het gevalideerd door een werknemer van het bedrijf.\bigskip
+De volgende stap is om AI gestuurde suggesties te leveren over nieuwe vaardigheden dat bij het profiel passen of vragen te stellen over het vaardigheidsniveau van medewerkers zelf “Hey, ik denk dat jij de vaardigheden hebt om logistieke planning bij te houden.” Of over collega’s “Wat denk je van de communicatie van Dries”. De bot kan Nederlands, Engels en Franse antwoorden ontvangen en vertalen.
+Om het probleem beter te begrijpen, zijn de volgende aspecten onderzocht:
 \begin{itemize}
-  \item kaderen thema
-  \item de doelgroep
-  \item de probleemstelling en (centrale) onderzoeksvraag
-  \item de onderzoeksdoelstelling
+    \item Wat zijn de kritieke parameters die gemonitord worden om strategische sturing te leveren?
+    \item Hoe wordt er afgetoetst dat de suggesties correct zijn?
+    \item Hoe wordt er gegarandeerd dat er geen verkeerde vertaling is?
+    \item Kan dit uitgebreid worden naar de hele organisatie?
+    \item Wat zijn de mentale effecten van werknemers continue te monitoren?
+    \item Hoe frequent kunnen de vaardigheden gemeten worden?
+    \item Hoe kan dit schaalbaar ingezet worden? 
 \end{itemize}
+Deze paper resulteert in een Proof of Concept van de WhatsApp chatbot met bijhorende integratie met de PostgreSQL databank van TalentGuide. De PoC bewijst de schaalbaarheid en gevalideerde dataflow van de chatbot. De implementatie garandeert end-to-end encryptie door de data management policy van WhatsApp.
 
-Denk er aan: een typische bachelorproef is \textit{toegepast onderzoek}, wat betekent dat je start vanuit een concrete probleemsituatie in bedrijfscontext, een \textbf{casus}. Het is belangrijk om je onderwerp goed af te bakenen: je gaat voor die \textit{ene specifieke probleemsituatie} op zoek naar een goede oplossing, op basis van de huidige kennis in het vakgebied.
-
-De doelgroep moet ook concreet en duidelijk zijn, dus geen algemene of vaag gedefinieerde groepen zoals \emph{bedrijven}, \emph{developers}, \emph{Vlamingen}, enz. Je richt je in elk geval op it-professionals, een bachelorproef is geen populariserende tekst. Eén specifiek bedrijf (die te maken hebben met een concrete probleemsituatie) is dus beter dan \emph{bedrijven} in het algemeen.
-
-Formuleer duidelijk de onderzoeksvraag! De begeleiders lezen nog steeds te veel voorstellen waarin we geen onderzoeksvraag terugvinden.
-
-Schrijf ook iets over de doelstelling. Wat zie je als het concrete eindresultaat van je onderzoek, naast de uitgeschreven scriptie? Is het een proof-of-concept, een rapport met aanbevelingen, \ldots Met welk eindresultaat kan je je bachelorproef als een succes beschouwen?
 
 %---------- Stand van zaken ---------------------------------------------------
 
 \section{Literatuurstudie}%
 \label{sec:literatuurstudie}
 
-Hier beschrijf je de \emph{state-of-the-art} rondom je gekozen onderzoeksdomein, d.w.z.\ een inleidende, doorlopende tekst over het onderzoeksdomein van je bachelorproef. Je steunt daarbij heel sterk op de professionele \emph{vakliteratuur}, en niet zozeer op populariserende teksten voor een breed publiek. Wat is de huidige stand van zaken in dit domein, en wat zijn nog eventuele open vragen (die misschien de aanleiding waren tot je onderzoeksvraag!)?
+Het integreren van AI in de moderne werkomgeving vertegenwoordigt een van de complexste  transformaties in Human Resource Managment \autocite{Tenakwah2025}. Het draagt bij aan het uitlijnen van de personeelsplanning door het verbeteren van efficiëntie en het optimaliseren van de besluitvorming wat essentieel is voor strategische personeelsplanning.
+\bigskip
+Toch, blijkt uit de literatuur dat de rol van AI in de werkomgeving nieuwe spanningen creëert tussen toezicht en controle. Succesvolle implementatie vereist het balanceren van technische capaciteit en menselijke autonomie \textcite{Tenakwah2025}. De verhoogde efficiëntie kan leiden tot een groeiende kloof tussen productiviteitsmaatstaven en het welzijn van de werknemer. Waardoor er de groter probleem ontstaat van het balanceren van efficiëntie, de veiligheid en het welzijn van de werknemer \textcite{Tenakwah2025}.
 
-Je mag de titel van deze sectie ook aanpassen (literatuurstudie, stand van zaken, enz.). Zijn er al gelijkaardige onderzoeken gevoerd? Wat concluderen ze? Wat is het verschil met jouw onderzoek?
+\subsection{De digitale kloof}
+De noodzaak voor deze oplossing wijst op de digitale kloof tussen de gebruikte tools in de HR omgeving en de adoptiegraad van deze applicaties door arbeiders. Waardoor het leidt tot een gebrek aan accurate competentieprofielen en vervolgens tot een inefficiënte strategische personeelsplanning.
+\bigskip
+De literatuur wijst erop dat AI chatbots genormaliseerd zijn en effectief kunnen worden ingezet voor het leveren van directe antwoorden op de vragen van de werknemers. \textcite{Alkashami2025}. De oplossing voor de lage adoptiegraad ligt daarom in de inzet van een vertrouwd en laagdrempelig communicatiekanaal zoals WhatsApp dat de doelgroep al beheerst.
 
-Verwijs bij elke introductie van een term of bewering over het domein naar de vakliteratuur, bijvoorbeeld~\autocite{Hykes2013}! Denk zeker goed na welke werken je refereert en waarom.
+\subsection{Juridische verantwoord}
+De keuze om WhatsApp te gebruiken als oplossing brengt vragen rond data privacy en naleving van de GDPR regels. Dit is cruciaal omdat de informatie ethisch behandelt moet worden bij het inzetten van AI gedreven monitoring \autocite{Alkashami2025}.
 
-Draag zorg voor correcte literatuurverwijzingen! Een bronvermelding hoort thuis \emph{binnen} de zin waar je je op die bron baseert, dus niet er buiten! Maak meteen een verwijzing als je gebruik maakt van een bron. Doe dit dus \emph{niet} aan het einde van een lange paragraaf. Baseer nooit teveel aansluitende tekst op eenzelfde bron.
-
-Als je informatie over bronnen verzamelt in JabRef, zorg er dan voor dat alle nodige info aanwezig is om de bron terug te vinden (zoals uitvoerig besproken in de lessen Research Methods).
 
 % Voor literatuurverwijzingen zijn er twee belangrijke commando's:
 % \autocite{KEY} => (Auteur, jaartal) Gebruik dit als de naam van de auteur
@@ -54,7 +50,6 @@ Als je informatie over bronnen verzamelt in JabRef, zorg er dan voor dat alle no
 %   functie heeft in de zin (bv. ``Uit onderzoek door Doll & Hill (1954) bleek
 %   ...'')
 
-Je mag deze sectie nog verder onderverdelen in subsecties als dit de structuur van de tekst kan verduidelijken.
 
 %---------- Methodologie ------------------------------------------------------
 \section{Methodologie}%

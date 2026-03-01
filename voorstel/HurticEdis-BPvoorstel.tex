@@ -14,6 +14,9 @@
 % Invoegen bibliografiebestand
 \addbibresource{voorstel.bib}
 
+% Tabellen maken
+\usepackage{tabularx}
+
 % Informatie over de opleiding, het vak en soort opdracht
 \studyprogramme{Professionele bachelor toegepaste informatica}
 \course{Bachelorproef}
@@ -25,7 +28,7 @@
 
 \academicyear{2025-2026}
 
-\title{Implementeren van een laagdrempelige methode om competenties van arbeiders continue te monitoren met WhatsApp.}
+\title{End-to-end procesanalyse van de competentie extractie via WhatsApp en implementatie van de validatiepijplijn bij MtecPlus.}
 
 \author{Edis Hurtic}
 \email{edis.hurtic@student.hogent.be}
@@ -44,12 +47,16 @@
 %   zelf
 %
 \specialisation{Full stack developer}
-\keywords{Laagdrempelige HR-tooling, chatbot, competentiemonitoring, Human Resource Management, strategische personeelsplanning, }
+\keywords{input validatie, human-in-the-loop, machine learning, strategische personeelsplanning, HR tooling}
 
 \begin{document}
 
 \begin{abstract}
-Dit onderzoek vindt plaats in opdracht van TalentGuide. Hier worden AI-gedreven inzichten in competenties van arbeiders geleverd. Dit is een SaaS-platform, gericht op talentontwikkeling en strategische personeelsplanning. Talentguide richt zich op de digitale kloof bij arbeiders. Voor deze doelgroep ontbreekt een traditioneel cv en is digitale bereikbaarheid minder vanzelfsprekend. Het doel is het ontwikkelen van een laagdrempelige methode om competenties van medewerkers met minimale intrusie en betrouwbaar in kaart te brengen, waaruit bruikbare vaardigheidsprofielen vloeien zonder administratieve last van de eindgebruiker. In dit voorstel is de inzet van populaire mobiele berichtendienst WhatsApp onderzocht als oplossing. De focus ligt op het automatiseren van de dataverzameling via een medium dat de doelgroep al beheerst en kent. Het onderzoek is uitgevoerd volgens het Agile werken. Eerst zijn de technische requirements en het systeemontwerp geanalyseerd. Dan wordt er met sprints iteratief features uitgewerkt. De kern van de realisatie is een Proof of Concept van de chatbot en de bijhorende API-koppeling. Waarbij de nadruk ligt op de vertaling van ongestructureerde chat input naar gestructureerde data met GDPR-compliance. Het verwachte resultaat is een schaalbare oplossing dat voor arbeiders een up-to-date vaardigheidsprofiel onderhoudt met minimale intrusie tijdens het werken.
+Dit onderzoek vindt plaats in opdracht van TalentGuide, een organisatie die AI gedreven inzichten in competenties van arbeiders levert om talentontwikkeling en strategische personeelsplanning te bevorderen. TalentGuide richt zich op het dichten van de digitale kloof bij arbeiders, een doelgroep waarbij een traditioneel cv ontbreekt en digitale bereikbaarheid minder vanzelfsprekend is. In het bijzonder is het probleem dat de huidige AI extractie via WhatsApp bij de cliënt MtecPlus onnauwkeurige output genereert, waardoor de resulterende competentieprofielen onvoldoende betrouwbaar zijn voor professionele HR besluitvorming.
+De hoofdonderzoeksvraag luidt: Hoe kan een end-to-end procesanalyse van de huidige competentie extractie via WhatsApp leiden tot de ontwikkeling van een proof of concept voor een validatiepijplijn die zorgt voor accurate en betrouwbare competentieprofielen binnen de organisatie van MtecPlus?
+De gevolgde methodologie is volgens zes fasen opgedeeld. Eerst is de WhatsApp end-to-end flow volledig gedocumenteerd, gevolgd door de identificatie van kritieke componenten en de ontwikkeling van de validatiestrategie. In de derde fase is de huidige input getest, doordat minderwaardige input voor minderwaardige output zorgt. Vervolgens in fase vier is het human-in-the-loop proces in kaart gebracht, om validatie via WhatsApp te bevorderen. In de voorlaatste fase is de effectieve implementatie van het proof on concept. Hier is de validatiepijplijn geïmplementeerd om dan in de laatste fase geëvalueerd te worden met frontend en backend testen.
+De voorlaatste fase is de effectieve realisatie van de validatiepijplijn als proof of concept. Ten slotte is dit prototype grondig beoordeeld met frontend- en backend testen. De verwachte resultaten omvatten een technisch procesverslag, een statusrapport van de inputkwalitiet, een human-in-the-loop artefact en een functioneel prototype. Indien dit prototype succesvol blijkt, kan geconcludeerd worden dat een dergelijke validatiepijplijn de nodige betrouwbaarheid biedt om informele chatdata om te zetten naar kwalitatieve HR inzichten.
+
 \end{abstract}
 
 \tableofcontents

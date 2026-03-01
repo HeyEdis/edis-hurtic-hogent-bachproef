@@ -3,26 +3,39 @@
 \section{Inleiding}%
 \label{sec:inleiding}
 
-Human Resources zit in een transitie waarbij het manueel onderhouden van een competentieprofiel is vervangen door een geautomatiseerd proces. De integratie van Artificiële Intelligentie in HRM is een cruciale ontwikkeling gericht op het verhogen van efficiënte personeelsplannen en hogere individuele talentontwikkeling. Hiervoor is data van het vaardigheidsniveau van werknemers vereist. \autocite{Tenakwah2025}.
+Het manueel onderhouden van een competentieprofiel is aan het vervangen door geautomatiseerde processen in Human Resources. De integratie van Artificiële Intelligentie (AI) in Human Resource Management (HRM) is een cruciale ontwikkeling gericht op het verbeteren van de strategische personeelsplanning en individuele talentontwikkeling. Hiervoor is data van het vaardigheidsniveau van werknemers vereist \autocite{Tenakwah2025}.
 \bigskip
-De doelgroep zijn non-desk medewerkers of arbeiders uit elke sector, specifiek de 100+ werknemers van de client Mtechplus. Maar het up-to-date houden van dit profiel wordt niet altijd gedaan voor arbeiders. Bij arbeiders is vaak geen cv aanwezig of is het enorm verouderd en de HR afdeling kan dit niet altijd voor elke werknemer bijhouden.\bigskip 
-In dit onderzoek wordt zich gericht op de digitale kloof tussen arbeiders en de strategische doelen van de onderneming. Om dit te onderhouden is door de opdrachtgever een implementatie met WhatsApp voorgesteld, doordat 70\% van de mensen in België hiermee vertrouwd is. De impact voor de arbeider is hierdoor minimaal, aangezien enkel een telefoon met WhatsApp vereist is.
+\\
+Talentguide biedt hiervoor een oplossing voor waarbij AI gestuurde onboarding via WhatsApp wordt gefaciliteerd, specifiek gericht op arbeiders zonder een traditioneel cv. Echter, is gebleken dat de output van deze modellen niet altijd betrouwbaar is en nood heeft aan verbetering. Voor hun cliënt MtecPlus wordt gekeken naar hoe de huidige output van competenties, uit ongestructureerde WhatsApp berichten, hun HR besluitvormingen belemmert. Dit onderzoek richt zich op het algeheel in kaart brengen van dit proces om de datakwaliteit te verbeteren en betere output aan de cliënt te bezorgen.
 \bigskip
-De focus van de oplossing is het sturen van werknemers in hun groei en het dichten van vaardigheidskloven binnen hun huidige functie, door ze te matchen met opleidingen of senior profielen. Dit initiatief is strikt gericht op talentontwikkeling en personeelsplanning geen werving of ontslag.  
+\\
+Het normale verloop van het systeem start met het creëren van een digitale ‘Space’ voor de cliënt. Waarin drie rubrieken centraal staan: 'Members', 'Roles' en 'Educations'. Werknemers worden toegevoegd onder de rubriek ‘Members’ en kunnen hun competentieprofiel via het Software As A Service (SaaS) platform vervolledigen door middel van het uploaden van een cv, weblinks naar hun website, uittypen van vaardigen, door gebruik te maken van de vaardigheidsbibliotheek van Talentguide om associaties toe te voegen, en door het toevoegen van hun LinkedIn account. Specifiek voor de werknemers van MtecPlus wordt de WhatsApp onboarding geactiveerd in het ‘Space’. Hierbij benadert een bot de arbeider met de vraag om zijn vaardigheden in kaart te brengen. De gebruiker kan hierop antwoorden via vrije tekst (bijvoorbeeld: "Ik werk vijf jaar als bakker bij Carrefour"), het invoeren van een job titel, of het doorsturen van documenten. Korte teksten worden door de AI automatisch uitgebreid om voldoende context te bieden voor de extractie.
 \bigskip
-De werkwijze is als volgt: het bedrijf kiest zelf welke medewerkers worden toegevoegd aan de chat. De medewerker wordt toegevoegd aan een chat waarin die een bericht krijgt van de chatbot met de vraag om een cv te uploaden. Als deze ontbreekt worden bijvragen gesteld, zoals wat hun rol of verricht werk is. Op basis hiervan wordt een profiel opgemaakt: de informatie wordt naar de AI engine van TalentGuide gestuurd, als het profiel niet compleet is kunnen vaardigheden uit de skill engine toegevoegd worden via het online platform. Eenmaal het profiel compleet is wordt het gevalideerd door een werknemer van het bedrijf.\bigskip
-De volgende stap is om AI gestuurde suggesties te leveren over nieuwe vaardigheden dat bij het profiel passen of vragen te stellen over het vaardigheidsniveau van medewerkers zelf “Hey, ik denk dat jij de vaardigheden hebt om logistieke planning bij te houden.” Of over collega’s “Wat denk je van de communicatie van Dries”. De bot kan Nederlands, Engels en Franse antwoorden ontvangen en vertalen.
-Om het probleem beter te begrijpen, zijn de volgende aspecten onderzocht:
+\\
+Achter de schermen wordt dit proces aangestuurd door een multi-agent opstelling. Wanneer data binnenkomt besluit een managing agent welke gespecialiseerde Large Language Model (LLM) agent het best hierop wordt ingezet. Zo worden kleinere, snellere modellen gebruikt voor vertalingen naar het Engels, terwijl zwaardere 'reasoning models' worden ingezet voor de daadwerkelijke competentie extractie. De geëxtraheerde taken worden vervolgens omgezet in vectoren om een semantische overeenstemming te maken met de standaard ESCO vaardigheidsbibliotheek van TalentGuide. Hierbij wordt momenteel een drempelwaarde van 75\% gebruikt voor een 'good match' en vanaf 60\% is het gezien als een ‘soft match’. Hoewel dit systeem geavanceerd is, ontbreekt momenteel een validatiestap om te controleren of de geëxtraheerde informatie feitelijk correct is. Momenteel worden profielen nog handmatig door werknemers opgeschoond.
+De hoofdonderzoeksvraag luidt: Hoe kan een end-to-end procesanalyse van de huidige competentie extractie via WhatsApp leiden tot de ontwikkeling van een proof of concept voor een validatiepijplijn die zorgt voor accurate en betrouwbare competentieprofielen binnen de organisatie van MtecPlus?
+\bigskip
+\\
+Om het probleem beter te begrijpen, werden de volgende aspecten in kaart gebracht:
 \begin{itemize}
-    \item Wat zijn de kritieke parameters die gemonitord worden om strategische sturing te leveren?
-    \item Hoe wordt er afgetoetst dat de suggesties correct zijn?
-    \item Hoe wordt er gegarandeerd dat er geen verkeerde vertaling is?
-    \item Kan dit uitgebreid worden naar de hele organisatie?
-    \item Wat zijn de mentale effecten van werknemers continue te monitoren?
-    \item Hoe frequent kunnen de vaardigheden gemeten worden?
-    \item Hoe kan dit schaalbaar ingezet worden? 
+    \item Wat zijn de kritieke componenten die leiden tot minderwaardige output?
+    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
+    \item Hoe wordt data geëxtraheerd uit bestanden?
 \end{itemize}
-Deze paper resulteert in een Proof of Concept van de WhatsApp chatbot met bijhorende integratie met de PostgreSQL databank van TalentGuide. De PoC bewijst de schaalbaarheid en gevalideerde dataflow van de chatbot. De implementatie garandeert end-to-end encryptie door de data management policy van WhatsApp.
+\bigskip
+Om een oplossing te vinden, zijn de volgende aspecten onderzocht:
+\begin{itemize}
+    \item Hoe kan een feedback loop worden ontworpen om de menselijke validatie in het proces te integreren?
+    \item Op welke wijze kan foutieve data vroegtijdig opgevangen worden?
+    \item Welke LLM is het meest geschikt om vaardigheden te extraheren uit korte, informele tekstberichten?
+\end{itemize}
+\bigskip
+Het doel van dit onderzoek is om de betrouwbaarheid van de gegenereerde competentieprofielen te verhogen voor talentguid’s cliënt MtecPlus. Het concreet eindresultaat zijn zeven artefacten: een gedetailleerde end-to-end procesdocumentatie dat als een overzicht dient van het verloop, identificatie van de drie kritieke componenten, een statusrapport van de huidige input, een prototype van de validatiepijplijn, een gedocumenteerd human-in-the-loop proces en frontend- en backend testen.
+\bigskip
+\\
+Het eindresultaat wordt als een succes beschouwd wanneer: het proof of concept meetbaar aantoont dat de ingevoerde input is verbeterd ten opzichte van de huidige situatie en er een volledig overzicht is van de flow van de initiële input door de MtecPlus arbeider tot de output van het Talentguide systeem.
+
+
 
 
 %---------- Stand van zaken ---------------------------------------------------
@@ -30,17 +43,30 @@ Deze paper resulteert in een Proof of Concept van de WhatsApp chatbot met bijhor
 \section{Literatuurstudie}%
 \label{sec:literatuurstudie}
 
-Het integreren van AI in de moderne werkomgeving vertegenwoordigt een van de complexste  transformaties in Human Resource Managment \autocite{Tenakwah2025}. Het draagt bij aan het uitlijnen van de personeelsplanning door het verbeteren van efficiëntie en het optimaliseren van de besluitvorming wat essentieel is voor strategische personeelsplanning.
+Het integreren van AI in de moderne werkomgeving vertegenwoordigt een van de meest complexe transformaties in Human Resource Managment \autocite{Tenakwah2025}. Het draagt bij aan het uitlijnen van de personeelsplanning door het verbeteren van efficiëntie en het optimaliseren van de besluitvorming, wat essentieel is voor strategische personeelsplanning.
 \bigskip
-Toch, blijkt uit de literatuur dat de rol van AI in de werkomgeving nieuwe spanningen creëert tussen toezicht en controle. Succesvolle implementatie vereist het balanceren van technische capaciteit en menselijke autonomie \textcite{Tenakwah2025}. De verhoogde efficiëntie kan leiden tot een groeiende kloof tussen productiviteitsmaatstaven en het welzijn van de werknemer. Waardoor er de groter probleem ontstaat van het balanceren van efficiëntie, de veiligheid en het welzijn van de werknemer \textcite{Tenakwah2025}.
+\\
+Toch, blijkt uit de literatuur dat de rol van AI in de werkomgeving nieuwe spanningen creëert tussen toezicht en sturing. Succesvolle implementatie vereist het balanceren van technische capaciteit en menselijke autonomie \autocite{Tenakwah2025}. De verhoogde efficiëntie kan leiden tot een groeiende kloof tussen productiviteitsmaatstaven en het welzijn van de werknemer. Waardoor er een groter probleem ontstaat van het balanceren van efficiëntie, de veiligheid en het welzijn van de werknemer \autocite{Tenakwah2025}.
 
 \subsection{De digitale kloof}
-De noodzaak voor deze oplossing wijst op de digitale kloof tussen de gebruikte tools in de HR omgeving en de adoptiegraad van deze applicaties door arbeiders. Waardoor het leidt tot een gebrek aan accurate competentieprofielen en vervolgens tot een inefficiënte strategische personeelsplanning.
+De noodzaak voor deze oplossing wijst op de digitale kloof tussen de gebruikte tools in de HR omgeving en de adoptiegraad van deze applicaties door arbeiders, waardoor het leidt tot een gebrek aan accurate competentieprofielen en vervolgens tot een inefficiënte strategische personeelsplanning.
 \bigskip
-De literatuur wijst erop dat AI chatbots genormaliseerd zijn en effectief kunnen worden ingezet voor het leveren van directe antwoorden op de vragen van de werknemers. \textcite{Alkashami2025}. De oplossing voor de lage adoptiegraad ligt daarom in de inzet van een vertrouwd en laagdrempelig communicatiekanaal zoals WhatsApp dat de doelgroep al beheerst.
+\\
+De literatuur wijst erop dat AI chatbots genormaliseerd zijn en effectief kunnen worden ingezet voor het leveren van directe antwoorden op de vragen van de werknemers. \autocite{Alkashami2025}. De oplossing voor de lage adoptiegraad ligt daarom in de inzet van een vertrouwd en laagdrempelig communicatiekanaal, zoals WhatsApp, dat de doelgroep al beheerst.
 
-\subsection{Juridische verantwoord}
-De keuze om WhatsApp te gebruiken als oplossing brengt vragen rond data privacy en naleving van de GDPR regels. Dit is cruciaal omdat de informatie ethisch behandelt moet worden bij het inzetten van AI gedreven monitoring \autocite{Alkashami2025}.
+\subsection{Robuuste end-to-end architectuur}
+Om de geëxtraheerde data betrouwbare te valideren is een robuuste end-to-end architectuur noodzakelijk om de volledige datastroom te beheren. De literatuur benadrukt dat een robuuste architectuur essentieel is voor ‘real-time analytics’ en het handhaven van gegevensintegritiet over verschillende database omgevingen \autocite{Khattach2025}.
+\bigskip
+\\
+Bij geavanceerde systemen waar data vanuit een ongestructureerde staat naar persistentie opslag vloeit, zal de architectuur meer dan alleen als doorgeefluik dienen. Ook zal het de verantwoordelijkheid van monitoring en kwaliteitscontrole op zich nemen. Het in kaart brengen van dit volledig proces is een voorwaarde om voorspelbare en accurate resultaten te behalen in een productieomgeving \autocite{Khattach2025}.
+
+\subsection{Human-in-the-Loop (HITL) en validatie}
+Het concept van HITL speelt een cruciale rol bij het bewaken van de accuraatheid van AI gedreven processen. Uit onderzoek blijkt dat de introductie van AI de rol van de mens niet afneemt, maar juist de verantwoording van manuele controle verhoogt: "AI will not reduce the importance of people - it will raise the expectations placed on them" \autocite{Schiel2025}. In een omgeving waar datakwaliteit directe gevolgen heeft in de besluitsvormingen bij organisaties, is een robuust ontwerp van HTIL processen noodzakelijk om te voorkomen dat governance frameworks worden ingehaald door technologie \autocite{Schiel2025}.
+\bigskip
+\\
+Verdere ontwikkelingen op dit gebied, zoals bij het COACH+ model, tonen aan dat de integratie van machine learning algoritmen met menselijke expertise essentieel zijn voor het automatisch controleren van outputs. Door een samenwerking tussen geautomatiseerde algoritmen en menselijke toezichthouders kan de geschiktheid van gegenereerde data voor release of gebruik worden vastgesteld \autocite{Slokom2024}. Voor de validatiepijplijn binnen de MtecPlus case betekent dit dat technische extractie en menselijke verificatie complementair moeten werken om hallucinaties te minimaliseren en de betrouwbaarheid van de competentieprofielen te maximaliseren.
+
+
 
 
 % Voor literatuurverwijzingen zijn er twee belangrijke commando's:
@@ -55,25 +81,74 @@ De keuze om WhatsApp te gebruiken als oplossing brengt vragen rond data privacy 
 \section{Methodologie}%
 \label{sec:methodologie}
 
-Hier beschrijf je hoe je van plan bent het onderzoek te voeren. Welke onderzoekstechniek ga je toepassen om elk van je onderzoeksvragen te beantwoorden? Gebruik je hiervoor literatuurstudie, interviews met belanghebbenden (bv.~voor requirements-analyse), experimenten, simulaties, vergelijkende studie, risico-analyse, PoC, \ldots?
+\subsection{Fase 1:  Documenteren van de WhatsApp end-to-end flow}
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Hoe wordt data geëxtraheerd uit bestanden?
+    \item Welke LLM is het meest geschikt om vaardigheden te extraheren uit korte, informele tekstberichten?
+\end{itemize}
 
-Valt je onderwerp onder één van de typische soorten bachelorproeven die besproken zijn in de lessen Research Methods (bv.\ vergelijkende studie of risico-analyse)? Zorg er dan ook voor dat we duidelijk de verschillende stappen terug vinden die we verwachten in dit soort onderzoek!
+In deze fase zal het huidige systeem volledig worden gedocumenteerd, hierbij zal de flow vanaf de initiële input door de MtecPlus arbeider in WhatsApp tot de gegenereerde output van Talentguide in kaart gebracht worden. Dit bevat: de koppeling tussen WhatsApp en de backend; het systeem dat extractie uitvoert op de bestanden; hoe het in de databank wordt opgeslagen; welke prompts de output sturen en een overzicht van elke toepassing die de ingegeven data gebruikt. Ook zullen de gebruikte LLM modellen benoemd worden en hun specifieke taak worden gedocumenteerd, het token gebruik en de aanhangende kosten. Dit zal zorgen voor een compleet overzicht van het systeem, dat gebruikt zal worden in de volgende fase om kritieken componenten te benoemen. Daarnaast zijn er technische interviews met de data scientist bij Talentguide. Om een begrip te krijgen over hoe de componenten met elkaar werken.
+\bigskip
+\\
+Na deze fase zal er een volledig gedocumenteerd verloop zijn van de end-to-end flow waaruit hindernissen uit kunnen worden gedetecteerd.
 
-Vermijd onderzoekstechnieken die geen objectieve, meetbare resultaten kunnen opleveren. Enquêtes, bijvoorbeeld, zijn voor een bachelorproef informatica meestal \textbf{niet geschikt}. De antwoorden zijn eerder meningen dan feiten en in de praktijk blijkt het ook bijzonder moeilijk om voldoende respondenten te vinden. Studenten die een enquête willen voeren, hebben meestal ook geen goede definitie van de populatie, waardoor ook niet kan aangetoond worden dat eventuele resultaten representatief zijn.
+\subsection{Fase 2: Kritieke componenten benoemen}
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Wat zijn de kritieke componenten die leiden tot minderwaardige output?
+\end{itemize}
 
-Uit dit onderdeel moet duidelijk naar voor komen dat je bachelorproef ook technisch voldoen\-de diepgang zal bevatten. Het zou niet kloppen als een bachelorproef informatica ook door bv.\ een student marketing zou kunnen uitgevoerd worden.
+Eenmaal er een overzicht is van het systeem zal dieper gekeken worden om de kritieke componenten te benoemen die voor minderwaardige output zorgen en deze te documenteren. Hiervoor zullen edge cases worden gecontroleerd, en de huidige validatie technieken in kaart gebracht worden.  Om vervolgens de drie grootste componenten aan te pakken, die voor de grootste verbetering kunnen zorgen. Ook zal een eerste versie van de validatie strategie ontworpen worden.
+\bigskip
+\\
+Na deze fase zullen de drie grootste pijnpunten gekend zijn en is er een strategie om ze aan te pakken.
 
-Je beschrijft ook al welke tools (hardware, software, diensten, \ldots) je denkt hiervoor te gebruiken of te ontwikkelen.
+\subsection{Fase 3: Huidige input testen}
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
+\end{itemize}
 
-Probeer ook een tijdschatting te maken. Hoe lang zal je met elke fase van je onderzoek bezig zijn en wat zijn de concrete \emph{deliverables} in elke fase?
+In deze fase word van de kritieke componenten de input getest. Hierbij wordt gekeken als er validatie regels aanwezig zijn. Dit is ook het moment om de huidige testen uit te voeren en na te gaan als alles werkt zoals het hoort. Het nut hiervan is om de eerste barrière van misvormende input tegen te gaan zodat het uiteindelijke resultaat dat TalentGuide aan hun klanten levert van hogere waarde is.
+\bigskip
+\\
+Na deze fase is er een stand van zaken.
+
+\subsection{Fase 4: Human-in-the-Loop (HITL) proces in kaart brengen}
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Hoe kan een feedback loop worden ontworpen om de menselijke validatie in het proces te integreren?
+\end{itemize}
+
+In deze fase wordt een HITL proces in kaart gebracht zodat de integratie van het menselijke oordeel en besluitvorming in de ontwikkeling, training en werking van het AI systeem kan gebruikt worden om de output te verbeteren, waarbij toezicht, validatie en interventie worden gewaarborgd \autocite{Schiel2025}. Dit proces is ontworpen om de verkregen output via WhatsApp van de werknemers van MtecPlus te verbeteren, waarbij de chatbot voor validatie vraagt, en ideeën aftoetst. Waarmee de output kan gestuurd worden om betere aanbevelingen te genereren.
+\bigskip
+\\
+Na deze fase zal er een gedocumenteerde procedure zijn die gebruikt wordt om proactief de output te verbeteren.
+
+\subsection{Fase 5: Implementatie van het Proof of Concept}
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Op welke wijze kan foutieve data vroegtijdig opgevangen worden?
+\end{itemize}
+
+Eenmaal de kritieke componenten zijn benoemd, een validatie strategie is bedacht en het HITL proces is ontwikkeld wordt in deze fase de validatiepijplijn geïmplementeerd. Hierbij wordt een experimentele ontwikkelingsomgeving opgezet om de theorie te testen. Hier ligt de focus op het bouwen van de validatie laag die iteratief verbeterde output kan bieden aan de cliënt.
+\bigskip
+\\
+Na deze fase zal er een proof of concept zijn waarbij de output opnieuw gemeten kan worden. Om na te gaan als de resultaten zijn verbeterd. Dit is een iteratieve fase die verfijning gaat vragen op de vorige fases.
+
+
+\subsection{Fase 6: Evaluatie}
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
+\end{itemize}
+
+In deze laatste fase worden testen geschreven om de geïmplementeerde validatie te testen. Dit wordt gedaan doormiddel van backend en frontend testen die een slaagkans van 100\% zouden hebben. Hierdoor kan geconcludeerd worden dat kwaliteitsvolle input gegarandeerd is, waardoor de LLM’s dat TalentGuide gebruikt betere output kunnen genereren voor hun klanten. 
+
 
 %---------- Verwachte resultaten ----------------------------------------------
 \section{Verwacht resultaat, conclusie}%
 \label{sec:verwachte_resultaten}
 
-Hier beschrijf je welke resultaten je verwacht. Als je metingen en simulaties uitvoert, kan je hier al mock-ups maken van de grafieken samen met de verwachte conclusies. Benoem zeker al je assen en de onderdelen van de grafiek die je gaat gebruiken. Dit zorgt ervoor dat je concreet weet welk soort data je moet verzamelen en hoe je die moet meten.
-
-Wat heeft de doelgroep van je onderzoek aan het resultaat? Op welke manier zorgt jouw bachelorproef voor een meerwaarde?
-
-Hier beschrijf je wat je verwacht uit je onderzoek, met de motivatie waarom. Het is \textbf{niet} erg indien uit je onderzoek andere resultaten en conclusies vloeien dan dat je hier beschrijft: het is dan juist interessant om te onderzoeken waarom jouw hypothesen niet overeenkomen met de resultaten.
-
+De primaire verwachting is dat er gevalideerd zal worden op alternatieve verlopen in plaats van enkel het 'happy path' en dat meerdere edge cases getest zullen zijn. Verder zal het menselijk feedback loop component data genereren dat later door TalentGuide kan geïmplementeerd worden.

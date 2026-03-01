@@ -26,5 +26,76 @@
 %% Maak voor elke fase (behalve het literatuuronderzoek) een NIEUW HOOFDSTUK aan
 %% en geef het een gepaste titel.
 
+\chapter{Documenteren van de WhatsApp end-to-end flow}
+
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Hoe wordt data geëxtraheerd uit bestanden?
+    \item Welke LLM is het meest geschikt om vaardigheden te extraheren uit korte, informele tekstberichten?
+\end{itemize}
+
+In deze fase zal het huidige systeem volledig worden gedocumenteerd, hierbij zal de flow vanaf de initiële input door de MtecPlus arbeider in WhatsApp tot de gegenereerde output van Talentguide in kaart gebracht worden. Dit bevat: de koppeling tussen WhatsApp en de backend; het systeem dat extractie uitvoert op de bestanden; hoe het in de databank wordt opgeslagen; welke prompts de output sturen en een overzicht van elke toepassing die de ingegeven data gebruikt. Ook zullen de gebruikte LLM modellen benoemd worden en hun specifieke taak worden gedocumenteerd, het token gebruik en de aanhangende kosten. Dit zal zorgen voor een compleet overzicht van het systeem, dat gebruikt zal worden in de volgende fase om kritieken componenten te benoemen. Daarnaast zijn er technische interviews met de data scientist bij Talentguide. Om een begrip te krijgen over hoe de componenten met elkaar werken.
+\bigskip
+\\
+Na deze fase zal er een volledig gedocumenteerd verloop zijn van de end-to-end flow waaruit hindernissen uit kunnen worden gedetecteerd.
+
+\chapter{Kritieke componenten benoemen}
+
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Wat zijn de kritieke componenten die leiden tot minderwaardige output?
+\end{itemize}
+
+Eenmaal er een overzicht is van het systeem zal dieper gekeken worden om de kritieke componenten te benoemen die voor minderwaardige output zorgen en deze te documenteren. Hiervoor zullen edge cases worden gecontroleerd, en de huidige validatie technieken in kaart gebracht worden.  Om vervolgens de drie grootste componenten aan te pakken, die voor de grootste verbetering kunnen zorgen. Ook zal een eerste versie van de validatie strategie ontworpen worden.
+\bigskip
+\\
+Na deze fase zullen de drie grootste pijnpunten gekend zijn en is er een strategie om ze aan te pakken.
+
+\chapter{Huidige input testen}
+
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
+\end{itemize}
+
+In deze fase word van de kritieke componenten de input getest. Hierbij wordt gekeken als er validatie regels aanwezig zijn. Dit is ook het moment om de huidige testen uit te voeren en na te gaan als alles werkt zoals het hoort. Het nut hiervan is om de eerste barrière van misvormende input tegen te gaan zodat het uiteindelijke resultaat dat TalentGuide aan hun klanten levert van hogere waarde is.
+\bigskip
+\\
+Na deze fase is er een stand van zaken.
+
+\chapter{Human-in-the-Loop (HITL) proces in kaart brengen}
+
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Hoe kan een feedback loop worden ontworpen om de menselijke validatie in het proces te integreren?
+\end{itemize}
+
+In deze fase wordt een HITL proces in kaart gebracht zodat de integratie van het menselijke oordeel en besluitvorming in de ontwikkeling, training en werking van het AI systeem kan gebruikt worden om de output te verbeteren, waarbij toezicht, validatie en interventie worden gewaarborgd \autocite{Schiel2025}. Dit proces is ontworpen om de verkregen output via WhatsApp van de werknemers van MtecPlus te verbeteren, waarbij de chatbot voor validatie vraagt, en ideeën aftoetst. Waarmee de output kan gestuurd worden om betere aanbevelingen te genereren.
+\bigskip
+\\
+Na deze fase zal er een gedocumenteerde procedure zijn die gebruikt wordt om proactief de output te verbeteren.
+
+\chapter{Implementatie van het Proof of Concept}
+
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Op welke wijze kan foutieve data vroegtijdig opgevangen worden?
+\end{itemize}
+
+Eenmaal de kritieke componenten zijn benoemd, een validatie strategie is bedacht en het HITL proces is ontwikkeld wordt in deze fase de validatiepijplijn geïmplementeerd. Hierbij wordt een experimentele ontwikkelingsomgeving opgezet om de theorie te testen. Hier ligt de focus op het bouwen van de validatie laag die iteratief verbeterde output kan bieden aan de cliënt.
+\bigskip
+\\
+Na deze fase zal er een proof of concept zijn waarbij de output opnieuw gemeten kan worden. Om na te gaan als de resultaten zijn verbeterd. Dit is een iteratieve fase die verfijning gaat vragen op de vorige fases.
+
+\chapter{Evaluatie}
+
+Deze fase geeft verduidelijking op de volgende deelvragen:
+\begin{itemize}
+    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
+\end{itemize}
+
+In deze laatste fase worden testen geschreven om de geïmplementeerde validatie te testen. Dit wordt gedaan doormiddel van backend en frontend testen die een slaagkans van 100\% zouden hebben. Hierdoor kan geconcludeerd worden dat kwaliteitsvolle input gegarandeerd is, waardoor de LLM’s dat TalentGuide gebruikt betere output kunnen genereren voor hun klanten. 
+
+
 \lipsum[21-25]
 

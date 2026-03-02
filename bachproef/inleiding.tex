@@ -5,32 +5,52 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen komen in de inleiding~\autocite{Pollefliet2011}:
+Binnen de organisatie van Talentguide is er een functionaliteit ontwikkeld voor hun client mtech+ om via WhatsApp arbeiders te onboarden. Dit proces bevat drie stappen:
 
-\begin{itemize}
-  \item context, achtergrond
-  \item afbakenen van het onderwerp
-  \item verantwoording van het onderwerp, methodologie
-  \item probleemstelling
-  \item onderzoeksdoelstelling
-  \item onderzoeksvraag
-  \item \ldots
-\end{itemize}
+\begin{enumerate}
+    \item Vraag voor de gebruiker zijn CV
+    \item Vraag voor de gebruiker zijn rol
+    \item Vraag voor de gebruiker zijn functie
+\end{enumerate}
+
+Vervolgens is uit deze ongestructureerde bron, data geëxtraheerd met behulp van kunstmatige intelligentie. Die met deze data een competentieprofiel opmaakt van de gebruiker. Hiermee kan de human resource (HR) afdeling besluiten vormen om een efficiënte en doeltreffende personeelsplanning te ontwikkelen. Ook biedt het Talentguide Software-As-a-Service (SaaS) platform opleidingen aan die de werkpunten van een werknemer kunnen verbeteren zodat die beter gestuurd wordt in zijn carrière.
+\bigstkip
+\\
+Hierbij is gevalideerde input cruciaal zodat de werknemer een doeltreffende richting voor zijn carrière kan plotten. In deze bachelorproef is onderzocht hoe de opzet van een terugkoppelingsproces kan ontwikkelend worden om de verkregen data te valideren. Zodat kwaliteitsvolle competentieprofielen gegarandeerd zijn.
+
+Het uiteindelijke doel is om een technisch procesverslag te hebben waaruit de kritieke trigger kan worden benoemd die aanzet tot valideren, een startpunt voor het volledig human-in-the-loop proces en een functioneel prototype dat wijzigingen bijhoudt, die later door de data scientist worden gebruikt om het artificiële intelligente (AI) model te trainen.
+
+%De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen komen in de inleiding~\autocite{Pollefliet2011}:
+
 
 \section{\IfLanguageName{dutch}{Probleemstelling}{Problem Statement}}%
 \label{sec:probleemstelling}
 
-Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's'', systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
+%Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's'', systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
+
+Het probleem is dat arbeiders vaak geen CV hebben of het is gedateerd. Om deze doelgroep te helpen heeft mtech+ aan Talentguide gevraagd om een WhatsApp functionaliteit te ontwikkelen om arbeiders sneller te onboarden. De doelgroep dient een CV up te loaden, zo niet prompt de chatbot hen voor hun rol en functie. Bij het extraheren van data door het AI model kunnen fouten gebeuren. 
+Door een terugkoppelingsproces toe te voegen, kunnen kwaliteitsvolle competentieprofielen verhoogd worden, wat leidt tot een verbeterde personeelsplanning en een doeltreffende carrière richting voor de werknemer.
 
 \section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
 \label{sec:onderzoeksvraag}
 
-Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
+%Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je % %kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder %specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
+
+Hoe kan een end-to-end procesanalyse van de huidige competentie extractie van verkregen data via WhatsApp leiden 
+tot de ontwikkeling van een terugkoppelingsproces (proof-of-concept) dat accurate en betrouwbare competentieprofielen 
+gegenereerd binnen de organisatie van mtech+?
 
 \section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
 \label{sec:onderzoeksdoelstelling}
 
-Wat is het beoogde resultaat van je bachelorproef? Wat zijn de criteria voor succes? Beschrijf die zo concreet mogelijk. Gaat het bv.\ om een proof-of-concept, een prototype, een verslag met aanbevelingen, een vergelijkende studie, enz.
+%Wat is het beoogde resultaat van je bachelorproef? Wat zijn de criteria voor succes? Beschrijf die zo concreet mogelijk. Gaat het bv.\ om een proof-of-concept, een prototype, een verslag met aanbevelingen, een vergelijkende studie, enz.
+
+Het doel van deze bachelorproef is om te onderzoeken hoe de opzet van een terugkoppelingsproces 
+in kaart kan worden gebracht. Om verkregen ongestructureerde data via WhatsApp
+te laten valideren door haar gebruikers, zodat dit leidt tot een verbetering in het 
+generen van competentieprofielen voor de client mtech+. Dit terugkoppelingsproces is echter een proof-of-concept 
+de verkregen wijzigingen zullen niet worden gebruikt om het huidig LLM model te trainen. Dit valt buiten de scope van het onderzoek.
+
 
 \section{\IfLanguageName{dutch}{Opzet van deze bachelorproef}{Structure of this bachelor thesis}}%
 \label{sec:opzet-bachelorproef}
@@ -44,6 +64,16 @@ De rest van deze bachelorproef is als volgt opgebouwd:
 In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand van zaken binnen het onderzoeksdomein, op basis van een literatuurstudie.
 
 In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken om een antwoord te kunnen formuleren op de onderzoeksvragen.
+
+In Hoofdstuk~\ref{ch:fase1} wordt een analyse gedaan hoe via WhatsApp competentieprofielen kunnen worden gegenereerd.
+
+In Hoofdstuk~\ref{ch:fase2} wordt gekeken om de kritieke triggers te benoemen die de chatbot aanzetten om te gebruiker te vragen tot een item te valideren.
+
+In Hoofdstuk~\ref{ch:fase3} wordt een human-in-the-loop proces in kaart gebracht.
+
+In Hoofdstuk~\ref{ch:fase4} wordt de ontwkikkeling van het proof-of-concept gedaan.
+
+In Hoofdstuk~\ref{ch:fase5} wordt meetbaar de evaluatie gedaan.
 
 % TODO: Vul hier aan voor je eigen hoofstukken, één of twee zinnen per hoofdstuk
 

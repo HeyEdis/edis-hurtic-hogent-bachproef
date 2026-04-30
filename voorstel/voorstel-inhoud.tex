@@ -3,39 +3,50 @@
 \section{Inleiding}%
 \label{sec:inleiding}
 
-Het manueel onderhouden van een competentieprofiel is aan het vervangen door geautomatiseerde processen in Human Resources. De integratie van Artificiële Intelligentie (AI) in Human Resource Management (HRM) is een cruciale ontwikkeling gericht op het verbeteren van de strategische personeelsplanning en individuele talentontwikkeling. Hiervoor is data van het vaardigheidsniveau van werknemers vereist \autocite{Tenakwah2025}.
+Binnen moderne softwareontwikkeling vormen end-to-end (E2E) testen een onmisbaar pijler voor kwaliteitsborging. Deze testen zijn de belangrijkste methode om te garanderen dat complexe systemen blijven functioneren zoals de eindgebruiker dat verwacht. E2E-testen verifiëren namelijk de volledige gebruikersstroom van begin tot einde, waardoor het inzichten biedt in de productiekwaliteit en de schaal van problemen.
 \bigskip
 \\
-Talentguide biedt hiervoor een oplossing voor waarbij AI gestuurde onboarding via WhatsApp wordt gefaciliteerd, specifiek gericht op arbeiders zonder een traditioneel cv. Echter, is gebleken dat de output van deze modellen niet altijd betrouwbaar is en nood heeft aan verbetering. Voor hun cliënt MtecPlus wordt gekeken naar hoe de huidige output van competenties, uit ongestructureerde WhatsApp berichten, hun HR besluitvormingen belemmert. Dit onderzoek richt zich op het algeheel in kaart brengen van dit proces om de datakwaliteit te verbeteren en betere output aan de cliënt te bezorgen.
+Traditioneel vereisen E2E testen opzetten en onderhouden een continue inbreng van ontwikkelaars, hierdoor is hun kostbare tijd weggenomen van nieuwe functionaliteiten te ontwikkelen. Dus is het belangrijk om een systeem te ontwerpen dat op een zelfvoorzienende manier de productkwaliteit meet bij elke oplevering naar de GitHub repository met minimale belasting voor het ontwikkelingsteam. 
 \bigskip
 \\
-Het normale verloop van het systeem start met het creëren van een digitale ‘Space’ voor de cliënt. Waarin drie rubrieken centraal staan: 'Members', 'Roles' en 'Educations'. Werknemers worden toegevoegd onder de rubriek ‘Members’ en kunnen hun competentieprofiel via het Software As A Service (SaaS) platform vervolledigen door middel van het uploaden van een cv, weblinks naar hun website, uittypen van vaardigen, door gebruik te maken van de vaardigheidsbibliotheek van Talentguide om associaties toe te voegen, en door het toevoegen van hun LinkedIn account. Specifiek voor de werknemers van MtecPlus wordt de WhatsApp onboarding geactiveerd in het ‘Space’. Hierbij benadert een bot de arbeider met de vraag om zijn vaardigheden in kaart te brengen. De gebruiker kan hierop antwoorden via vrije tekst (bijvoorbeeld: "Ik werk vijf jaar als bakker bij Carrefour"), het invoeren van een job titel, of het doorsturen van documenten. Korte teksten worden door de AI automatisch uitgebreid om voldoende context te bieden voor de extractie.
+De kwaliteit van het product dat Talentguide oplevert is nu laag, zelfs in de productieomgeving voor de eindgebruiker. De organisatie streeft naar artificieel intelligente gedreven inzichten in competenties van werknemers om talentontwikkeling en personeelsplanning te bevorderen.
 \bigskip
 \\
-Achter de schermen wordt dit proces aangestuurd door een multi-agent opstelling. Wanneer data binnenkomt besluit een managing agent welke gespecialiseerde Large Language Model (LLM) agent het best hierop wordt ingezet. Zo worden kleinere, snellere modellen gebruikt voor vertalingen naar het Engels, terwijl zwaardere 'reasoning models' worden ingezet voor de daadwerkelijke competentie extractie. De geëxtraheerde taken worden vervolgens omgezet in vectoren om een semantische overeenstemming te maken met de standaard ESCO vaardigheidsbibliotheek van TalentGuide. Hierbij wordt momenteel een drempelwaarde van 75\% gebruikt voor een 'good match' en vanaf 60\% is het gezien als een ‘soft match’. Hoewel dit systeem geavanceerd is, ontbreekt momenteel een validatiestap om te controleren of de geëxtraheerde informatie feitelijk correct is. Momenteel worden profielen nog handmatig door werknemers opgeschoond.
-De hoofdonderzoeksvraag luidt: Hoe kan een end-to-end procesanalyse van de huidige competentie extractie via WhatsApp leiden tot de ontwikkeling van een proof of concept voor een validatiepijplijn die zorgt voor accurate en betrouwbare competentieprofielen binnen de organisatie van MtecPlus?
+Het grote probleem is dat er nu geen metingen zijn uitgevoerd op de productkwaliteit, waardoor er geen maatstaf is om te zien hoe groot of klein problemen zijn. Dit komt door het gebrek aan E2E testen in de huidige React/Node.js codebase. Dit leidt ertoe dat releases naar de productieomgeving breken en een slechte gebruikerservaring opleveren.
 \bigskip
 \\
-Om het probleem beter te begrijpen, werden de volgende aspecten in kaart gebracht:
+Om deze productkwaliteit te verankeren zonder de snelheid van het ontwikkelingsteam te belemmeren is de integratie van Artificiële Intelligentie (AI) onderzocht. Hierbij staat de inzet van een geoptimaliseerd skill bestand centraal. Door AI-agents via dit bestand te voorzien van technische richtlijnen over de codebase en de structuur van volwaardige testen, kan de drempel voor het genereren van testen worden verlaagd. Deze geautomatiseerde testen zijn vervolgens verankerd in het ontwikkelingsproces door die te integreren binnen de CI/CD pijplijn van de GitHub omgeving. Hierdoor wordt bij elke oplevering van nieuwe functionaliteiten direct gevalideerd, wat een continue terugkoppeling tussen ontwikkeling en kwaliteit garandeert.
+\bigskip
+\\
+Ondanks de efficiëntievoordelen brengt het gebruik van Large Language Models (LLMs) in Quality Assurance (QA) processen specifieke risico's met zich mee, zoals gehallucineerd gebruikersgedrag waarbij de AI foutieve scenario’s genereert om het successtadium te bereiken. Bovendien kan de AI gegenereerde code het debuggen bemoeilijken, waarbij de analyse van testfouten transformeert van het lezen van code naar ingewikkeld "detectivewerk".
+\bigskip
+\\
+De doelgroep van dit onderzoek is Talentguide in het bijzonder het development- en QA team. Die hebben behoefte aan een systeem dat hun inzichten geeft op de schaal van de kwaliteitsproblemen, en dat de drempel van E2E testen verlaagd. Dit onderzoek richt zich vooral op het ontwerpen van een E2E testsysteem dat geïntegreerd is binnen de bestaande GitHub- en CI/CD infrastructuur van Talentguide, om met minimale intrusie van ontwikkelaars de huidige en toekomstige functionaliteiten continu te kunnen monitoren. 
+\bigskip
+\\
+De hoofdonderzoeksvraag luidt: hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?
+\bigskip
+\\
+Om het probleem beter te begrijpen, zijn de volgende aspecten in kaart gebracht:
 \begin{itemize}
-    \item Wat zijn de kritieke componenten die leiden tot minderwaardige output?
-    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
-    \item Hoe wordt data geëxtraheerd uit bestanden?
+    \item Wat is de gemeten foutmarge?
+    \item Waar bevindt zicht de laagste kwaliteit?
+    \item Hoe komt het dat de productkwaliteit laag is?
+    \item Hoe kan kwaliteitscontrole een deel worden van het ontwikkelingsproces?
 \end{itemize}
 \bigskip
 Om een oplossing te vinden, zijn de volgende aspecten onderzocht:
 \begin{itemize}
-    \item Hoe kan een feedback loop worden ontworpen om de menselijke validatie in het proces te integreren?
-    \item Op welke wijze kan foutieve data vroegtijdig opgevangen worden?
-    \item Welke LLM is het meest geschikt om vaardigheden te extraheren uit korte, informele tekstberichten?
+    \item Hoe kunnen geautomatiseerde E2E testen opgezet worden?
+    \item Welke procedures kunnen opgezet worden om de productkwaliteit te verhogen?
+    \item Kan er gebruik worden gemaakt van AI?
+    \item Welke tools bestaan er om E2E testen te automatiseren?
 \end{itemize}
 \bigskip
-Het doel van dit onderzoek is om de betrouwbaarheid van de gegenereerde competentieprofielen te verhogen voor talentguid’s cliënt MtecPlus. Het concreet eindresultaat zijn zeven artefacten: een gedetailleerde end-to-end procesdocumentatie dat als een overzicht dient van het verloop, identificatie van de drie kritieke componenten, een statusrapport van de huidige input, een prototype van de validatiepijplijn, een gedocumenteerd human-in-the-loop proces en frontend- en backend testen.
+Het doel van deze bachelorproef is om de kwaliteit van het eindproduct bij Talentguide te verhogen door een functioneel prototype af te leveren van een geautomatiseerde testomgeving dat op basis van minimale ontwikkelaars input robuuste testen genereert en uitvoert.
 \bigskip
 \\
-Het eindresultaat wordt als een succes beschouwd wanneer: het proof of concept meetbaar aantoont dat de ingevoerde input is verbeterd ten opzichte van de huidige situatie en er een volledig overzicht is van de flow van de initiële input door de MtecPlus arbeider tot de output van het Talentguide systeem.
-
-
+Het eindresultaat wordt als een succes beschouwd wanneer dit systeem objectief de productkwaliteit in kaart brengt bij het opleveren van nieuwe functionaliteiten naar de Github repository. Hiermee is de fundamentele stap gezet om structurele kwaliteitsmetingen binnen de organisatie te introduceren.
 
 
 %---------- Stand van zaken ---------------------------------------------------
@@ -81,74 +92,79 @@ Verdere ontwikkelingen op dit gebied, zoals bij het COACH+ model, tonen aan dat 
 \section{Methodologie}%
 \label{sec:methodologie}
 
-\subsection{Fase 1:  Documenteren van de WhatsApp end-to-end flow}
+\subsection{Fase 1:  Nulmeting van de huidige staat}
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
-    \item Hoe wordt data geëxtraheerd uit bestanden?
-    \item Welke LLM is het meest geschikt om vaardigheden te extraheren uit korte, informele tekstberichten?
+    \item Wat is de gemeten foutmarge?
+    \item Waar bevindt zicht de laagste kwaliteit?
+    \item Hoe komt het dat de productkwaliteit laag is?
 \end{itemize}
 
-In deze fase zal het huidige systeem volledig worden gedocumenteerd, hierbij zal de flow vanaf de initiële input door de MtecPlus arbeider in WhatsApp tot de gegenereerde output van Talentguide in kaart gebracht worden. Dit bevat: de koppeling tussen WhatsApp en de backend; het systeem dat extractie uitvoert op de bestanden; hoe het in de databank wordt opgeslagen; welke prompts de output sturen en een overzicht van elke toepassing die de ingegeven data gebruikt. Ook zullen de gebruikte LLM modellen benoemd worden en hun specifieke taak worden gedocumenteerd, het token gebruik en de aanhangende kosten. Dit zal zorgen voor een compleet overzicht van het systeem, dat gebruikt zal worden in de volgende fase om kritieken componenten te benoemen. Daarnaast zijn er technische interviews met de data scientist bij Talentguide. Om een begrip te krijgen over hoe de componenten met elkaar werken.
+De eerste fase richt zich op het in kaart brengen van de oorzaken achter de huidige kwaliteitsgebreken binnen het SaaS platform. In eerste instantie zal worden onderzocht waarom de bestaande kwaliteitscontroles falen tijdens het integratieproces; hierbij wordt de GitHub CI-pijplijn geanalyseerd om de technische blokkades te identificeren die voorkomen dat testen succesvol worden uitgevoerd bij een push naar de repository.
 \bigskip
 \\
-Na deze fase zal er een volledig gedocumenteerd verloop zijn van de end-to-end flow waaruit hindernissen uit kunnen worden gedetecteerd.
-
-\subsection{Fase 2: Kritieke componenten benoemen}
-Deze fase geeft verduidelijking op de volgende deelvragen:
-\begin{itemize}
-    \item Wat zijn de kritieke componenten die leiden tot minderwaardige output?
-\end{itemize}
-
-Eenmaal er een overzicht is van het systeem zal dieper gekeken worden om de kritieke componenten te benoemen die voor minderwaardige output zorgen en deze te documenteren. Hiervoor zullen edge cases worden gecontroleerd, en de huidige validatie technieken in kaart gebracht worden.  Om vervolgens de drie grootste componenten aan te pakken, die voor de grootste verbetering kunnen zorgen. Ook zal een eerste versie van de validatie strategie ontworpen worden.
+Vervolgens zal het Sentry dashboard kritisch worden onderzocht, omdat dit platform elke foutmelding in de development, staging en productieomgeving monitort en logt. Door deze incidenten te onderzoeken kan een beeld gevormd worden van de manier waarop deze defecten de gebruikerservaring van de eindgebruiker aantasten. De vijf meest significante fouten worden hierna diepgaand onderzocht om de exacte bron van het conflict te achterhalen.
 \bigskip
 \\
-Na deze fase zullen de drie grootste pijnpunten gekend zijn en is er een strategie om ze aan te pakken.
+Na deze fase is er inzicht in de tekortkomingen in de huidige opzet, wat als basis dient voor het ontwerpen van een oplossing die is toegespitst op de geïdentificeerde noden.
 
-\subsection{Fase 3: Huidige input testen}
+\subsection{Fase 2: Requirements-analyse}
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
-    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
+    \item Hoe kan kwaliteitscontrole een deel worden van het ontwikkelingsproces?
+    \item Kan er gebruik worden gemaakt van AI?
+    \item Welke tools bestaan er om E2E testen te automatiseren?
 \end{itemize}
 
-In deze fase word van de kritieke componenten de input getest. Hierbij wordt gekeken als er validatie regels aanwezig zijn. Dit is ook het moment om de huidige testen uit te voeren en na te gaan als alles werkt zoals het hoort. Het nut hiervan is om de eerste barrière van misvormende input tegen te gaan zodat het uiteindelijke resultaat dat TalentGuide aan hun klanten levert van hogere waarde is.
+Nadat de oorzaken voor de huidige kwaliteit tekortkomingen zijn geïdentificeerd, richt deze fase zich op de requirements analyse van de AI testworkflow. 
+Het doel hiervan is het opstellen van de nodige functionele en niet functionele vereisten die als technische richtlijnen zullen dienen van het skill bestand. Dit waarborgt dat de AI output artefacten oplevert die kunnen integreren in de codebase van Talentguide.
+Deze eisen pakken zijn niet alleen gericht om de huidige incidenten aan te pakken, maar garanderen ook de schaalbaarheid en toekomstbestendigheid van de workflow. In overleg met de IT lead en de copromotor is besloten om Playwright te gebruiken als het testing raamwerk voor de oplossing.
 \bigskip
 \\
-Na deze fase is er een stand van zaken.
-
-\subsection{Fase 4: Human-in-the-Loop (HITL) proces in kaart brengen}
-Deze fase geeft verduidelijking op de volgende deelvragen:
-\begin{itemize}
-    \item Hoe kan een feedback loop worden ontworpen om de menselijke validatie in het proces te integreren?
-\end{itemize}
-
-In deze fase wordt een HITL proces in kaart gebracht zodat de integratie van het menselijke oordeel en besluitvorming in de ontwikkeling, training en werking van het AI systeem kan gebruikt worden om de output te verbeteren, waarbij toezicht, validatie en interventie worden gewaarborgd \autocite{Schiel2025}. Dit proces is ontworpen om de verkregen output via WhatsApp van de werknemers van MtecPlus te verbeteren, waarbij de chatbot voor validatie vraagt, en ideeën aftoetst. Waarmee de output kan gestuurd worden om betere aanbevelingen te genereren.
+Om de prioriteiten van de behoeften te bepalen zal de MoSCoW methode worden toegepast op de verzamelde eisen. Daarnaast worden de succescriteria gedefinieerd voor de evaluatie van LLM modellen in de latere fase.
 \bigskip
 \\
-Na deze fase zal er een gedocumenteerde procedure zijn die gebruikt wordt om proactief de output te verbeteren.
+Na deze fase is er een lijst met vereisten en kwaliteitsnormen die als basis dienen voor de ontwikkeling van het prototype.
 
-\subsection{Fase 5: Implementatie van het Proof of Concept}
+
+\subsection{Fase 3: Opzet van het prototype}
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
-    \item Op welke wijze kan foutieve data vroegtijdig opgevangen worden?
+    \item Hoe kunnen geautomatiseerde E2E testen opgezet worden?
+    \item Welke procedures kunnen opgezet worden om de productkwaliteit te verhogen
 \end{itemize}
 
-Eenmaal de kritieke componenten zijn benoemd, een validatie strategie is bedacht en het HITL proces is ontwikkeld wordt in deze fase de validatiepijplijn geïmplementeerd. Hierbij wordt een experimentele ontwikkelingsomgeving opgezet om de theorie te testen. Hier ligt de focus op het bouwen van de validatie laag die iteratief verbeterde output kan bieden aan de cliënt.
+In deze fase zal er een proof-of-concept woorden ontwikkeld volgens de richtlijnen die zijn vastgesteld in de requirement analyse. Dit prototype bestaat uit een geautomatiseerde testomgeving die integreert met de ontwikkelingscyclus van Talentguide. De opzet start met het invoeren van het Playwright framework, waarbij de configuratie zal worden afgestemd op de eisen van de repository en CI/CD pijplijn.
 \bigskip
 \\
-Na deze fase zal er een proof of concept zijn waarbij de output opnieuw gemeten kan worden. Om na te gaan als de resultaten zijn verbeterd. Dit is een iteratieve fase die verfijning gaat vragen op de vorige fases.
+Bij het schrijven van de testen worden de beste praktijken van Playwright gebruikt. Hier zal worden gebruikgemaakt van het Page Object Model (POM). Hierbij zullen de interacties met de gebruikersinterface worden geabstraheerd in afzonderlijke klassen. Daarnaast zal er worden gewerkt met fixtures en een centrale support folder voor mockdata, constanten en helper methodes. Voor de authenticatie zal de officiële Playwright auth-setup geïmplementeerd worden, hierdoor kan de inlog sessie gedeeld worden over de volledige testsuite.
+\bigskip
+\\
+Ook is een noodzakelijk onderdeel van deze automatisering het ontwikkelen van een robuust skill bestand. Dit document dient als technische richtlijnen voor de AI agents om met minimale tussenkomst van de ontwikkelaar end-to-end testen te kunnen generen. Door deze toevoeging zal de drempel van Test Driven Development (TDD) verlaagd worden en wordt de objectieve meting van d productkwaliteit gefaciliteerd.
+\bigskip
+\\
+Na deze fase is er een praktische blauwdruk voor toekomstige uitvoering met Claude Code.
 
 
-\subsection{Fase 6: Evaluatie}
-Deze fase geeft verduidelijking op de volgende deelvragen:
-\begin{itemize}
-    \item Wat is de gemeten foutmarge bij de output van MtecPlus?
-\end{itemize}
+\subsection{Fase 4: Evaluatie}
 
-In deze laatste fase worden testen geschreven om de geïmplementeerde validatie te testen. Dit wordt gedaan doormiddel van backend en frontend testen die een slaagkans van 100\% zouden hebben. Hierdoor kan geconcludeerd worden dat kwaliteitsvolle input gegarandeerd is, waardoor de LLM’s dat TalentGuide gebruikt betere output kunnen genereren voor hun klanten. 
-
+Deze fase richt zich op de beoordeling van het prototype door het skill bestand in te zetten als een objectieve maatstaf voor de kwaliteitsborging. Hier zal de toepasbaarheid worden afgetoetst van de technische richtlijnen door verschillende LLM modellen hetzelfde testscenario te laten genereren. De evaluatie vindt plaats op basis van drie kernpunten.
+\bigskip
+\\
+Ten eerste in welke mate zullen de testen volgens de gedefinieerde architectuur gegenereerd worden. Ten tweede zal er worden onderzocht of de testen direct en zonder menselijke tussenkomst volledig functioneel zijn. Ten slotte zal de impact op de gevonden incidenten uit fase 1 geverifieerd worden als de testsuite daadwerkelijk deze opvangt in de development omgeving. 
+\bigskip
+\\
+Na deze fase kan een conclusie gevormd worden als de ontwikkelde aanpak de productkwaliteit daadwerkelijk kan verbeteren.
 
 %---------- Verwachte resultaten ----------------------------------------------
 \section{Verwacht resultaat, conclusie}%
 \label{sec:verwachte_resultaten}
 
-De primaire verwachting is dat er gevalideerd zal worden op alternatieve verlopen in plaats van enkel het 'happy path' en dat meerdere edge cases getest zullen zijn. Verder zal het menselijk feedback loop component data genereren dat later door TalentGuide kan geïmplementeerd worden.
+Het verwachte resultaat van dit onderzoek is het identificeren waar de laagste productkwaliteit zich bevindt, om vervolgens een structurele oplossing in te voeren die de foutmarge binnen het platform verlaagt. Dit proces vertrekt vanuit een grondige analyse van de vijf meest voorkomende incidenten in Sentry. Het opgeleverde artefact is een werkend prototype van een geautomatiseerde end-to-end testomgeving aangedreven door Playwright en ondersteund door een AI-gestuurde workflow. De kern van deze automatisering bestaat uit een skill bestand die de nodige technische richtlijnen bevat voor de generatie van testen.
+De centrale hypothese is dat de integratie van dit skill bestand de drempel voor Test Driven Development (TDD) verlaagt, waardoor AI-agents in staat zijn om met minimale menselijke tussenkomst kwalitatieve testen te genereren. Daarnaast zal het prototype meetbare data opleveren over de feedbackloop van de CI/CD pijplijn en de kostenefficiëntie van de gekozen methode.
+
+\subsection{Conclusie}
+
+De meerwaarde van dit onderzoek is om een robuuste testprocedure te verankeren in het ontwikkelingsproces. Hierdoor zal de productieomgeving niet dienen als testgrond van het systeem door de eindgebruiker. Voor het development team betekent dat er een tool aanwezig is die de drempel verlaagd voor de kwaliteitsborging. Voor Talentguide betekent dit dat de betrouwbaarheid van het SaaS platform is verhoogd, wat ervoor kan zorgen dat de klantentevredenheid toeneemt.
+
+

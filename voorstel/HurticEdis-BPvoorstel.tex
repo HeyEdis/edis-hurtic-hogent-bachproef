@@ -28,12 +28,12 @@
 
 \academicyear{2025-2026}
 
-\title{End-to-end procesanalyse van de competentie extractie via WhatsApp en implementatie van de validatiepijplijn bij MtecPlus.}
+\title{Ontwikkelen van een geautomatiseerde end-to-end test workflow om continu de productkwaliteit te meten bij Talentguide.}
 
 \author{Edis Hurtic}
 \email{edis.hurtic@student.hogent.be}
 
-\supervisor[Co-promotor]{M. Soufi (TalentGuide, \href{mailto:sigrid.beekman@synalco.be}{maryna.soufi@talentguide.com})}
+\supervisor[Co-promotor]{M. Soufi (Talentguide, \href{mailto:sigrid.beekman@synalco.be}{maryna.soufi@talentguide.com})}
 
 % Binnen welke specialisatierichting uit 3TI situeert dit onderzoek zich?
 % Kies uit deze lijst:
@@ -47,15 +47,19 @@
 %   zelf
 %
 \specialisation{Full stack developer}
-\keywords{input validatie, human-in-the-loop, machine learning, strategische personeelsplanning, HR tooling}
+\keywords{Testing AI workflow, kwaliteitsborging, HR tooling, geautomatiseerde testomgeving}
 
 \begin{document}
 
 \begin{abstract}
-Dit onderzoek vindt plaats in opdracht van TalentGuide, een organisatie die AI gedreven inzichten in competenties van arbeiders levert om talentontwikkeling en strategische personeelsplanning te bevorderen. TalentGuide richt zich op het dichten van de digitale kloof bij arbeiders, een doelgroep waarbij een traditioneel cv ontbreekt en digitale bereikbaarheid minder vanzelfsprekend is. In het bijzonder is het probleem dat de huidige AI extractie via WhatsApp bij de cliënt MtecPlus onnauwkeurige output genereert, waardoor de resulterende competentieprofielen onvoldoende betrouwbaar zijn voor professionele HR besluitvorming.
-De hoofdonderzoeksvraag luidt: Hoe kan een end-to-end procesanalyse van de huidige competentie extractie via WhatsApp leiden tot de ontwikkeling van een proof of concept voor een validatiepijplijn die zorgt voor accurate en betrouwbare competentieprofielen binnen de organisatie van MtecPlus?
-De gevolgde methodologie is volgens zes fasen opgedeeld. Eerst is de WhatsApp end-to-end flow volledig gedocumenteerd, gevolgd door de identificatie van kritieke componenten en de ontwikkeling van de validatiestrategie. In de derde fase is de huidige input getest, doordat minderwaardige input voor minderwaardige output zorgt. Vervolgens in fase vier is het human-in-the-loop proces in kaart gebracht, om validatie via WhatsApp te bevorderen. In de voorlaatste fase is de effectieve implementatie van het proof on concept. Hier is de validatiepijplijn geïmplementeerd om dan in de laatste fase geëvalueerd te worden met frontend en backend testen.
-De voorlaatste fase is de effectieve realisatie van de validatiepijplijn als proof of concept. Ten slotte is dit prototype grondig beoordeeld met frontend- en backend testen. De verwachte resultaten omvatten een technisch procesverslag, een statusrapport van de inputkwalitiet, een human-in-the-loop artefact en een functioneel prototype. Indien dit prototype succesvol blijkt, kan geconcludeerd worden dat een dergelijke validatiepijplijn de nodige betrouwbaarheid biedt om informele chatdata om te zetten naar kwalitatieve HR inzichten.
+Dit onderzoek vindt plaats in opdracht van Talentguide, een organisatie die AI gedreven inzichten in competenties van arbeiders levert om talentontwikkeling en strategische personeelsplanning te bevorderen. In het bijzonder is het probleem van een lage productkwaliteit onderzocht van het SaaS platform. Die veroorzaakt is door een gebrek aan kwaliteitsmetingen en end-to-end testen. Dit leidt tot instabiele releases naar de productieomgeving toe wat de gebruikerservaring verstoort.
+De hoofdonderzoeksvraag luidt: hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?
+De gevolgde methodologie is opgedeeld in vier fasen. Eerst is een nulmeting uitgevoerd door de bestaande GitHub CI/CD pijplijn en het Sentry dashboard te analyseren om de vijf meest kritieke fouten te identificeren.
+In de tweede fase volgt een requirements-analyse waarbij de functionele en non-functionele technische richtlijnen voor het skill-bestand worden vastgelegd. Dit waarborgt dat de AI output kan integreren binnen de codebase.
+In de derde fase is het prototype ontwikkeld. Dit is een geautomatiseerde testomgeving dat op basis van technische richtlijnen gedefinieerd in een skill bestand AI agents aanstuurt om met minimale intrusie van ontwikkelaars kwalitatieve end-to-end testen te generen. 
+In de laatste fase is het prototype geëvalueerd door dit skill bestand als objectieve maatstaf te gebruiken. Hierbij is de toepasbaarheid van de technische richtlijnen afgetoetst door LLM modellen te vergelijken op basis van de architecturale accuraatheid, het vermogen om functionele testen te generen zonder menselijke tussenkomst, en het effectiviteit in het onderscheppen van de geïdentificeerde Sentry incidenten.
+Er wordt verwacht dat dit prototype zal dienen als een betrouwbare testprocedure die kwaliteitsborging integreert in het ontwikkelingsproces met een minimale belasting van het ontwikkelingsteam. Het ontwikkeld skill bestand legt hierbij de technische specificaties vast van een volwaardige testsuite. Deze resultaten zullen leiden tot een verhoogde betrouwbaarheid van het SaaS platform met een toekomstgerichte aanpak.
+
 
 \end{abstract}
 

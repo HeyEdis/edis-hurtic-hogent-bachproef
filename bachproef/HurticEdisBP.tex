@@ -46,6 +46,9 @@
 }
 
 % Other packages not already included can be imported here
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc}
+\usepackage{graphicx}
 
 %%---------- Document metadata -------------------------------------------------
 % TODO: Replace this with your own information
@@ -53,7 +56,7 @@
 \supervisor{Mevr. M. Van Audenrode}
 \cosupervisor{Mevr. M. Soufi}
 \title
-    {Ontwikkeling van het terugkoppelingsproces bij ongeldige data en analyse van de end-to-end competentieprofiel generatie via WhatsApp.}
+    {Ontwikkelen van een geautomatiseerde end-to-end test workflow om continu de productkwaliteit te meten bij Talentguide.}
 \academicyear{\advance\year by -1 \the\year--\advance\year by 1 \the\year}
 \examperiod{1}
 \degreesought{\IfLanguageName{dutch}{Professionele bachelor in de toegepaste informatica}{Bachelor of applied computer science}}
@@ -156,11 +159,13 @@ Het onderwerp van deze bachelorproef is gebaseerd op een onderzoeksvoorstel dat 
 \section*{Samenvatting}
 
 % Kopieer en plak hier de samenvatting (abstract) van je onderzoeksvoorstel.
-Dit onderzoek vindt plaats in opdracht van Talentguide, een organisatie die AI gedreven inzichten in competenties van arbeiders levert om talentontwikkeling en strategische personeelsplanning te bevorderen. Talentuide richt zich op het dichten van de digitale kloof bij arbeiders, een doelgroep waarbij een traditioneel CV ontbreekt en digitale bereikbaarheid minder vanzelfsprekend is. In het bijzonder is het probleem dat de huidige extractie van competentieprofielen via WhatsApp bij de cliënt mtech+ onnauwkeurige profielen genereert, waardoor het resultaat onvoldoende betrouwbaar is voor professionele HR besluitvorming.
-De hoofdonderzoeksvraag luidt: Hoe kan een end-to-end procesanalyse van de huidige competentie extractie van verkregen data via WhatsApp leiden 
-tot de ontwikkeling van een terugkoppelingsproces (proof-of-concept) dat accurate en betrouwbare competentieprofielen 
-gegenereerd binnen de organisatie van mtech+?
-De gevolgde methodologie is volgens vijf fasen opgedeeld. In de eerste fase is een analyse gedaan van de competentieprofiel generatie flow uitgevoerd, gevolgd door de identificatie van kritieke triggers die de chatbot gebruikt om de gebruiker te vragen voor items te valideren. Dan is het human-in-the-looop proces in kaart gebracht en vervolgens is een proof-op-concept opgezet om de theorie te testen. In de laatste fase is heel de opstelling geëvalueerd met meetbare maatstaven. De verwachte resultaten omvatten een technisch procesverslag, een human-in-the-loop artefact en een functioneel prototype. Indien dit prototype succesvol blijkt, kan geconcludeerd worden dat een dergelijke terugkoppelingsproces de nodige betrouwbaarheid biedt om informele chatdata om te zetten naar kwalitatieve HR inzichten.
+Dit onderzoek vindt plaats in opdracht van Talentguide, een organisatie die AI gedreven inzichten in competenties van arbeiders levert om talentontwikkeling en strategische personeelsplanning te bevorderen. In het bijzonder is het probleem van een lage productkwaliteit onderzocht van het SaaS platform. Die veroorzaakt is door een gebrek aan kwaliteitsmetingen en end-to-end testen. Dit leidt tot instabiele releases naar de productieomgeving toe wat de gebruikerservaring verstoort.
+De hoofdonderzoeksvraag luidt: hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?
+De gevolgde methodologie is opgedeeld in vier fasen. Eerst is een nulmeting uitgevoerd door de bestaande GitHub CI/CD pijplijn en het Sentry dashboard te analyseren om de vijf meest kritieke fouten te identificeren.
+In de tweede fase volgt een requirements-analyse waarbij de functionele en non-functionele technische richtlijnen voor het skill-bestand worden vastgelegd. Dit waarborgt dat de AI output kan integreren binnen de codebase.
+In de derde fase is het prototype ontwikkeld. Dit is een geautomatiseerde testomgeving dat op basis van technische richtlijnen gedefinieerd in een skill bestand AI agents aanstuurt om met minimale intrusie van ontwikkelaars kwalitatieve end-to-end testen te generen. 
+In de laatste fase is het prototype geëvalueerd door dit skill bestand als objectieve maatstaf te gebruiken. Hierbij is de toepasbaarheid van de technische richtlijnen afgetoetst door LLM modellen te vergelijken op basis van de architecturale accuraatheid, het vermogen om functionele testen te generen zonder menselijke tussenkomst, en het effectiviteit in het onderscheppen van de geïdentificeerde Sentry incidenten.
+Er wordt verwacht dat dit prototype zal dienen als een betrouwbare testprocedure die kwaliteitsborging integreert in het ontwikkelingsproces met een minimale belasting van het ontwikkelingsteam. Het ontwikkeld skill bestand legt hierbij de technische specificaties vast van een volwaardige testsuite. Deze resultaten zullen leiden tot een verhoogde betrouwbaarheid van het SaaS platform met een toekomstgerichte aanpak.
 
 % Verwijzing naar het bestand met de inhoud van het onderzoeksvoorstel
 \input{../voorstel/voorstel-inhoud.tex}

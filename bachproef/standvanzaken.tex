@@ -7,45 +7,67 @@
 
 % Pas na deze inleidende paragraaf komt de eerste sectiehoofding.
 
-Dit hoofdstuk bevat je literatuurstudie. De inhoud gaat verder op de inleiding, maar zal het onderwerp van de bachelorproef *diepgaand* uitspitten. De bedoeling is dat de lezer na lezing van dit hoofdstuk helemaal op de hoogte is van de huidige stand van zaken (state-of-the-art) in het onderzoeksdomein. Iemand die niet vertrouwd is met het onderwerp, weet nu voldoende om de rest van het verhaal te kunnen volgen, zonder dat die er nog andere informatie moet over opzoeken \autocite{Pollefliet2011}.
+%Dit hoofdstuk bevat je literatuurstudie. De inhoud gaat verder op de inleiding, maar zal het onderwerp van de bachelorproef *diepgaand* uitspitten. De bedoeling is dat de lezer na lezing van dit hoofdstuk helemaal op de hoogte is van de huidige stand van zaken (state-of-the-art) in het onderzoeksdomein. Iemand die niet vertrouwd is met het onderwerp, weet nu voldoende om de rest van het verhaal te kunnen volgen, zonder dat die er nog andere informatie moet over opzoeken \autocite{Pollefliet2011}.
 
-Je verwijst bij elke bewering die je doet, vakterm die je introduceert, enz.\ naar je bronnen. In \LaTeX{} kan dat met het commando \texttt{$\backslash${textcite\{\}}} of \texttt{$\backslash${autocite\{\}}}. Als argument van het commando geef je de ``sleutel'' van een ``record'' in een bibliografische databank in het Bib\LaTeX{}-formaat (een tekstbestand). Als je expliciet naar de auteur verwijst in de zin (narratieve referentie), gebruik je \texttt{$\backslash${}textcite\{\}}. Soms is de auteursnaam niet expliciet een onderdeel van de zin, dan gebruik je \texttt{$\backslash${}autocite\{\}} (referentie tussen haakjes). Dit gebruik je bv.~bij een citaat, of om in het bijschrift van een overgenomen afbeelding, broncode, tabel, enz. te verwijzen naar de bron. In de volgende paragraaf een voorbeeld van elk.
+%Je verwijst bij elke bewering die je doet, vakterm die je introduceert, enz.\ naar je bronnen. In \LaTeX{} kan dat met het commando \texttt{$\backslash${textcite\{\}}} of \texttt{$\backslash${autocite\{\}}}. Als argument van het commando geef je de ``sleutel'' van een ``record'' in een bibliografische databank in het Bib\LaTeX{}-formaat (een tekstbestand). Als je expliciet naar de auteur verwijst in de zin (narratieve referentie), gebruik je \texttt{$\backslash${}textcite\{\}}. Soms is de auteursnaam niet expliciet een onderdeel van de zin, dan gebruik je \texttt{$\backslash${}autocite\{\}} (referentie tussen haakjes). Dit gebruik je bv.~bij een citaat, of om in het bijschrift van een overgenomen afbeelding, broncode, tabel, enz. te verwijzen naar de bron. In de volgende paragraaf een voorbeeld van elk.
 
-\textcite{Knuth1998} schreef een van de standaardwerken over sorteer- en zoekalgoritmen. Experten zijn het erover eens dat cloud computing een interessante opportuniteit vormen, zowel voor gebruikers als voor dienstverleners op vlak van informatietechnologie~\autocite{Creeger2009}.
+%\textcite{Knuth1998} schreef een van de standaardwerken over sorteer- en zoekalgoritmen. Experten zijn het erover eens dat cloud computing een interessante opportuniteit vormen, zowel voor gebruikers als voor dienstverleners op vlak van informatietechnologie~\autocite{Creeger2009}.
 
-Let er ook op: het \texttt{cite}-commando voor de punt, dus binnen de zin. Je verwijst meteen naar een bron in de eerste zin die erop gebaseerd is, dus niet pas op het einde van een paragraaf.
+%Let er ook op: het \texttt{cite}-commando voor de punt, dus binnen de zin. Je verwijst meteen naar een bron in de eerste zin die erop gebaseerd is, dus niet pas op het einde van een paragraaf.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{grail.jpg}
-  \caption[Voorbeeld figuur.]{\label{fig:grail}Voorbeeld van invoegen van een figuur. Zorg altijd voor een uitgebreid bijschrift dat de figuur volledig beschrijft zonder in de tekst te moeten gaan zoeken. Vergeet ook je bronvermelding niet!}
-\end{figure}
+%\begin{figure}
+%  \centering
+%  \includegraphics[width=0.8\textwidth]{grail.jpg}
+%  \caption[Voorbeeld figuur.]{\label{fig:grail}Voorbeeld van invoegen van een figuur. Zorg altijd voor een uitgebreid bijschrift dat de figuur volledig beschrijft zonder in de tekst te moeten gaan zoeken. Vergeet ook je bronvermelding niet!}
+%\end{figure}
 
-\begin{listing}
-  \begin{minted}{python}
-    import pandas as pd
-    import seaborn as sns
+%\begin{listing}
+%  \begin{minted}{python}
+%    import pandas as pd
+%    import seaborn as sns
 
-    penguins = sns.load_dataset('penguins')
-    sns.relplot(data=penguins, x="flipper_length_mm", y="bill_length_mm", hue="species")
-  \end{minted}
-  \caption[Voorbeeld codefragment]{Voorbeeld van het invoegen van een codefragment.}
-\end{listing}
+%    penguins = sns.load_dataset('penguins')
+%    sns.relplot(data=penguins, x="flipper_length_mm", y="bill_length_mm", hue="species")
+%  \end{minted}
+%  \caption[Voorbeeld codefragment]{Voorbeeld van het invoegen van een codefragment.}
+%\end{listing}
 
-\lipsum[7-20]
+%\lipsum[7-20]
 
-\begin{table}
-  \centering
-  \begin{tabular}{lcr}
-    \toprule
-    \textbf{Kolom 1} & \textbf{Kolom 2} & \textbf{Kolom 3} \\
-    $\alpha$         & $\beta$          & $\gamma$         \\
-    \midrule
-    A                & 10.230           & a                \\
-    B                & 45.678           & b                \\
-    C                & 99.987           & c                \\
-    \bottomrule
-  \end{tabular}
-  \caption[Voorbeeld tabel]{\label{tab:example}Voorbeeld van een tabel.}
-\end{table}
+%\begin{table}
+%  \centering
+%  \begin{tabular}{lcr}
+%    \toprule
+%    \textbf{Kolom 1} & \textbf{Kolom 2} & \textbf{Kolom 3} \\
+%    $\alpha$         & $\beta$          & $\gamma$         \\
+%    \midrule
+%    A                & 10.230           & a                \\
+%    B                & 45.678           & b                \\
+%    C                & 99.987           & c                \\
+%    \bottomrule
+%  \end{tabular}
+%  \caption[Voorbeeld tabel]{\label{tab:example}Voorbeeld van een tabel.}
+%\end{table}
 
+In dit hoofdstuk is het onderwerp diepgaand onderzocht met bestaande literatuur over web-GUI-testing, AI-ondersteunde testautomatisering en Playwright gebaseerde E2E-testworkflows. Eerst is toegelicht waarom web-GUI en E2E-testen belangrijk zijn voor het meten van softwarekwaliteit.
+Daarna is ondezocht hoe AI en LLM’s kunnen bijdragen aan het genereren, onderhouden en evalueren van Playwright testen. Vervolgens komen skill files, promptingtechnieken en risico's zoals hallucinerende of niet-reproduceerbare testoutput aan bod. Dit vormt de theoretische basis voor het proof of concept bij talentguide, waarin een AI-gestuurde workflow met minimale ontwikkelaarsinput E2E-testen moet genereren die passen binnen de bestaande codebase.
+
+\section{De basis voor kwaliteitsmeting}
+Voor een SaaS-platform zoals dat van talentguide is de browserinterface een belangrijke plaats waar fouten zichtbaar zijn voor eindgebruikers. Daarom volstaat het niet om enkel afzonderlijke functies of componenten te testen. E2E-testen controleren of volledige gebruikersstromen werken zoals verwacht. Web-GUI-testing sluit aan bij die benadering, doordat deze testvorm de kwaliteit van een webapplicatie beoordeelt vanuit het perspectief van de eindgebruiker in de browser \autocite{DiMeglio2026}.
+\bigskip
+\\
+De literatuur maakt duidelijk dat web-GUI-testen zowel manueel als geautomatiseerd kunnen worden uitgevoerd. \textcite{DiMeglio2026} Manuele testen blijven bruikbaar voor verkennende scenario's, maar ze zijn moeilijk te schalen wanneer een ontwikkelteam nieuwe functionaliteiten oplevert. Geautomatiseerde web-GUI-testen bieden daarentegen herhaalbaarheid, consistentie en schaalbaarheid, omdat dezelfde scenario's altijd opnieuw kunnen worden uitgevoerd door een browserautomatiseringsraamwerk \autocite{DiMeglio2026}). Die eigenschappen sluiten rechtstreeks aan bij het doel van dit onderzoek: kwaliteitscontrole moet een terugkoppelingsproces worden tijdens het ontwikkelen, zodat de productieomgeving niet de eerste plaats is waar kritieke fouten opgemerkt worden.
+\bigskip
+\\
+Binnen geautomatiseerde web-GUI-testing onderscheiden \textcite{DiMeglio2026} scripted testing van low-code-, capture-and-replay- en benaderingen zonder script. Scripted testing vereist dat testcode is geschreven met frameworks zoals Selenium, Playwright, Cypress of Puppeteer. Deze aanpak vraagt technische kennis, maar biedt tegelijk controle over selectors, assertions, testdata en de structuur van de testsuite \autocite{DiMeglio2026}. Voor deze bachelorproef is de scripted benadering onderzocht, doordat het prototype gericht is op Playwright testen die moeten passen binnen de bestaande React/Node.js-codebase van talentguide. Een AI-agent kan niet alleen een testscenario opleveren, maar moet code schrijven dat volgens de gedefinieerde technische richtlijnen is verwerkt en architecturaal aansluit bij de repository.
+\bigskip
+\\
+Het belang van een doordachte E2E aanpak is duidelijker wanneer de onderhoudsproblemen van web-GUI-testen zijn bekeken. Volgens \textcite{DiMeglio2026} zijn geautomatiseerde GUI-testen gevoelig voor fragility en flakiness. Fragility betekent dat testen breken door kleine wijzigingen in het interface of DOM-structuur, terwijl flakiness verwijst naar niet-deterministische foutmeldingen die bijvoorbeeld ontstaan door timingproblemen of asynchrone inhoud \autocite{DiMeglio2026}. In de CI/CD-context is dit noodzakelijk: een test die onterecht faalt, vertraagt het ontwikkelproces, maar een test die onterecht slaagt, creëert een vals gevoel van kwaliteit. De testworkflow moet daarom niet alleen tests genereren, maar ook betrouwbare en interpreteerbare signalen leveren.
+\bigskip
+\\
+Het toegepast onderzoek van \textcite{DiMeglio2026} verduidelijkt het beeld dat web-GUI-testen vooral een last vormen. Het onderzoek naar 472 open-source webapplicaties toont dat projecten met scripted web-GUI-testen vaak meer ontwikkelactiviteit, meer contributors en actievere issue-trackers hebben. Bovendien evolueren web-GUI-testen in veel gevallen mee met de applicatiecode, wat erop wijst dat deze testen kunnen worden verankerd in het ontwikkelingsproces \autocite{DiMeglio2026}. Die vaststelling ondersteunt de richting van dit onderzoek: E2E testen zijn niet opgevat als een losstaande QA activiteit, maar als een maatstaf die ontwikkelaars feedback geeft bij elke wijziging.
+\bigskip
+\\
+Doordat web-GUI-testen onderhoud vragen naar de ontwikkelaar toe is een AI-ondersteunende testautomatisering relevant. Het onderzoeksvoorstel legt de nadruk op een skill bestand dat AI-agents technische richtlijnen geeft voor het genereren van Playwright testen met minimale ontwikkelaarsinput. De literatuurstudie onderzoekt daarom niet alleen of AI testen kan genereren, maar welke voorwaarden nodig zijn om die output bruikbaar te maken binnen een professionele workflow. AI kan de drempel voor E2E-testing verlagen, maar alleen wanneer de gegenereerde tests onderhoudbaar, reproduceerbaar en controleerbaar blijven.
+
+\section{AI in softwaretesten en testautomatisering}

@@ -27,71 +27,193 @@
 %% en geef het een gepaste titel.
 
 
-\section{Fase 1: Analyse van de end-to-end competentieprofiel generatie via WhatsApp}
+\section{Fase 1:  Nulmeting van de huidige staat}
 
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
-    \item Hoe wordt data geëxtraheerd uit bestanden?
-    \item Welke LLM is het meest geschikt om vaardigheden te extraheren uit korte, informele tekstberichten?
+    \item Wat is de gemeten foutmarge?
+    \item Waar bevindt zicht de laagste kwaliteit?
+    \item Hoe komt het dat de productkwaliteit laag is?
 \end{itemize}
 
-In deze fase zal het huidige systeem volledig worden gedocumenteerd, hierbij zal de flow vanaf de initiële input door de mtech+ arbeider in WhatsApp tot de gegenereerde output van Talentguide in kaart gebracht worden. Dit bevat: de koppeling tussen WhatsApp en de backend; het systeem dat extractie uitvoert op de bestanden; hoe het in de databank wordt opgeslagen en welke prompts de output sturen. Ook zullen de gebruikte LLM modellen benoemd worden en hun specifieke taak worden gedocumenteerd. Dit zal zorgen voor een compleet overzicht van het systeem, dat gebruikt zal worden in de volgende fase om kritieken triggers te vinden.
+
+De eerste fase richt zich op het in kaart brengen van de oorzaken achter de huidige kwaliteitsgebreken binnen het SaaS-platform. In eerste instantie zal worden onderzocht waarom de bestaande kwaliteitscontroles falen tijdens het integratieproces; hierbij wordt de GitHub CI-pijplijn geanalyseerd om de technische blokkades te identificeren die voorkomen dat testen succesvol worden uitgevoerd bij een push naar de repository.
 \bigskip
 \\
-Na deze fase zal er een volledig gedocumenteerd verloop zijn van de end-to-end flow.
+Vervolgens zal het Sentry dashboard kritisch worden onderzocht, omdat dit platform elke foutmelding in de development, staging en productieomgeving monitort en logt. Door deze incidenten te onderzoeken kan een beeld gevormd worden van de manier waarop deze defecten de gebruikerservaring van de eindgebruiker aantasten. De vijf meest significante fouten worden hierna diepgaand onderzocht om de exacte bron van het conflict te achterhalen.
+\bigskip
+\\
+Na deze fase is er inzicht in de tekortkomingen in de huidige opzet, wat als basis dient voor het ontwerpen van een oplossing die is toegespitst op de geïdentificeerde noden.
 
-\section{Fase 2: Kritieke triggers benoemen}
+\section{Fase 2: Requirements-analyse}
 
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
-    \item Wat zijn de kritieke componenten die leiden tot minderwaardige output?
+    \item Hoe kan kwaliteitscontrole een deel worden van het ontwikkelingsproces?
+    \item Kan er gebruik worden gemaakt van AI?
+    \item Welke tools bestaan er om E2E testen te automatiseren?
 \end{itemize}
 
-Eenmaal er een overzicht is van het systeem zal dieper gekeken worden om de aanleidingen tot validatie te benoemen. Dit zijn de kritieke punten die voor minderwaardige output zorgen. Hiervoor zullen edge cases worden gecontroleerd, en de huidige validatie technieken in kaart gebracht worden. In deze fase is ook de validatie strategie ontworpen.
+Nadat de oorzaken voor de huidige kwaliteit tekortkomingen zijn geïdentificeerd, richt deze fase zich op de requirements analyse van de AI testworkflow. 
+Het doel hiervan is het opstellen van de nodige functionele en niet functionele vereisten die als technische richtlijnen zullen dienen van het skill bestand. Dit waarborgt dat de AI output artefacten oplevert die kunnen integreren in de codebase van talentguide.
+Deze eisen pakken zijn niet alleen gericht om de huidige incidenten aan te pakken, maar garanderen ook de schaalbaarheid en toekomstbestendigheid van de workflow. In overleg met de IT lead en de copromotor is besloten om Playwright te gebruiken als het testing raamwerk voor de oplossing.
 \bigskip
 \\
-Na deze fase zijn de triggers bekend en is een strategie ontworpen om het aan te pakken.
+Om de prioriteiten van de behoeften te bepalen zal de MoSCoW methode worden toegepast op de verzamelde eisen. Daarnaast worden de succescriteria gedefinieerd voor de evaluatie van LLM modellen in de latere fase.
+\bigskip
+\\
+Na deze fase is er een lijst met vereisten en kwaliteitsnormen die als basis dienen voor de ontwikkeling van het prototype.
 
-\section{Fase 3: Human-in-the-Loop (HITL) proces in kaart brengen}
-
+\section{Fase 3: Opzet van het prototype}
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
-    \item Hoe kan een terugkoppelingsproces worden ontworpen om de menselijke validatie in het proces te integreren?
+    \item Hoe kunnen geautomatiseerde E2E testen opgezet worden?
+    \item Welke procedures kunnen opgezet worden om de productkwaliteit te verhogen
 \end{itemize}
 
-In deze fase wordt een HITL proces in kaart gebracht zodat de integratie van het menselijke oordeel en besluitvorming in de ontwikkeling, training en werking van het AI systeem kan gebruikt worden om de output te verbeteren, waarbij toezicht, validatie en interventie worden gewaarborgd \autocite{Schiel2025}. Dit proces is ontworpen om de verkregen output via WhatsApp van de werknemers van mtec+ te verbeteren, waarbij de chatbot voor validatie vraagt, en ideeën aftoetst. Waarmee de output kan gestuurd worden om betere aanbevelingen te genereren.
-
+In deze fase zal er een proof-of-concept woorden ontwikkeld volgens de richtlijnen die zijn vastgesteld in de requirement analyse. Dit prototype bestaat uit een geautomatiseerde testingworkflow die integreert met de ontwikkelingscyclus van Talentguide. De opzet start met het invoeren van het Playwright framework, waarbij de configuratie zal worden afgestemd op de eisen van de repository en CI/CD pijplijn.
 \bigskip
 \\
-Na deze fase is er een procedure die gebruikt kan worden om gebruikers proactief voor sturing te vragen zodat de output kan verbeteren.
-
-\section{Fase 4: Ontwikkeling van het Proof-of-Concept}
-
-Deze fase geeft verduidelijking op de volgende deelvragen:
-\begin{itemize}
-    \item Op welke wijze kan foutieve data vroegtijdig opgevangen worden?
-\end{itemize}
-
-Eenmaal de kritieke componenten zijn benoemd, een validatie strategie is bedacht en het HITL proces is ontwikkeld wordt in deze fase het terugkoppelingsproces ontwikkeld. Hierbij wordt een experimentele ontwikkelingsomgeving opgezet om de theorie te testen. Waarbij de focus ligt op het bouwen van een validatie laag die voor verbeterde input kan vragen en wijzigingen kan opslaan. Daarnaast wordt er aandacht besteed aan de frequentie dat gebruikers gevraagd worden om hun profiel te valideren en het moet passen in de workflow van de werknemer.
+Bij het schrijven van de testen worden de beste praktijken van Playwright gebruikt. Hier zal worden gebruikgemaakt van het Page Object Model (POM). Hierbij zullen de interacties met de gebruikersinterface worden geabstraheerd in afzonderlijke klassen. Daarnaast zal er worden gewerkt met fixtures en een centrale support folder voor mockdata, constanten en helper methodes. Voor de authenticatie zal de officiële Playwright auth-setup geïmplementeerd worden, hierdoor kan de inlog sessie gedeeld worden over de volledige testsuite.
 \bigskip
 \\
-Na deze fase is er een proof-of-concept die getest kan worden.
+Ook is een noodzakelijk onderdeel van deze automatisering het ontwikkelen van een robuust skill bestand. Dit document dient als technische richtlijnen voor de AI agents om met minimale tussenkomst van de ontwikkelaar end-to-end testen te kunnen generen. Door deze toevoeging zal de drempel van Test Driven Development (TDD) verlaagd worden en wordt de objectieve meting van d productkwaliteit gefaciliteerd.
+\bigskip
+\\
+Na deze fase is er een praktische blauwdruk voor toekomstige uitvoering met een coding agent.
 
-\section{Fase 5: Evaluatie}
-In deze laatste fase van het onderzoek worden meerdere testscenario's opgesteld met verschillende gebruikers fouten. Bij deze testen wordt gemeten wat de slaagkansen van de triggers bij edge case's. Ook als de wijzigingen correct zijn opgeslagen in de databank en hoeveel valse positieven/negatieven er zijn.
+\section{Fase 4: Evaluatie}
+Deze fase richt zich op de beoordeling van het prototype door het skill bestand in te zetten als een objectieve maatstaf voor de kwaliteitsborging. Hier zal de toepasbaarheid worden afgetoetst van de technische richtlijnen door verschillende LLM modellen hetzelfde testscenario te laten genereren. De evaluatie vindt plaats op basis van drie kernpunten.
+\bigskip
+\\
+Ten eerste in welke mate zullen de testen volgens de gedefinieerde architectuur gegenereerd worden. Ten tweede zal er worden onderzocht of de testen direct en zonder menselijke tussenkomst volledig functioneel zijn. Ten slotte zal de impact op de gevonden incidenten uit fase 1 geverifieerd worden als de testsuite daadwerkelijk deze opvangt in de development omgeving. 
+\bigskip
+\\
+Na deze fase kan een conclusie gevormd worden als de ontwikkelde aanpak de productkwaliteit daadwerkelijk kan verbeteren.
 
-
-\chapter{Analyse van de end-to-end competentieprofiel generatie via WhatsApp}
+\chapter{Nulmeting van de huidige staat}
 \label{ch:fase1}
 
-\chapter{Kritieke triggers benoemen}
+\chapter{Requirements-analyse}
 \label{ch:fase2}
 
-\chapter{Human-in-the-Loop (HITL) proces in kaart brengen}
-\label{ch:fase3}
+In dit hoofdstuk is vastgelegd welke onderdelen nodig zijn om een AI-ondersteunde E2E-testworkflow voor talentguide te bouwen. De focus ligt op de volledige keten: routes omzetten naar user stories, user stories vertalen naar testtaken, Playwright testen genereren met een ralph-loop en de output beoordelen. Voor deze keten functionele en niet-functionele requirements opgesteld voor een bruikbare en onderhoudbare oplossing.
 
-\chapter{Ontwikkeling van het Proof-of-Concept}
-\label{ch:fase4}
+\section{Benodigde onderdelen van de workflowketen}
+Deze workflow bestaat uit meerdere opeenvolgende onderdelen. Elk onderdeel heeft een specifieke taak binnen de keten en levert input voor de volgende stap. Op deze manier vertrekt de workflow niet rechtstreeks vanuit een losse prompt, maar vanuit gestructureerde tussenstappen die samen het hoofddoel van een geautomatiseerde E2E-testworkflow ondersteunen.
+
+
+\subsection{Gestructureerd user-story vaardigheidsbestand}
+Dit artefact vertrekt vanuit de routes van de applicatie en zet deze om naar user stories. Daarbij is vastgelegd wat de rol van de route is, de betrokken pagina of componenten, het doel van de gebruiker, de acceptatiecriteria, de happy flow, de belangrijkste interacties en de nodige precondities.
+Dit onderdeel is nodig omdat een route op zichtzelf te weinig context bevat voor de AI-agent om een betekenisvolle E2E-test te genereren. De route toont waar de eindgebruiker terechtkomt niet welk gedrag getest moet worden. Door deze vertaling ontstaat een tussenlaag die functionele betekenis toevoegt aan de route.
+
+\subsection{Richtlijnen voor de E2E-testen}
+Dit artefact bestaat uit technische richtlijnen waaraan Playwright-testen moeten voldoen. Hierin is vastgelegd dat testen gebruikersgedrag moeten controleren, dat elke test onafhankelijk uitvoerbaar moet zijn, dat echte endpoints gebruikt moeten worden, en testId’s aan componenten moet toegewezen worden. Dit is uitgebreider in de opzet vermeld. Daarnaast beschrijft het de testarchitectuur en is bepaald waar elk onderdeel leeft.
+Dit onderdeel is noodzakelijk om de kwaliteit te waarborgen zodat vermeden kan worden dat agents syntactisch correcte testen generen, maar afwijken van de projectconventies. 
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.1cm and 1.2cm,
+        startend/.style={
+            ellipse,
+            draw,
+            align=center,
+            minimum width=1.5cm,
+            minimum height=0.75cm,
+            font=\scriptsize
+        },
+        activity/.style={
+            rectangle,
+            draw,
+            rounded corners,
+            align=center,
+            minimum width=2.4cm,
+            minimum height=0.85cm,
+            font=\scriptsize
+        },
+        gateway/.style={
+            diamond,
+            draw,
+            aspect=1.4,
+            align=center,
+            inner sep=1pt,
+            minimum width=0.8cm,
+            minimum height=0.8cm,
+            font=\scriptsize
+        },
+        arrow/.style={->, thick},
+        feedback/.style={->, thick, dashed}
+        ]
+        
+        % Preparation chain
+        \node[startend] (start) {Start};
+        \node[activity, right=of start] (routes) {Routes\\zijn gekend};
+        \node[activity, right=of routes] (stories) {User stories\\maken};
+        \node[activity, right=of stories] (plans) {Planbestanden\\maken};
+        
+        % First AND gateway
+        \node[gateway, below=1.1cm of plans] (andstart) {+};
+        
+        % Parallel inputs
+        \node[activity, below left=1.35cm and 1.25cm of andstart] (e2e) {E2E-richtlijnen\\volgen};
+        \node[activity, below right=1.35cm and 1.25cm of andstart] (ralph) {Ralph-loop\\uitvoeren};
+        
+        % Join gateway
+        \node[gateway, below=2.0cm of andstart] (andjoin) {+};
+        
+        % Output
+        \node[activity, below=1.05cm of andjoin] (tests) {Playwright-\\testen gemaakt\\volgens richtlijnen};
+        \node[startend, minimum width=2.5cm, below=1.05cm of tests] (working) {Gebruiker heeft\\werkende\\E2E-testen};
+        
+        % Decision after working tests
+        \node[gateway, below=1.05cm of working] (choice) {X};
+        
+        % End branches
+        \node[activity, below left=1.3cm and 1.45cm of choice] (intro) {Introspectie\\uitvoeren};
+        \node[startend, below right=1.3cm and 1.45cm of choice] (end) {Einde};
+        
+        % Main flow
+        \draw[arrow] (start) -- (routes);
+        \draw[arrow] (routes) -- (stories);
+        \draw[arrow] (stories) -- (plans);
+        \draw[arrow] (plans) -- (andstart);
+        
+        \draw[arrow] (andstart) -| (e2e);
+        \draw[arrow] (andstart) -| (ralph);
+        
+        \draw[arrow] (e2e.south) |- (andjoin);
+        \draw[arrow] (ralph.south) |- (andjoin);
+        
+        \draw[arrow] (andjoin) -- (tests);
+        \draw[arrow] (tests) -- (working);
+        \draw[arrow] (working) -- (choice);
+        
+        \draw[arrow] (choice) -| node[pos=0.35, left, font=\scriptsize, align=center] {Wel terugkerende\\fouten} (intro);
+        \draw[arrow] (choice) -| node[pos=0.25, right, font=\scriptsize, align=center] {Geen terugkerende\\fouten} (end);
+        
+        % Feedback loop
+        \coordinate (feedbackleft) at ($(intro.west)+(-2.2,0)$);
+        \coordinate (feedbacktop) at (feedbackleft |- e2e.west);
+        
+        \draw[feedback] (intro.west) -- (feedbackleft)
+        -- node[midway, left, font=\scriptsize, align=center] {Bijsturing\\vaardigheidsbestand}
+        (feedbacktop) -- (e2e.west);
+        
+    \end{tikzpicture}
+    \caption{Procesmodel van de workflowketen}
+    \label{fig:e2e-workflow-procesmodel}
+\end{figure}
+
+
+Figuur ~\ref{fig:e2e-workflow-procesmodel} visualiseert deze samenhang als een lineaire pipeline met een feedbackloop. De hoofdrichting loopt van routes naar gegenereerde Playwright-testen en evaluatie. De feedbackloop loopt vanuit introspectie terug naar de richtlijnen en vaardigheidsbestanden, zodat latere testgeneratie beter gestuurd wordt.
+
+
+
+
+
+\chapter{Opzet van het prototype}
+\label{ch:fase3}
 
 \chapter{Evaluatie}
 \label{ch:fase5}

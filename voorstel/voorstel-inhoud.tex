@@ -9,7 +9,10 @@ Binnen moderne softwareontwikkeling vormen end-to-end (E2E) testen een onmisbaar
 Traditioneel vereisen E2E testen opzetten en onderhouden een continue inbreng van ontwikkelaars, hierdoor is hun kostbare tijd weggenomen van nieuwe functionaliteiten te ontwikkelen. Dus is het belangrijk om een systeem te ontwerpen dat op een zelfvoorzienende manier de productkwaliteit meet bij elke oplevering naar de GitHub repository met minimale belasting voor het ontwikkelingsteam. 
 \bigskip
 \\
-De kwaliteit van het product dat Talentguide oplevert is nu laag, zelfs in de productieomgeving voor de eindgebruiker. De organisatie streeft naar artificieel intelligente gedreven inzichten in competenties van werknemers om talentontwikkeling en personeelsplanning te bevorderen.
+De kwaliteit van het product dat talentguide oplevert is nu laag, zelfs in de productieomgeving voor de eindgebruiker. Om de impact hiervan te begrijpen, moet eerst duidelijk zijn wat het platform precies doet. Talentguide is een SaaS-platform dat organisaties ondersteunt bij het structureren en interpreteren van personeelsgegevens. Het platform verwerkt data zoals cv’s, functiebeschrijvingen en interne documenten en zet deze om naar een gestructureerd competentieprofiel. Daarbij worden eerst kleinere bouwstenen geëxtraheerd, zoals taken, tools, kennis en gedragskenmerken. Binnen talentguide worden deze aangeduid als TTK’s. Deze TTK’s krijgen een expertiselevel en worden vervolgens gegroepeerd onder bredere vaardigheden. Op die manier ontstaat er een profiel dat niet enkel weergeeft welke vaardigheden een werknemer bezit, maar ook op welk niveau deze vaardigheden aanwezig zijn.
+\bigskip
+\\
+Deze profielen vormen de basis voor verdere inzichten binnen het platform. Talentguide gebruikt de gestructureerde data om werknemers te matchen met rollen, competentie gaten te identificeren en ontwikkelingsnoden zichtbaar te maken. Het platform kan ook gelijkaardige of ontbrekende competenties voorstellen om een profiel verder te vervolledigen. Omdat deze inzichten afhankelijk zijn van correcte en betrouwbare data, is de kwaliteit van de onderliggende software belangrijk. Wanneer releases fouten bevatten of gebruikersstromen niet correct werken, kan dit rechtstreeks invloed hebben op de betrouwbaarheid van competentieprofielen, validatieflows en de gebruikerservaring. Daarom is het relevant om te onderzoeken hoe een geautomatiseerde end-to-end testingworkflow kan bijdragen aan een stabieler en betrouwbaarder SaaS-platform.
 \bigskip
 \\
 Het grote probleem is dat er nu geen metingen zijn uitgevoerd op de productkwaliteit, waardoor er geen maatstaf is om te zien hoe groot of klein problemen zijn. Dit komt door het gebrek aan E2E testen in de huidige React/Node.js codebase. Dit leidt ertoe dat releases naar de productieomgeving breken en een slechte gebruikerservaring opleveren.
@@ -21,7 +24,7 @@ Om deze productkwaliteit te verankeren zonder de snelheid van het ontwikkelingst
 Ondanks de efficiëntievoordelen brengt het gebruik van Large Language Models (LLMs) in Quality Assurance (QA) processen specifieke risico's met zich mee, zoals gehallucineerd gebruikersgedrag waarbij de AI foutieve scenario’s genereert om het successtadium te bereiken. Bovendien kan de AI gegenereerde code het debuggen bemoeilijken, waarbij de analyse van testfouten transformeert van het lezen van code naar ingewikkeld "detectivewerk".
 \bigskip
 \\
-De doelgroep van dit onderzoek is Talentguide in het bijzonder het development- en QA team. Die hebben behoefte aan een systeem dat hun inzichten geeft op de schaal van de kwaliteitsproblemen, en dat de drempel van E2E testen verlaagd. Dit onderzoek richt zich vooral op het ontwerpen van een E2E testsysteem dat geïntegreerd is binnen de bestaande GitHub- en CI/CD infrastructuur van Talentguide, om met minimale intrusie van ontwikkelaars de huidige en toekomstige functionaliteiten continu te kunnen monitoren. 
+De doelgroep van dit onderzoek is talentguide in het bijzonder het development- en QA team. Die hebben behoefte aan een systeem dat hun inzichten geeft op de schaal van de kwaliteitsproblemen, en dat de drempel van E2E testen verlaagd. Dit onderzoek richt zich vooral op het ontwerpen van een E2E testsysteem dat geïntegreerd is binnen de bestaande GitHub- en CI/CD infrastructuur van talentguide, om met minimale intrusie van ontwikkelaars de huidige en toekomstige functionaliteiten continu te kunnen monitoren. 
 \bigskip
 \\
 De hoofdonderzoeksvraag luidt: hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?
@@ -43,7 +46,7 @@ Om een oplossing te vinden, zijn de volgende aspecten onderzocht:
     \item Welke tools bestaan er om E2E testen te automatiseren?
 \end{itemize}
 \bigskip
-Het doel van deze bachelorproef is om de kwaliteit van het eindproduct bij Talentguide te verhogen door een functioneel prototype af te leveren van een geautomatiseerde testomgeving dat op basis van minimale ontwikkelaars input robuuste testen genereert en uitvoert.
+Het doel van deze bachelorproef is om de kwaliteit van het eindproduct bij talentguide te verhogen door een functioneel prototype af te leveren van een geautomatiseerde testingworkflow dat op basis van minimale ontwikkelaars input robuuste testen genereert en uitvoert.
 \bigskip
 \\
 Het eindresultaat wordt als een succes beschouwd wanneer dit systeem objectief de productkwaliteit in kaart brengt bij het opleveren van nieuwe functionaliteiten naar de Github repository. Hiermee is de fundamentele stap gezet om structurele kwaliteitsmetingen binnen de organisatie te introduceren.
@@ -100,7 +103,7 @@ Deze fase geeft verduidelijking op de volgende deelvragen:
     \item Hoe komt het dat de productkwaliteit laag is?
 \end{itemize}
 
-De eerste fase richt zich op het in kaart brengen van de oorzaken achter de huidige kwaliteitsgebreken binnen het SaaS platform. In eerste instantie zal worden onderzocht waarom de bestaande kwaliteitscontroles falen tijdens het integratieproces; hierbij wordt de GitHub CI-pijplijn geanalyseerd om de technische blokkades te identificeren die voorkomen dat testen succesvol worden uitgevoerd bij een push naar de repository.
+De eerste fase richt zich op het in kaart brengen van de oorzaken achter de huidige kwaliteitsgebreken binnen het SaaS-platform. In eerste instantie zal worden onderzocht waarom de bestaande kwaliteitscontroles falen tijdens het integratieproces; hierbij wordt de GitHub CI-pijplijn geanalyseerd om de technische blokkades te identificeren die voorkomen dat testen succesvol worden uitgevoerd bij een push naar de repository.
 \bigskip
 \\
 Vervolgens zal het Sentry dashboard kritisch worden onderzocht, omdat dit platform elke foutmelding in de development, staging en productieomgeving monitort en logt. Door deze incidenten te onderzoeken kan een beeld gevormd worden van de manier waarop deze defecten de gebruikerservaring van de eindgebruiker aantasten. De vijf meest significante fouten worden hierna diepgaand onderzocht om de exacte bron van het conflict te achterhalen.
@@ -117,7 +120,7 @@ Deze fase geeft verduidelijking op de volgende deelvragen:
 \end{itemize}
 
 Nadat de oorzaken voor de huidige kwaliteit tekortkomingen zijn geïdentificeerd, richt deze fase zich op de requirements analyse van de AI testworkflow. 
-Het doel hiervan is het opstellen van de nodige functionele en niet functionele vereisten die als technische richtlijnen zullen dienen van het skill bestand. Dit waarborgt dat de AI output artefacten oplevert die kunnen integreren in de codebase van Talentguide.
+Het doel hiervan is het opstellen van de nodige functionele en niet functionele vereisten die als technische richtlijnen zullen dienen van het skill bestand. Dit waarborgt dat de AI output artefacten oplevert die kunnen integreren in de codebase van talentguide.
 Deze eisen pakken zijn niet alleen gericht om de huidige incidenten aan te pakken, maar garanderen ook de schaalbaarheid en toekomstbestendigheid van de workflow. In overleg met de IT lead en de copromotor is besloten om Playwright te gebruiken als het testing raamwerk voor de oplossing.
 \bigskip
 \\
@@ -134,7 +137,7 @@ Deze fase geeft verduidelijking op de volgende deelvragen:
     \item Welke procedures kunnen opgezet worden om de productkwaliteit te verhogen
 \end{itemize}
 
-In deze fase zal er een proof-of-concept woorden ontwikkeld volgens de richtlijnen die zijn vastgesteld in de requirement analyse. Dit prototype bestaat uit een geautomatiseerde testomgeving die integreert met de ontwikkelingscyclus van Talentguide. De opzet start met het invoeren van het Playwright framework, waarbij de configuratie zal worden afgestemd op de eisen van de repository en CI/CD pijplijn.
+In deze fase zal er een proof-of-concept woorden ontwikkeld volgens de richtlijnen die zijn vastgesteld in de requirement analyse. Dit prototype bestaat uit een geautomatiseerde testingworkflow die integreert met de ontwikkelingscyclus van Talentguide. De opzet start met het invoeren van het Playwright framework, waarbij de configuratie zal worden afgestemd op de eisen van de repository en CI/CD pijplijn.
 \bigskip
 \\
 Bij het schrijven van de testen worden de beste praktijken van Playwright gebruikt. Hier zal worden gebruikgemaakt van het Page Object Model (POM). Hierbij zullen de interacties met de gebruikersinterface worden geabstraheerd in afzonderlijke klassen. Daarnaast zal er worden gewerkt met fixtures en een centrale support folder voor mockdata, constanten en helper methodes. Voor de authenticatie zal de officiële Playwright auth-setup geïmplementeerd worden, hierdoor kan de inlog sessie gedeeld worden over de volledige testsuite.
@@ -143,7 +146,7 @@ Bij het schrijven van de testen worden de beste praktijken van Playwright gebrui
 Ook is een noodzakelijk onderdeel van deze automatisering het ontwikkelen van een robuust skill bestand. Dit document dient als technische richtlijnen voor de AI agents om met minimale tussenkomst van de ontwikkelaar end-to-end testen te kunnen generen. Door deze toevoeging zal de drempel van Test Driven Development (TDD) verlaagd worden en wordt de objectieve meting van d productkwaliteit gefaciliteerd.
 \bigskip
 \\
-Na deze fase is er een praktische blauwdruk voor toekomstige uitvoering met Claude Code.
+Na deze fase is er een praktische blauwdruk voor toekomstige uitvoering met een coding agent.
 
 
 \subsection{Fase 4: Evaluatie}
@@ -160,11 +163,11 @@ Na deze fase kan een conclusie gevormd worden als de ontwikkelde aanpak de produ
 \section{Verwacht resultaat, conclusie}%
 \label{sec:verwachte_resultaten}
 
-Het verwachte resultaat van dit onderzoek is het identificeren waar de laagste productkwaliteit zich bevindt, om vervolgens een structurele oplossing in te voeren die de foutmarge binnen het platform verlaagt. Dit proces vertrekt vanuit een grondige analyse van de vijf meest voorkomende incidenten in Sentry. Het opgeleverde artefact is een werkend prototype van een geautomatiseerde end-to-end testomgeving aangedreven door Playwright en ondersteund door een AI-gestuurde workflow. De kern van deze automatisering bestaat uit een skill bestand die de nodige technische richtlijnen bevat voor de generatie van testen.
+Het verwachte resultaat van dit onderzoek is het identificeren waar de laagste productkwaliteit zich bevindt, om vervolgens een structurele oplossing in te voeren die de foutmarge binnen het platform verlaagt. Dit proces vertrekt vanuit een grondige analyse van de vijf meest voorkomende incidenten in Sentry. Het opgeleverde artefact is een werkend prototype van een geautomatiseerde end-to-end testingworkflow aangedreven door Playwright en ondersteund door een AI-gestuurde workflow. De kern van deze automatisering bestaat uit een skill bestand die de nodige technische richtlijnen bevat voor de generatie van testen.
 De centrale hypothese is dat de integratie van dit skill bestand de drempel voor Test Driven Development (TDD) verlaagt, waardoor AI-agents in staat zijn om met minimale menselijke tussenkomst kwalitatieve testen te genereren. Daarnaast zal het prototype meetbare data opleveren over de feedbackloop van de CI/CD pijplijn en de kostenefficiëntie van de gekozen methode.
 
 \subsection{Conclusie}
 
-De meerwaarde van dit onderzoek is om een robuuste testprocedure te verankeren in het ontwikkelingsproces. Hierdoor zal de productieomgeving niet dienen als testgrond van het systeem door de eindgebruiker. Voor het development team betekent dat er een tool aanwezig is die de drempel verlaagd voor de kwaliteitsborging. Voor Talentguide betekent dit dat de betrouwbaarheid van het SaaS platform is verhoogd, wat ervoor kan zorgen dat de klantentevredenheid toeneemt.
+De meerwaarde van dit onderzoek is om een robuuste testprocedure te verankeren in het ontwikkelingsproces. Hierdoor zal de productieomgeving niet dienen als testgrond van het systeem door de eindgebruiker. Voor het development team betekent dat er een tool aanwezig is die de drempel verlaagd voor de kwaliteitsborging. Voor talentguide betekent dit dat de betrouwbaarheid van het SaaS-platform is verhoogd, wat ervoor kan zorgen dat de klantentevredenheid toeneemt.
 
 

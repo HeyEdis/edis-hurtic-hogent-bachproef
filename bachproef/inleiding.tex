@@ -5,20 +5,16 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-Binnen de organisatie van Talentguide is er een functionaliteit ontwikkeld voor hun client mtech+ om via WhatsApp arbeiders te onboarden. Dit proces bevat drie stappen:
-
-\begin{enumerate}
-    \item Vraag voor de gebruiker zijn CV
-    \item Vraag voor de gebruiker zijn rol
-    \item Vraag voor de gebruiker zijn functie
-\end{enumerate}
-
-Vervolgens is uit deze ongestructureerde bron, data geëxtraheerd met behulp van kunstmatige intelligentie. Die met deze data een competentieprofiel opmaakt van de gebruiker. Hiermee kan de human resource (HR) afdeling besluiten vormen om een efficiënte en doeltreffende personeelsplanning te ontwikkelen. Ook biedt het Talentguide Software-As-a-Service (SaaS) platform opleidingen aan die de werkpunten van een werknemer kunnen verbeteren zodat die beter gestuurd wordt in zijn carrière.
-\bigstkip
+Binnen moderne softwareontwikkeling vormen end-to-end (E2E) testen een onmisbaar pijler voor kwaliteitsborging. Deze testen zijn de belangrijkste methode om te garanderen dat complexe systemen blijven functioneren zoals de eindgebruiker dat verwacht. E2E-testen verifiëren namelijk de volledige gebruikersstroom van begin tot einde, waardoor het inzichten biedt in de productiekwaliteit en de schaal van problemen.
+\bigskip
 \\
-Hierbij is gevalideerde input cruciaal zodat de werknemer een doeltreffende richting voor zijn carrière kan plotten. In deze bachelorproef is onderzocht hoe de opzet van een terugkoppelingsproces kan ontwikkelend worden om de verkregen data te valideren. Zodat kwaliteitsvolle competentieprofielen gegarandeerd zijn.
-
-Het uiteindelijke doel is om een technisch procesverslag te hebben waaruit de kritieke trigger kan worden benoemd die aanzet tot valideren, een startpunt voor het volledig human-in-the-loop proces en een functioneel prototype dat wijzigingen bijhoudt, die later door de data scientist worden gebruikt om het artificiële intelligente (AI) model te trainen.
+Traditioneel vereisen E2E testen opzetten en onderhouden een continue inbreng van ontwikkelaars, hierdoor is hun kostbare tijd weggenomen van nieuwe functionaliteiten te ontwikkelen. Dus is het belangrijk om een systeem te ontwerpen dat op een zelfvoorzienende manier de productkwaliteit meet bij elke oplevering naar de GitHub repository met minimale belasting voor het ontwikkelingsteam. 
+\bigskip
+\\
+De kwaliteit van het product dat talentguide oplevert is nu laag, zelfs in de productieomgeving voor de eindgebruiker. Om de impact hiervan te begrijpen, moet eerst duidelijk zijn wat het platform precies doet. Talentguide is een SaaS-platform dat organisaties ondersteunt bij het structureren en interpreteren van personeelsgegevens. Het platform verwerkt data zoals cv’s, functiebeschrijvingen en interne documenten en zet deze om naar een gestructureerd competentieprofiel. Daarbij worden eerst kleinere bouwstenen geëxtraheerd, zoals taken, tools, kennis en gedragskenmerken. Binnen talentguide worden deze aangeduid als TTK’s. Deze TTK’s krijgen een expertiselevel en worden vervolgens gegroepeerd onder bredere vaardigheden. Op die manier ontstaat er een profiel dat niet enkel weergeeft welke vaardigheden een werknemer bezit, maar ook op welk niveau deze vaardigheden aanwezig zijn.
+\bigskip
+\\
+Deze profielen vormen de basis voor verdere inzichten binnen het platform. Talentguide gebruikt de gestructureerde data om werknemers te matchen met rollen, competentie gaten te identificeren en ontwikkelingsnoden zichtbaar te maken. Het platform kan ook gelijkaardige of ontbrekende competenties voorstellen om een profiel verder te vervolledigen. Omdat deze inzichten afhankelijk zijn van correcte en betrouwbare data, is de kwaliteit van de onderliggende software belangrijk. Wanneer releases fouten bevatten of gebruikersstromen niet correct werken, kan dit rechtstreeks invloed hebben op de betrouwbaarheid van competentieprofielen, validatieflows en de gebruikerservaring. Daarom is het relevant om te onderzoeken hoe een geautomatiseerde end-to-end testingworkflow kan bijdragen aan een stabieler en betrouwbaarder SaaS-platform.
 
 %De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen komen in de inleiding~\autocite{Pollefliet2011}:
 
@@ -28,28 +24,21 @@ Het uiteindelijke doel is om een technisch procesverslag te hebben waaruit de kr
 
 %Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's'', systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
 
-Het probleem is dat arbeiders vaak geen CV hebben of het is gedateerd. Om deze doelgroep te helpen heeft mtech+ aan Talentguide gevraagd om een WhatsApp functionaliteit te ontwikkelen om arbeiders sneller te onboarden. De doelgroep dient een CV up te loaden, zo niet prompt de chatbot hen voor hun rol en functie. Bij het extraheren van data door het AI model kunnen fouten gebeuren. 
-Door een terugkoppelingsproces toe te voegen, kunnen kwaliteitsvolle competentieprofielen verhoogd worden, wat leidt tot een verbeterde personeelsplanning en een doeltreffende carrière richting voor de werknemer.
+Het grote probleem is dat er nu geen metingen zijn uitgevoerd op de productkwaliteit, waardoor er geen maatstaf is om te zien hoe groot of klein problemen zijn. Dit komt door het gebrek aan E2E testen in de huidige React/Node.js codebase. Dit leidt ertoe dat releases naar de productieomgeving breken en een slechte gebruikerservaring opleveren.
 
 \section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
 \label{sec:onderzoeksvraag}
 
 %Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je % %kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder %specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
 
-Hoe kan een end-to-end procesanalyse van de huidige competentie extractie van verkregen data via WhatsApp leiden 
-tot de ontwikkeling van een terugkoppelingsproces (proof-of-concept) dat accurate en betrouwbare competentieprofielen 
-gegenereerd binnen de organisatie van mtech+?
+De hoofdonderzoeksvraag luidt: hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?
 
 \section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
 \label{sec:onderzoeksdoelstelling}
 
 %Wat is het beoogde resultaat van je bachelorproef? Wat zijn de criteria voor succes? Beschrijf die zo concreet mogelijk. Gaat het bv.\ om een proof-of-concept, een prototype, een verslag met aanbevelingen, een vergelijkende studie, enz.
 
-Het doel van deze bachelorproef is om te onderzoeken hoe de opzet van een terugkoppelingsproces 
-in kaart kan worden gebracht. Om verkregen ongestructureerde data via WhatsApp
-te laten valideren door haar gebruikers, zodat dit leidt tot een verbetering in het 
-generen van competentieprofielen voor de client mtech+. Dit terugkoppelingsproces is echter een proof-of-concept 
-de verkregen wijzigingen zullen niet worden gebruikt om het huidig LLM model te trainen. Dit valt buiten de scope van het onderzoek.
+Het doel van deze bachelorproef is om de kwaliteit van het eindproduct bij talentguide te verhogen door een functioneel prototype af te leveren van een geautomatiseerde testingworkflow dat op basis van minimale ontwikkelaars input robuuste testen genereert en uitvoert.
 
 
 \section{\IfLanguageName{dutch}{Opzet van deze bachelorproef}{Structure of this bachelor thesis}}%
@@ -65,13 +54,13 @@ In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand v
 
 In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken om een antwoord te kunnen formuleren op de onderzoeksvragen.
 
-In Hoofdstuk~\ref{ch:fase1} wordt een analyse gedaan hoe via WhatsApp competentieprofielen kunnen worden gegenereerd.
+In Hoofdstuk~\ref{ch:fase1} wordt een nulmeting uitgevoerd om concrete problemen te identificeren.
 
-In Hoofdstuk~\ref{ch:fase2} wordt gekeken om de kritieke triggers te benoemen die de chatbot aanzetten om te gebruiker te vragen tot een item te valideren.
+In Hoofdstuk~\ref{ch:fase2} wordt de requirement analyse uitgevoerd.
 
-In Hoofdstuk~\ref{ch:fase3} wordt een human-in-the-loop proces in kaart gebracht.
+In Hoofdstuk~\ref{ch:fase3} wordt het prototype ontwikkeld.
 
-In Hoofdstuk~\ref{ch:fase4} wordt de ontwkikkeling van het proof-of-concept gedaan.
+In Hoofdstuk~\ref{ch:fase4} wordt het prototype geëvalueerd.
 
 In Hoofdstuk~\ref{ch:fase5} wordt meetbaar de evaluatie gedaan.
 

@@ -1,0 +1,24 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{path}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}/hr/people/:personId/evaluations/create\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{element}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZlt{}}\PYG{n+nt}{EvaluationWizardShell}\PYG{+w}{ }\PYG{p}{/\PYGZgt{},}
+\PYG{+w}{    }\PYG{n+nx}{children}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{index}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{true}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{element}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZlt{}}\PYG{n+nt}{Navigate}\PYG{+w}{ }\PYG{n+na}{to}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}overview\PYGZdq{}}\PYG{+w}{ }\PYG{n+na}{replace}\PYG{+w}{ }\PYG{p}{/\PYGZgt{},}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{path}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}overview\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{element}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZlt{}}\PYG{n+nt}{EvaluationWizardStep1}\PYG{+w}{ }\PYG{p}{/\PYGZgt{},}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{path}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}schedule\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{element}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZlt{}}\PYG{n+nt}{EvaluationWizardStep2}\PYG{+w}{ }\PYG{p}{/\PYGZgt{},}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{path}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}summary\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{element}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZlt{}}\PYG{n+nt}{EvaluationWizardStep3}\PYG{+w}{ }\PYG{p}{/\PYGZgt{},}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{    }\PYG{p}{],}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,20 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}checking an unselected level adds it to the saved settings\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nx}{CoachSettingsPage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nx}{checkedLevels}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{captureCheckedLevels}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n+nx}{levelToCheck}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{findUncheckedLevel}\PYG{p}{(}\PYG{n+nx}{checkedLevels}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n+nx}{levelToCheck}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{toggleLevel}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}EXPERT\PYGZsq{}}\PYG{p}{)}
+\PYG{+w}{        }\PYG{n+nx}{checkedLevels}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{captureCheckedLevels}\PYG{p}{()}
+\PYG{+w}{        }\PYG{n+nx}{levelToCheck}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{findUncheckedLevel}\PYG{p}{(}\PYG{n+nx}{checkedLevels}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{toggleLevel}\PYG{p}{(}\PYG{n+nx}{levelToCheck}\PYG{o}{!}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{assertLevelChecked}\PYG{p}{(}\PYG{n+nx}{levelToCheck}\PYG{o}{!}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{reloadAndWait}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{settingsPage}\PYG{p}{.}\PYG{n+nx}{assertLevelChecked}\PYG{p}{(}\PYG{n+nx}{levelToCheck}\PYG{o}{!}\PYG{p}{)}
+\PYG{p}{\PYGZcb{})}
+\end{MintedVerbatim}

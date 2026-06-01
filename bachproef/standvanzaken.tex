@@ -49,25 +49,92 @@
 %  \caption[Voorbeeld tabel]{\label{tab:example}Voorbeeld van een tabel.}
 %\end{table}
 
-In dit hoofdstuk is het onderwerp diepgaand onderzocht met bestaande literatuur over web-GUI-testing, AI-ondersteunde testautomatisering en Playwright gebaseerde E2E-testworkflows. Eerst is toegelicht waarom web-GUI en E2E-testen belangrijk zijn voor het meten van softwarekwaliteit.
-Daarna is ondezocht hoe AI en LLM’s kunnen bijdragen aan het genereren, onderhouden en evalueren van Playwright testen. Vervolgens komen skill files, promptingtechnieken en risico's zoals hallucinerende of niet-reproduceerbare testoutput aan bod. Dit vormt de theoretische basis voor het proof of concept bij talentguide, waarin een AI-gestuurde workflow met minimale ontwikkelaarsinput E2E-testen moet genereren die passen binnen de bestaande codebase.
+Recente ontwikkelingen in AI-ondersteunde testautomatisering hebben de noodzaak doen toenemen om E2E-testen niet alleen als technische controle, maar ook als onderdeel van softwarekwaliteit te begrijpen. Dit hoofdstuk bouwt voort op de probleemstelling uit de inleiding: bij een SaaS-platform zoals talentguide is het belangrijk dat volledige gebruikersstromen betrouwbaar blijven werken tijdens de ontwikkeling. Eerst wordt besproken waarom E2E-testen relevant zijn binnen de ontwikkelingscyclus en hoe zulke testen gebruikersstromen kunnen bewaken. Daarna wordt onderzocht hoe AI en LLM's softwaretesten kunnen ondersteunen, onder meer via testgeneratie, testautomatisering en zelfherstellende testmechanismen. Tot slot wordt besproken waarom duidelijke context, herbruikbare instructies en controle noodzakelijk blijven om AI-gegenereerde testoutput bruikbaar en betrouwbaar te maken. Deze literatuurstudie vormt zo de theoretische basis voor de methodologie, waarin het proof of concept voor talentguide wordt uitgewerkt.
 
-\section{De basis voor kwaliteitsmeting}
-Voor een SaaS-platform zoals dat van talentguide is de browserinterface een belangrijke plaats waar fouten zichtbaar zijn voor eindgebruikers. Daarom volstaat het niet om enkel afzonderlijke functies of componenten te testen. E2E-testen controleren of volledige gebruikersstromen werken zoals verwacht. Web-GUI-testing sluit aan bij die benadering, doordat deze testvorm de kwaliteit van een webapplicatie beoordeelt vanuit het perspectief van de eindgebruiker in de browser \autocite{DiMeglio2026}.
-\bigskip
-\\
-De literatuur maakt duidelijk dat web-GUI-testen zowel manueel als geautomatiseerd kunnen worden uitgevoerd. \textcite{DiMeglio2026} Manuele testen blijven bruikbaar voor verkennende scenario's, maar ze zijn moeilijk te schalen wanneer een ontwikkelteam nieuwe functionaliteiten oplevert. Geautomatiseerde web-GUI-testen bieden daarentegen herhaalbaarheid, consistentie en schaalbaarheid, omdat dezelfde scenario's altijd opnieuw kunnen worden uitgevoerd door een browserautomatiseringsraamwerk \autocite{DiMeglio2026}). Die eigenschappen sluiten rechtstreeks aan bij het doel van dit onderzoek: kwaliteitscontrole moet een terugkoppelingsproces worden tijdens het ontwikkelen, zodat de productieomgeving niet de eerste plaats is waar kritieke fouten opgemerkt worden.
-\bigskip
-\\
-Binnen geautomatiseerde web-GUI-testing onderscheiden \textcite{DiMeglio2026} scripted testing van low-code-, capture-and-replay- en benaderingen zonder script. Scripted testing vereist dat testcode is geschreven met frameworks zoals Selenium, Playwright, Cypress of Puppeteer. Deze aanpak vraagt technische kennis, maar biedt tegelijk controle over selectors, assertions, testdata en de structuur van de testsuite \autocite{DiMeglio2026}. Voor deze bachelorproef is de scripted benadering onderzocht, doordat het prototype gericht is op Playwright testen die moeten passen binnen de bestaande React/Node.js-codebase van talentguide. Een AI-agent kan niet alleen een testscenario opleveren, maar moet code schrijven dat volgens de gedefinieerde technische richtlijnen is verwerkt en architecturaal aansluit bij de repository.
-\bigskip
-\\
-Het belang van een doordachte E2E aanpak is duidelijker wanneer de onderhoudsproblemen van web-GUI-testen zijn bekeken. Volgens \textcite{DiMeglio2026} zijn geautomatiseerde GUI-testen gevoelig voor fragility en flakiness. Fragility betekent dat testen breken door kleine wijzigingen in het interface of DOM-structuur, terwijl flakiness verwijst naar niet-deterministische foutmeldingen die bijvoorbeeld ontstaan door timingproblemen of asynchrone inhoud \autocite{DiMeglio2026}. In de CI/CD-context is dit noodzakelijk: een test die onterecht faalt, vertraagt het ontwikkelproces, maar een test die onterecht slaagt, creëert een vals gevoel van kwaliteit. De testworkflow moet daarom niet alleen tests genereren, maar ook betrouwbare en interpreteerbare signalen leveren.
-\bigskip
-\\
-Het toegepast onderzoek van \textcite{DiMeglio2026} verduidelijkt het beeld dat web-GUI-testen vooral een last vormen. Het onderzoek naar 472 open-source webapplicaties toont dat projecten met scripted web-GUI-testen vaak meer ontwikkelactiviteit, meer contributors en actievere issue-trackers hebben. Bovendien evolueren web-GUI-testen in veel gevallen mee met de applicatiecode, wat erop wijst dat deze testen kunnen worden verankerd in het ontwikkelingsproces \autocite{DiMeglio2026}. Die vaststelling ondersteunt de richting van dit onderzoek: E2E testen zijn niet opgevat als een losstaande QA activiteit, maar als een maatstaf die ontwikkelaars feedback geeft bij elke wijziging.
-\bigskip
-\\
-Doordat web-GUI-testen onderhoud vragen naar de ontwikkelaar toe is een AI-ondersteunende testautomatisering relevant. Het onderzoeksvoorstel legt de nadruk op een skill bestand dat AI-agents technische richtlijnen geeft voor het genereren van Playwright testen met minimale ontwikkelaarsinput. De literatuurstudie onderzoekt daarom niet alleen of AI testen kan genereren, maar welke voorwaarden nodig zijn om die output bruikbaar te maken binnen een professionele workflow. AI kan de drempel voor E2E-testing verlagen, maar alleen wanneer de gegenereerde tests onderhoudbaar, reproduceerbaar en controleerbaar blijven.
+\section{E2E-testen in de ontwikkelingscyclus}
 
-\section{AI in softwaretesten en testautomatisering}
+\subsection{Waarom E2E-testen nodig zijn}
+
+Voor webapplicaties is de browserinterface een belangrijke plaats waar fouten zichtbaar worden voor eindgebruikers \autocite{DiMeglio2026}. Daarom volstaat het niet altijd om enkel afzonderlijke functies, componenten of API's te testen. E2E-testen controleren of volledige gebruikersstromen werken zoals verwacht, bijvoorbeeld door een applicatie via de browser te bedienen en daarbij navigatie, invoer, interacties en validaties te doorlopen. Web-GUI-testen sluiten aan bij die benadering, omdat deze testvorm de kwaliteit van een webapplicatie beoordeelt vanuit het perspectief van de eindgebruiker \autocite{DiMeglio2026}.
+
+\textcite{DiMeglio2026} tonen aan dat web-GUI-testen in de praktijk worden toegepast met browserautomatiseringsframeworks zoals Selenium, Playwright, Cypress en Puppeteer. Deze frameworks maken het mogelijk om gebruikersinteracties herhaalbaar uit te voeren en te controleren of een applicatie zich correct gedraagt in realistische scenario's. Voor een SaaS-platform zoals talentguide sluit dat rechtstreeks aan bij productkwaliteit: afzonderlijke technische onderdelen moeten werken, maar gebruikers moeten ook volledige workflows betrouwbaar kunnen doorlopen.
+
+\subsection{E2E-testen als bewaking van gebruikersstromen}
+
+Onderzoek naar web-GUI-testen toont het belang aan van testen die complex UI-gedrag op applicatieniveau controleren \autocite{DiMeglio2026}. De waarde van E2E-testen ligt vooral in het bewaken van samenhang tussen verschillende onderdelen van een applicatie. Waar unit- en integratietesten specifieke functies of technische koppelingen controleren, richten E2E-testen zich op het gedrag van de applicatie als geheel. Dat maakt deze testvorm geschikt om gebruikersstromen te bewaken die meerdere schermen, componenten, invoervelden en achterliggende services combineren.
+
+\textcite{DiMeglio2026} tonen daarnaast dat web-GUI-testen in open-sourceprojecten kunnen meegroeien met de applicatiecode. Hun analyse van 472 webapplicaties toont een verband met meer ontwikkelactiviteit, meer contributors en actievere issue-trackers. Een rechtstreeks kwaliteitsvoordeel volgt daar niet uit. Wel toont de studie dat zulke testen passen binnen actieve ontwikkeling. In dit onderzoek worden E2E-testen daarom gezien als een manier om productkwaliteit al tijdens de ontwikkeling zichtbaar te maken.
+
+\subsection{Waarom E2E-testen onderhoud vragen}
+
+\textcite{DiMeglio2026} beschrijven dat scripted web-GUI-testen technische kennis vragen, omdat testcode geschreven en aangepast moet worden wanneer de applicatie verandert. De studie onderscheidt scripted testing van low-code-, capture-and-replay- en scriptless-benaderingen. Scripted testing biedt meer controle over selectors, assertions, testdata en teststructuur, maar vraagt ook meer programmeerkennis en onderhoud.
+
+Een belangrijk onderhoudsrisico bij web-GUI-testen is fragility: testen kunnen breken door kleine wijzigingen in de interface, de DOM-structuur of gebruikte selectors \autocite{DiMeglio2026}. Een ander risico is flakiness: testen falen dan niet-deterministisch, bijvoorbeeld door timingproblemen, asynchrone inhoud of wisselende testdata \autocite{DiMeglio2026}. Zulke problemen zijn belangrijk binnen een ontwikkelingsproces, omdat een foutief falende test het werk vertraagt, terwijl een foutief geslaagde test een vals gevoel van kwaliteit kan geven.
+
+De studie van \textcite{DiMeglio2026} nuanceert tegelijk het idee dat web-GUI-testen per definitie onstabiel zijn. Hun resultaten tonen dat web-GUI-testen in veel projecten relatief lang kunnen blijven bestaan en vaak slechts beperkt aangepast worden. Dat wijst erop dat E2E-testen onderhoudbaar kunnen zijn wanneer het ontwerp goed is en de testen stapsgewijs worden bijgewerkt. De uitdaging ligt dus niet enkel bij het schrijven van E2E-testen. Ook de testaanpak moet betrouwbaar, onderhoudbaar en toepasbaar blijven binnen de normale ontwikkelingscyclus.
+
+\section{AI en LLM's in softwaretesten}
+
+\subsection{Het AI-gebaseerde raamwerk}
+
+Bestaand onderzoek erkent de rol van AI in softwaretesten als ondersteuning voor testgeneratie, codeanalyse, anomaliedetectie, performancetesten en regressietesten \autocite{Raju2025}. AI krijgt daarmee een afgebakende plaats binnen de kwaliteitsworkflow: ondersteuning van specifieke testtaken, zonder het volledige testproces over te nemen.
+
+Figuur 1 van \textcite{Raju2025} illustreert een AI-gebaseerd testautomatiseringsraamwerk. In dat raamwerk vormen gebruiksvereisten en specificaties de input voor het testproces. Op basis daarvan kunnen AI-ondersteunde testtools testgevallen genereren. Vervolgens voert een testengine deze testgevallen uit, monitort het uitvoeringsproces en verzamelt feedback. De resultaten worden daarna verwerkt in rapporten, zodat QA- en ontwikkelingsteams vastgestelde problemen kunnen opvolgen.
+
+Deze figuur toont AI-testautomatisering als een keten van input, testgeneratie, uitvoering, feedback en rapportage \autocite{Raju2025}. AI is daarin geen losse codegenerator. De gegenereerde testen hangen ook af van de vereisten, de beschikbare informatie en de manier waarop de testen worden uitgevoerd en de resultaten worden beoordeeld.
+
+\subsection{De rol van LLM's}
+
+Binnen AI-ondersteunde testautomatisering spelen LLM's een specifieke rol, omdat deze modellen natuurlijke taal en codecontext kunnen verwerken \autocite{SaezIznaga2025}. \textcite{SaezIznaga2025} onderzoeken hoe LLM's kunnen worden gebruikt om testcode te genereren op basis van natuurlijke taal en bestaande codecontext. Hun studie behandelt zowel text-to-code-generatie als situaties waarin een model bijkomende broncodecontext krijgt om testcode te produceren.
+
+\textcite{SaezIznaga2025} gebruiken gestructureerde prompt engineering om de gegenereerde testcode beter af te stemmen op het gewenste resultaat. Hun resultaten wijzen erop dat LLM's, bij duidelijke opdrachten en relevante code-informatie, syntactisch geldige en semantisch samenhangende testcode kunnen genereren. Voor E2E-testen is dat relevant omdat zulke testen vaak vertrekken vanuit gebruikersstromen, functionele verwachtingen en interacties tussen meerdere onderdelen van een applicatie.
+
+De rol van LLM's ligt daardoor vooral bij testcreatie \autocite{SaezIznaga2025}. Een LLM kan een functionele beschrijving of gebruikersflow omzetten naar een eerste testscenario of testimplementatie \autocite{SaezIznaga2025}. Die eerste versie is nog geen eindresultaat. De gegenereerde test moet aansluiten bij de beschreven gebruikersflow, de technische afspraken en de controle achteraf.
+
+\subsection{De bedrijfswaarde van testautomatisering}
+
+Naast technische mogelijkheden koppelt de literatuur testautomatisering ook aan bedrijfswaarde \autocite{Raju2025}. \textcite{Raju2025} verwijzen naar surveyresultaten uit het World Quality Report 2024-2025 over de uitkomsten van testautomatisering. Volgens deze resultaten geeft 61\% van de ondervraagde CIO's aan dat verbeterde testdekking het vertrouwen in IT-systemen verhoogt. In dezelfde survey stelt 60\% van het senior management dat hogere automatiseringsniveaus bijdragen aan snellere oplevering van functionaliteiten, terwijl 59\% van de CIO's automatisering koppelt aan een snellere time-to-market.
+
+\textcite{Raju2025} vermelden ook dat 58\% van de bevraagden aangeeft dat automatisering de handmatige testinspanning vermindert en zo kan bijdragen aan lagere operationele kosten. Daarnaast geeft 53\% aan dat automatisering leidt tot minder defecten, wat de gebruikerservaring kan verbeteren. Deze cijfers gaan over testautomatisering in het algemeen en tonen dus niet rechtstreeks het effect van AI-gegenereerde E2E-testen.
+
+Deze surveyresultaten zijn relevant omdat het belang van testautomatisering voor softwarekwaliteit, ontwikkelsnelheid en handmatige inspanning eruit blijkt \autocite{Raju2025}. AI kan daarbij vooral repetitieve onderdelen van E2E-testcreatie ondersteunen. De cijfers bewijzen geen automatische tijdswinst door AI. Wel verklaren de resultaten waarom automatisering binnen softwaretesten een waardevol onderzoeksgebied blijft.
+
+\subsection{Tool- en risicolandschap}
+
+\textcite{Raju2025a} vergelijken verschillende AI-testtools en testautomatiseringsframeworks en benadrukken dat toolselectie moet aansluiten bij projectvereisten, platformondersteuning, integratiemogelijkheden, gebruiksgemak en schaalbaarheid. Voor AI-ondersteunde E2E-testen betekent dit dat een tool of workflow niet enkel op generatiemogelijkheden beoordeeld kan worden. De oplossing moet ook passen binnen bestaande ontwikkel- en testprocessen.
+
+\textcite{Pacholi2025} beschrijven generatieve AI, LLM's en zelfherstellende testmechanismen als ontwikkelingen die CI/CD-processen kunnen versnellen en onderhoud van testscenario's kunnen verminderen. De studie wijst ook op uitdagingen rond ethiek, gegevenskwaliteit, computationele duurzaamheid en hybride mens-AI-testteams. Daaruit volgt dat AI testautomatisering kan uitbreiden, op voorwaarde dat kwaliteitscriteria en menselijke beoordeling deel blijven van de workflow.
+
+\section{AI aansturen met technische richtlijnen}
+
+\subsection{Wat de AI-agent nodig heeft}
+
+Een AI-agent heeft meer nodig dan een algemene opdracht om bruikbare testcode te genereren \autocite{SaezIznaga2025,Ognibene2025}. Uit onderzoek naar LLM-gebruik blijkt dat de kwaliteit van gegenereerde testcode sterk samenhangt met duidelijke opdrachten, beschikbare code-informatie en een afgebakende taak \autocite{SaezIznaga2025}. \textcite{SaezIznaga2025} tonen dit binnen softwaretesten door natuurlijke taal te combineren met codecontext bij het genereren van testcode. Die code-informatie helpt het model om testcode te produceren die beter aansluit bij de bedoelde testlogica.
+
+Effectieve LLM-aansturing is taak- en domeinspecifiek \autocite{Ognibene2025}. \textcite{Ognibene2025} benadrukken dat prompting niet vanzelfsprekend is: gebruikers moeten leren hoe opdrachten, relevante informatie en beoordelingscriteria geformuleerd worden. Bij softwaretesten moet een AI-agent daarom meer kennen dan de gebruikersflow. Ook technische conventies, kwaliteitscriteria en outputverwachtingen moeten duidelijk zijn.
+
+AI-ondersteunde testgeneratie vraagt daarom duidelijke sturing \autocite{Ognibene2025}. De agent moet weten welke test gegenereerd moet worden, welke projectinformatie telt, welke beperkingen gelden en hoe de gegenereerde test beoordeeld wordt \autocite{Ognibene2025}. Zonder die randvoorwaarden kan testcode plausibel lijken, terwijl de code toch naast het gewenste gedrag of de technische omgeving zit.
+
+\subsection{Herbruikbare instructies voor consistente output}
+
+Herbruikbare instructies kunnen helpen om gegenereerde testcode consistenter te maken \autocite{Lewis2023}. \textcite{Lewis2023} stellen dat organisaties betere resultaten uit AI-systemen kunnen halen door prompts en instructies gestructureerd te benaderen. Een vage of onvolledige prompt kan leiden tot onnauwkeurige of moeilijk bruikbare testcode, terwijl duidelijke instructies het model beter sturen naar het gewenste resultaat.
+
+Bij AI-ondersteunde testgeneratie hoeven terugkerende richtlijnen niet telkens opnieuw ad hoc geformuleerd te worden \autocite{Lewis2023}. Wanneer taakdoel, technische informatie, verwachte testvorm en kwaliteitscriteria herbruikbaar worden vastgelegd, kan de AI-agent consistenter werken over verschillende testscenario's heen \autocite{Lewis2023}. Dit principe sluit aan bij de nood aan reproduceerbaarheid in softwareontwikkeling: dezelfde soort input moet zo veel mogelijk leiden tot vergelijkbare en controleerbare resultaten.
+
+Herbruikbare instructies lossen niet alle problemen op \autocite{Lewis2023}. Dergelijke instructies beperken vooral de variatie in gegenereerde testcode en maken de beoordeling eenvoudiger \autocite{Lewis2023}. Bij E2E-testen is dat belangrijk: gegenereerde testen moeten uitvoerbaar, leesbaar en onderhoudbaar zijn.
+
+\subsection{Hallucinaties en fouten beperken}
+
+Generatieve AI levert niet automatisch betrouwbare testcode op \autocite{Kaynarpinar2025}. \textcite{Kaynarpinar2025} tonen dat modellen bruikbare oplossingen kunnen produceren. Tegelijk blijven er beperkingen bestaan in foutafhandeling, modulariteit en betrouwbaarheid. Syntactisch correcte testcode is dus nog geen bewijs dat de test functioneel juist of onderhoudbaar is.
+
+\textcite{Ognibene2025} wijzen erop dat gebruikers van LLM-systemen fouten zoals hallucinaties, biases, incoherentie en inhoudelijke vergissingen moeten leren herkennen. Bij AI-gegenereerde E2E-testen is dat bijzonder belangrijk. Een gegenereerde test kan technisch uitvoerbaar zijn en toch het verkeerde gedrag controleren, een onvolledig scenario afdekken of een foutieve interpretatie van de gebruikersflow bevatten.
+
+Menselijke controle blijft daarom noodzakelijk \autocite{Kaynarpinar2025,Ognibene2025}. Gegenereerde testcode moet worden nagekeken op uitvoerbaarheid, functionele betekenis, onderhoudbaarheid en aansluiting bij de kwaliteitsdoelen \autocite{Kaynarpinar2025,Ognibene2025}. Hallucinaties en fouten verdwijnen niet volledig. Duidelijke opdrachten, relevante code-informatie en reproduceerbare testuitvoering maken die risico's wel beter beheersbaar. De taakverdeling blijft daardoor duidelijk: AI ondersteunt de generatie, terwijl interpretatie en validatie menselijke beoordeling vragen.
+
+\section{Conclusie}
+
+E2E-testen bewaken productkwaliteit door volledige gebruikersstromen te controleren vanuit het perspectief van de eindgebruiker \autocite{DiMeglio2026}. Deze testvorm maakt fouten zichtbaar die op lager testniveau moeilijker te detecteren zijn. Zulke testen vragen tegelijk onderhoud, technische kennis en aandacht voor fragility en flakiness.
+
+AI en LLM's kunnen testautomatisering ondersteunen bij het genereren van testscenario's en testcode op basis van natuurlijke taal en codecontext \autocite{Raju2025,SaezIznaga2025}. Die gegenereerde testen zijn pas bruikbaar wanneer de gebruikersflow, technische randvoorwaarden, gebruikte tooling en controle achteraf duidelijk zijn.
+
+In dit onderzoek wordt AI gebruikt als ondersteunende laag in een gecontroleerde testworkflow. De meerwaarde ligt in het verlagen van de drempel, zodat testen een actief onderdeel van het ontwikkelingsproces worden. Deze stand van zaken vormt daarmee de basis voor de methodologie, waarin een AI-ondersteund E2E-testsysteem voor continue kwaliteitsbewaking wordt uitgewerkt.

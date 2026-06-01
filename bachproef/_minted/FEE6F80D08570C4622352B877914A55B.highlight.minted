@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 3.2 Wizard exception}
+
+Sequential multi\PYGZhy{}step flows (...) are treated as a single file:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }All step routes listed in frontmatter.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Acceptance criteria organised as sub\PYGZhy{}sections per step.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }One continuous happy flow covering the full sequence.
+\end{MintedVerbatim}

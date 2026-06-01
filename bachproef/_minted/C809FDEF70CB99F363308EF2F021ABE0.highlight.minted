@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 2026\PYGZhy{}05\PYGZhy{}12 \PYGZhy{} eval\PYGZhy{}wizard\PYGZhy{}step2\PYGZhy{}dates}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added Step 2 coverage for selecting the first evaluation date, adding a follow\PYGZhy{}up date picker, selecting a follow\PYGZhy{}up date, and removing it.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Decision: selected a same\PYGZhy{}month follow\PYGZhy{}up date one day after the first date to keep the date picker interaction focused on this task without adding month navigation.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Verified with \PYG{l+s+sb}{`cd apps/client \PYGZam{}\PYGZam{} npx playwright test e2e/evaluation\PYGZhy{}wizard.spec.ts`} on 2026\PYGZhy{}05\PYGZhy{}12: 4 passed.
+\end{MintedVerbatim}

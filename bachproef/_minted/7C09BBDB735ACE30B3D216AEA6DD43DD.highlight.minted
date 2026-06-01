@@ -1,0 +1,339 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+name: generate\PYGZhy{}user\PYGZhy{}stories
+\PYG{g+gu}{description: Generate user story files for every route in the app. Reads RouteConfig.tsx, groups related routes, creates structured user story markdown files in playwright/user\PYGZhy{}stories/. Skips files that already exist. Use when you want to generate user stories for e2e test planning.}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{g+gh}{\PYGZsh{} Generate User Stories from Routes}
+
+This skill reads every route in the application and generates user story files that serve as input for a future e2e test\PYGZhy{}generation loop. Do NOT interview the user — autonomously explore the codebase and generate.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 1 — Source of Truth}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Routes:**} \PYG{l+s+sb}{`apps/client/src/RouteConfig.tsx`} — the single source of truth for all routes.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**E2E guidelines:**} \PYG{l+s+sb}{`apps/client/playwright/skill/SKILL.md`} — reference for auth fixtures and test conventions (used lightly, only in Preconditions).
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Route constants:**} \PYG{l+s+sb}{`apps/client/playwright/support/data/routes.ts`} — existing route constants for tests.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Output directory:**} \PYG{l+s+sb}{`apps/client/playwright/user\PYGZhy{}stories/`}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 2 — Folder Structure}
+
+Organise user story files by role:
+
+\PYG{l+s+sb}{```markdown}
+playwright/user\PYGZhy{}stories/
+├── public/
+│   ├── signin.md
+│   ├── signup.md
+│   └── ...
+├── employee/
+│   ├── me.md
+│   ├── me\PYGZhy{}activities.md
+│   └── ...
+└── admin/
+    ├── people.md
+    ├── people\PYGZhy{}detail.md          ← parent
+    ├── people\PYGZhy{}detail\PYGZhy{}jobs.md     ← child of people\PYGZhy{}detail
+    ├── jobs.md
+    ├── jobs\PYGZhy{}detail.md            ← parent
+    ├── jobs\PYGZhy{}detail\PYGZhy{}people.md     ← child of jobs\PYGZhy{}detail
+    └── ...
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Naming rules}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Role folders: \PYG{l+s+sb}{`public/`}, \PYG{l+s+sb}{`employee/`}, \PYG{l+s+sb}{`admin/`}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }File names are derived from the route path with \PYG{l+s+sb}{`/`} replaced by \PYG{l+s+sb}{`\PYGZhy{}`}, stripping the role prefix.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Dynamic segments (\PYG{l+s+sb}{`:id`}, \PYG{l+s+sb}{`:personId`}) are replaced with \PYG{l+s+sb}{`detail`} for parent routes or dropped for child routes.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Examples:
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/signin`} → \PYG{l+s+sb}{`public/signin.md`}
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/employee/me`} → \PYG{l+s+sb}{`employee/me.md`}
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/employee/me/activities`} → \PYG{l+s+sb}{`employee/me\PYGZhy{}activities.md`}
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/hr/jobs/:id`} → \PYG{l+s+sb}{`admin/jobs\PYGZhy{}detail.md`}
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/hr/jobs/:id/people`} → \PYG{l+s+sb}{`admin/jobs\PYGZhy{}detail\PYGZhy{}people.md`}
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/hr/people/:id`} → \PYG{l+s+sb}{`admin/people\PYGZhy{}detail.md`}
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`/hr/settings/branding`} → \PYG{l+s+sb}{`admin/settings\PYGZhy{}branding.md`}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 3 — Route Grouping Rules}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 3.1 Parent/child pattern (default)}
+
+When a route has sub\PYGZhy{}routes under a dynamic segment (e.g. \PYG{l+s+sb}{`/hr/jobs/:id/people`}, \PYG{l+s+sb}{`/hr/jobs/:id/history`}):
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The \PYG{g+gs}{**parent**} route (e.g. \PYG{l+s+sb}{`/hr/jobs/:id`}) gets its own file with shared context and preconditions.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Each \PYG{g+gs}{**child**} route gets its own file with a \PYG{l+s+sb}{`parent`} field in frontmatter pointing to the parent file.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Each child file has its own focused acceptance criteria, happy flow, and key interactions.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 3.2 Wizard exception}
+
+Sequential multi\PYGZhy{}step flows (e.g. \PYG{l+s+sb}{`/hr/development\PYGZhy{}plans/create/:personId/role\PYGZhy{}selection`}, \PYG{l+s+sb}{`step\PYGZhy{}2`}, \PYG{l+s+sb}{`step\PYGZhy{}3`}, \PYG{l+s+sb}{`step\PYGZhy{}4`}) are treated as a \PYG{g+gs}{**single file**}:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }All step routes listed in frontmatter.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Acceptance criteria organised as sub\PYGZhy{}sections per step.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }One continuous happy flow covering the full sequence.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }File name: \PYG{l+s+sb}{`admin/development\PYGZhy{}plan\PYGZhy{}wizard.md`}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 3.3 Identifying wizards vs. tabs}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }If child routes are \PYG{g+gs}{**sequential steps**} of a single flow (user must go through them in order) → wizard pattern → single file.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }If child routes are \PYG{g+gs}{**independent views/tabs**} of a resource (user can visit any in any order) → parent/child pattern → separate files.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+so that [benefit].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Acceptance Criteria}
+\PYG{k}{\PYGZhy{} [ ]} Given [context], when [action], then [result].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Happy Flow}
+\PYG{k}{1.} User navigates to ...
+\PYG{k}{2.} User sees ...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Key Interactions}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }List of interactive elements on THIS page (not children).
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Preconditions}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Auth: \PYG{l+s+sb}{`adminAuth`} fixture
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Seed data: \PYGZdq{}at least one job profile must exist\PYGZdq{}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Note: child route files inherit these preconditions.
+\PYG{l+s+sb}{```}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.3 Child route (has parent)}
+
+\PYG{l+s+sb}{```markdown}
+\PYG{l+s+sb}{\PYGZhy{}\PYGZhy{}\PYGZhy{}\PYGZsh{}\PYGZsh{} 4 — File Templates}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.1 Standard route (no parent, no children)}
+
+\PYG{l+s+sb}{```markdown}
+\PYG{l+s+sb}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\PYG{l+s+sb}{route: /signin}
+\PYG{l+s+sb}{role: public}
+\PYG{l+s+sb}{page: LoginPage}
+\PYG{l+s+sb}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{l+s+sb}{\PYGZsh{} Sign In}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} Description}
+\PYG{l+s+sb}{Brief description of what this page does and why it exists.}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} User Stories}
+\PYG{l+s+sb}{1. As a [actor], I want to [action], so that [benefit].}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} Acceptance Criteria}
+\PYG{l+s+sb}{\PYGZhy{} [ ] Given [context], when [action], then [result].}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} Happy Flow}
+\PYG{l+s+sb}{1. User navigates to ...}
+\PYG{l+s+sb}{2. User sees ...}
+\PYG{l+s+sb}{3. User does ...}
+\PYG{l+s+sb}{4. System responds with ...}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} Key Interactions}
+\PYG{l+s+sb}{\PYGZhy{} List of interactive elements (buttons, forms, modals, navigation links, etc.)}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} Preconditions}
+\PYG{l+s+sb}{\PYGZhy{} Auth fixture required (e.g. `none — public route`, `adminAuth`, `employeeAuth`)}
+\PYG{l+s+sb}{\PYGZhy{} Seed data needed (e.g. \PYGZdq{}existing user account with valid credentials\PYGZdq{})}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.2 Parent route (has children)}
+
+\PYG{l+s+sb}{```markdown}
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+route: /hr/jobs/:id
+role: admin
+page: JobProfilePage
+children:
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }admin/jobs\PYGZhy{}detail\PYGZhy{}people.md
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }admin/jobs\PYGZhy{}detail\PYGZhy{}history.md
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }admin/jobs\PYGZhy{}detail\PYGZhy{}activities.md
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }admin/jobs\PYGZhy{}detail\PYGZhy{}compare.md
+\PYG{g+gu}{  \PYGZhy{} admin/jobs\PYGZhy{}detail\PYGZhy{}sources.md}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{g+gh}{\PYGZsh{} Job Detail}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Description}
+Brief description of the job detail page and its role as a hub for sub\PYGZhy{}views.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} User Stories}
+\PYG{k}{1.} As an [actor], I want to [action],
+route: /hr/jobs/:id/people
+role: admin
+page: JobMatchesPage
+\PYG{g+gu}{parent: admin/jobs\PYGZhy{}detail.md}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{g+gh}{\PYGZsh{} Job Detail — People Matches}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Description}
+Brief description of this specific sub\PYGZhy{}view.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} User Stories}
+\PYG{k}{1.} As an [actor], I want to [action], so that [benefit].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Acceptance Criteria}
+\PYG{k}{\PYGZhy{} [ ]} Given [context], when [action], then [result].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Happy Flow}
+\PYG{k}{1.} User is on the job detail page (see parent).
+\PYG{k}{2.} User navigates to the people tab ...
+\PYG{k}{3.} User sees ...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Key Interactions}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }List of interactive elements specific to this sub\PYGZhy{}view.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Preconditions}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Inherits from parent: admin/jobs\PYGZhy{}detail.md
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Additional: \PYGZdq{}job must have at least one person match\PYGZdq{}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.4 Wizard flow (single file, multiple steps)}
+
+\PYG{l+s+sb}{```markdown}
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+routes:
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/development\PYGZhy{}plans/create/:personId/role\PYGZhy{}selection
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/development\PYGZhy{}plans/create/:personId/step\PYGZhy{}2
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/development\PYGZhy{}plans/create/:personId/step\PYGZhy{}3
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/development\PYGZhy{}plans/create/:personId/step\PYGZhy{}4
+role: admin
+pages:
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }WizardStep1
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }WizardStep2
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }WizardStep3
+\PYG{+w}{  }\PYG{k}{\PYGZhy{}}\PYG{+w}{ }WizardStep4
+\PYG{g+gu}{type: wizard}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{g+gh}{\PYGZsh{} Development Plan Wizard}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Description}
+Brief description of the entire wizard flow.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} User Stories}
+\PYG{k}{1.} As an [actor], I want to [action], so that [benefit].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Acceptance Criteria}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Step 1 — Role Selection}
+\PYG{k}{\PYGZhy{} [ ]} Given [context], when [action], then [result].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Step 2 — ...}
+\PYG{k}{\PYGZhy{} [ ]} Given [context], when [action], then [result].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Step 3 — ...}
+\PYG{k}{\PYGZhy{} [ ]} Given [context], when [action], then [result].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Step 4 — ...}
+\PYG{k}{\PYGZhy{} [ ]} Given [context], when [action], then [result].
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Happy Flow}
+\PYG{k}{1.} HR admin navigates to create development plan for a person.
+\PYG{k}{2.} Step 1: ...
+\PYG{k}{3.} Step 2: ...
+\PYG{k}{4.} Step 3: ...
+\PYG{k}{5.} Step 4: ...
+\PYG{k}{6.} Wizard completes and redirects to ...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Key Interactions}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Step 1: ...
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Step 2: ...
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Step 3: ...
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Step 4: ...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Preconditions}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Auth: \PYG{l+s+sb}{`adminAuth`} fixture
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Seed data: \PYGZdq{}person must exist with a profile\PYGZdq{}
+\PYG{l+s+sb}{```}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 5 — Exploration Depth}
+
+For each route, \PYG{g+gs}{**deeply explore the page component tree**}:
+
+\PYG{k}{1.} Read the top\PYGZhy{}level page component imported in \PYG{l+s+sb}{`RouteConfig.tsx`}.
+\PYG{k}{2.} Follow its child components — read each imported component.
+\PYG{k}{3.} Identify all interactive elements: buttons, forms, modals, dropdowns, links, tabs, toggles.
+\PYG{k}{4.} Identify data dependencies: what GraphQL queries/mutations are used, what data must exist.
+\PYG{k}{5.} Identify conditional UI: what changes based on state, permissions, or data presence.
+
+Use this understanding to write \PYG{g+gs}{**specific, meaningful**} user stories and acceptance criteria — not generic ones.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} What makes a good user story}
+
+\PYG{g+gs}{**Good:**} \PYGZdq{}As an HR admin, I want to see a ranked list of people matching a job\PYGZsq{}s required skills, so that I can identify the best internal candidates.\PYGZdq{}
+
+\PYG{g+gs}{**Bad:**} \PYGZdq{}As a user, I want to view the people page, so that I can see people.\PYGZdq{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} What makes good acceptance criteria}
+
+\PYG{g+gs}{**Good:**} \PYGZdq{}Given a job with 3 matching people, when the HR admin navigates to the people tab, then all 3 matches are displayed with their match percentage.\PYGZdq{}
+
+\PYG{g+gs}{**Bad:**} \PYGZdq{}Given a user, when they visit the page, then it loads.\PYGZdq{}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 6 — Skip Logic}
+
+Before generating a file, check if it already exists in \PYG{l+s+sb}{`playwright/user\PYGZhy{}stories/`}:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }If the file exists → \PYG{g+gs}{**skip it entirely**}. Do not overwrite, do not merge.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }If the file does not exist → generate it.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 7 — Scoping}
+
+By default, the skill processes \PYG{g+gs}{**all routes**} from \PYG{l+s+sb}{`RouteConfig.tsx`}.
+
+If the user provides context narrowing the scope:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }A specific role (e.g. \PYGZdq{}generate for admin routes\PYGZdq{}) → only process routes in that role group.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }A specific route (e.g. \PYGZdq{}generate for /hr/jobs/:id\PYGZdq{}) → only generate that file (and its children if it\PYGZsq{}s a parent).
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 8 — Process}
+
+\PYG{k}{1.} \PYG{g+gs}{**Read `RouteConfig.tsx`**} — extract all routes, their page components, and role groupings.
+\PYG{k}{2.} \PYG{g+gs}{**Build the route map**} — determine which routes are parents, children, wizards, or standalone.
+\PYG{k}{3.} \PYG{g+gs}{**Check existing files**} — scan \PYG{l+s+sb}{`playwright/user\PYGZhy{}stories/`} for already\PYGZhy{}generated files.
+\PYG{k}{4.} \PYG{g+gs}{**For each route group that needs generation:**}
+   a. Read the page component(s) deeply — follow the component tree.
+   b. Identify user\PYGZhy{}visible features, interactions, data dependencies, and conditional UI.
+   c. Reference \PYG{l+s+sb}{`SKILL.md`} lightly for auth fixture names and seed data conventions.
+   d. Write the user story file using the appropriate template (standard / parent / child / wizard).
+   e. Save to \PYG{l+s+sb}{`playwright/user\PYGZhy{}stories/\PYGZlt{}role\PYGZgt{}/\PYGZlt{}filename\PYGZgt{}.md`}.
+\PYG{k}{5.} \PYG{g+gs}{**Print the generation summary.**}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 9 — Generation Summary}
+
+After processing all routes, output a summary:
+
+\PYG{l+s+sb}{```markdown}
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Generation Summary}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Generated (X files)}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }✅ public/signin.md
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }✅ admin/jobs\PYGZhy{}detail.md (parent)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }✅ admin/jobs\PYGZhy{}detail\PYGZhy{}people.md (child of jobs\PYGZhy{}detail)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Skipped (Y files already exist)}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }⏭️ employee/me.md
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Route Map}
+Total routes: N | Grouped into: M files | Generated: X | Skipped: Y
+\PYG{l+s+sb}{```}
+\end{MintedVerbatim}

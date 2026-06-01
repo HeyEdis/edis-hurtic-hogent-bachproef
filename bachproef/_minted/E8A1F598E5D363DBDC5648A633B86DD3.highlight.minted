@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 2026\PYGZhy{}05\PYGZhy{}12 \PYGZhy{} eval\PYGZhy{}wizard\PYGZhy{}step3\PYGZhy{}summary}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added Step 3 summary coverage for reaching the summary step, verifying the title input,
+editing it with an \PYG{l+s+sb}{`E2E\PYGZus{}`} value, and checking the evaluators, dates, and items summary sections.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added data\PYGZhy{}testid attributes for the Step 3 title input, evaluators summary card,
+dates summary card, items summary section, Back button, and Schedule Evaluation button.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added the summary route glob to the shared Playwright route data.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }RED confirmed before React changes: the test failed because \PYG{l+s+sb}{`evaluation\PYGZhy{}wizard\PYGZhy{}title\PYGZhy{}input`} was missing.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Verified with \PYG{l+s+sb}{`cd apps/client \PYGZam{}\PYGZam{} npx playwright test e2e/evaluation\PYGZhy{}wizard.spec.ts`}
+on 2026\PYGZhy{}05\PYGZhy{}12: 6 passed.
+\end{MintedVerbatim}

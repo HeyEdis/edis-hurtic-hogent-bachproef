@@ -14,5 +14,37 @@
 % Heeft het onderzoek geleid tot nieuwe vragen die uitnodigen tot verder 
 %onderzoek?
 
-\lipsum[76-80]
+Deze bachelorproef vertrok vanuit een concreet probleem binnen talentguide. De productkwaliteit werd vooral opgevolgd nadat fouten al zichtbaar waren in runtime-data, zoals Sentry. Uit de analyse kwamen terugkerende foutclusters naar voren rond inputvalidatie, autorisatie en sessies, null- en undefined-referenties, databaseconsistentie, Azure ML-integratie en ontbrekende clientobservability. De Wintercircus-piek maakte de oorspronkelijke fouttelling minder zuiver, maar na normalisatie bleef hetzelfde basisprobleem overeind: kritieke flows hadden nood aan vroegere en meer gerichte controle.
 
+De hoofdonderzoeksvraag was hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?
+
+De uitgewerkte workflow start bij de routes van talentguide. Die routes worden eerst omgezet naar user stories. Daarna worden de user stories opgesplitst in kleine taken in `plan.json`. De Ralph-loop voert die taken vervolgens iteratief uit en genereert Playwright-testen volgens de E2E-richtlijnen van het project. Het resultaat is testcode met een spoor van tussenstappen: user stories, planbestanden, progresslogs, fixtures, Page Object Models, routegegevens en specs.
+
+De evaluatie toont dat deze aanpak bruikbare output kan opleveren. `evaluation-wizard` behaalt Excellent, omdat de route uitvoerbaar is, functionele dekking heeft en sterk traceerbaar blijft. `people` scoort hoog, maar blijft Acceptable omdat een doorlopende full happy-flowtest ontbreekt. `coach-settings` levert bruikbare testcode op, maar blijft ook Acceptable doordat plan- en progressartefacten ontbreken. Deze verschillen tonen dat een werkende test op zichzelf niet genoeg is. De test moet ook terug te koppelen zijn naar de user story, de taak in `plan.json`, de richtlijnen en de verificatie.
+
+Het onderzoek geeft dus geen ja-of-nee-antwoord, maar een afgebakend antwoord. Een geautomatiseerd E2E-testsysteem voor talentguide kan worden opgezet door routeanalyse, user stories, `plan.json`, Ralph en Playwright aan elkaar te koppelen. De workflow zorgt ervoor dat testgeneratie niet begint met een losse prompt, maar met controleerbare artefacten. Dat maakt de output beter reviewbaar en beter inpasbaar in de bestaande codebase.
+
+De workflow neemt het werk van ontwikkelaars niet volledig over. De ontwikkelaar blijft nodig om de scope te controleren, user stories en plannen na te kijken, gegenereerde code te reviewen en de output in de codebase te integreren. De winst zit dus vooral in de verschuiving van het werk. Ontwikkelaars moeten minder vaak vanaf nul de happy flow, teststructuur, fixtures, testdata en locators uitwerken. De workflow maakt een eerste versie die daarna gecontroleerd en bijgestuurd kan worden.
+
+\section{De meerwaarde}
+De meerwaarde van deze bachelorproef is dat talentguide nu een concretere manier heeft om productkwaliteit zichtbaar te maken. Voor deze thesis had de codebase geen uitgewerkte E2E-testbasis voor de onderzochte flows. Daardoor was het moeilijk om continu te meten of kritieke gebruikersflows nog werkten na wijzigingen in de codebase.
+
+De proof of concept verandert dat op twee manieren. Eerst zijn er Playwright-testen uitgewerkt voor concrete routes binnen talentguide. Die testen maken het mogelijk om productkwaliteit niet pas achteraf via Sentry te bekijken, maar al preventief te controleren in de CI/CD-pipeline. Een release kan daardoor vroeger signalen geven wanneer een gebruikersflow breekt.
+
+Daarnaast is er een workflow uitgewerkt om van routes naar E2E-testen te gaan. Die workflow bestaat uit routeanalyse, user stories, plan.json, Ralph-uitvoering en Playwright-output. Daardoor is er geen losse set testen toegevoegd, maar een herhaalbare aanpak om nieuwe routes later op dezelfde manier om te zetten naar testbare gebruikersflows. Dat is de kernbijdrage: talentguide krijgt een eerste E2E-testbasis en een proces om die basis verder uit te breiden.
+
+\section{Reflectie}
+
+De resultaten blijven beperkt tot drie geëvalueerde routes: `evaluation-wizard`, `people` en `coach-settings`. Die routes tonen verschillende situaties, maar ze vertegenwoordigen niet automatisch alle routes in talentguide. Er kan dus niet besloten worden dat dezelfde kwaliteit voor elke route haalbaar is zonder extra evaluatie.
+
+Wat  zichtbaar is, is dat de workflow werk voorbereidt dat normaal manueel moet gebeuren: user stories uitschrijven, taken opdelen, fixtures voorzien, Page Object Models structureren en Playwright-testen opbouwen. Hierdoor kan de workflow de opstartkost waarschijnlijk verlagen.
+
+Menselijke review blijft noodzakelijk. `people` toont dat een hoge score niet automatisch genoeg is wanneer een minimumcriterium ontbreekt. `coach-settings` toont het omgekeerde probleem: de testcode kan bruikbaar zijn, maar zonder plan- en progressinformatie wordt de beoordeling moeilijker. Vooral traceerbaarheid bleek dus geen extraatje te zijn. Zonder die informatie is het moeilijker om na te gaan of een test echt uit de bedoelde user story komt en of `passes: true` overeenkomt met echte verificatie.
+
+\section{Naar de toekomst toe}
+
+Een eerste vervolgstap is de evaluatie uitbreiden naar meer routes. De huidige cases tonen een wizardflow, een people-overzicht en een instellingenpagina. Andere routes kunnen nieuwe problemen tonen, vooral wanneer er meerdere rollen, ML-afhankelijke data of strengere autorisatievoorwaarden bij komen.
+
+Een tweede stap is de verdere integratie in CI/CD. De bestaande pull-requestworkflow is daarvoor een logisch pad, maar de gegenereerde testreeks moet nog stabieler gekoppeld worden aan stagingdata, credentials en beheer van persistente `E2E_`-testdata.
+
+Tot slot de laatste uitbreiding is de terugkoppeling tussen evaluatie-output en de Ralph-loop. Nu beoordeelt de evaluatie de output achteraf. Een volgende versie kan die evaluatie opnieuw als input gebruiken voor Ralph. Als de evaluatie aangeeft dat een full happy-flowtest ontbreekt, dat traceerbaarheid zwak is of dat een minimumcriterium niet gehaald wordt, kan Ralph daaruit een nieuw vervolgtakenplan maken. Dan moet de ontwikkelaar niet elke verbetering zelf uit de evaluatie halen en manueel omzetten naar nieuwe taken.

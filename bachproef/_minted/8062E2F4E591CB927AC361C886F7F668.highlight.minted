@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+routes:
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/people/:personId/evaluations/create/overview
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/people/:personId/evaluations/create/schedule
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }/hr/people/:personId/evaluations/create/summary
+role: admin
+pages:
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }EvaluationWizardStep1
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }EvaluationWizardStep2
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }EvaluationWizardStep3
+\PYG{g+gu}{type: wizard}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+\end{MintedVerbatim}

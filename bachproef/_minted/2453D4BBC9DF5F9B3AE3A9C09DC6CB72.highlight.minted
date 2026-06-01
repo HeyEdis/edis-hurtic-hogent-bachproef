@@ -1,0 +1,69 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gh}{\PYGZsh{} Evaluation Rubric}
+
+Detailed scoring rules for each check. Apply partial credit as specified.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} A — Coverage structure (25 pts)}
+
+Verifies the spec follows the mandatory test hierarchy from \PYG{l+s+sb}{`e2e\PYGZhy{}testing\PYGZhy{}guidelines.md`}: smoke → incremental steps → full happy path → edge cases.
+
+| \PYGZsh{} | Check | Points | How to evaluate |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| A1 | Smoke test exists | 5 | The first \PYG{l+s+sb}{`test()`} block (lowest priority task) navigates to the route and asserts the page renders. Must be a standalone render/navigation test, not part of a larger flow. |
+| A2 | Building\PYGZhy{}block tests exist | 5 | Tasks between smoke and happy path break the flow into incremental steps. Award 5 if ≥2 intermediate step tests exist. Award 3 if only 1 exists. Award 0 if the spec jumps from smoke directly to full happy path. |
+| A3 | Full happy\PYGZhy{}path test exists | 10 | A single \PYG{l+s+sb}{`test()`} that executes the complete user journey end\PYGZhy{}to\PYGZhy{}end. Award 10 if present and covers the flow described in the plan\PYGZsq{}s \PYG{l+s+sb}{`source.user\PYGZus{}story`}. Award 5 if a partial happy path exists. Award 0 if absent. \PYG{g+gs}{**If the plan type does not warrant a happy path (e.g. a static read\PYGZhy{}only page), document why in the reasoning — award full points if justification is valid.**} |
+| A4 | Edge\PYGZhy{}case tests exist | 5 | At least one test covers error states, validation, disabled states, empty states, or boundary conditions. Award 5 if ≥1 edge\PYGZhy{}case test exists. Award 0 if none. |
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} B — Task execution fidelity (30 pts)}
+
+Verifies that all plan tasks were implemented and are traceable in the spec.
+
+| \PYGZsh{} | Check | Points | How to evaluate |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| B1 | All tasks pass | 15 | Every task in \PYG{l+s+sb}{`plan.json`} has \PYG{l+s+sb}{`\PYGZdq{}passes\PYGZdq{}: true`}. Award proportionally: \PYG{l+s+sb}{`(passing\PYGZus{}count / total\PYGZus{}count) × 15`}, rounded to nearest integer. |
+| B2 | Test count matches | 8 | Count \PYG{l+s+sb}{`test(`} calls in the spec file. Must be ≥ number of tasks in \PYG{l+s+sb}{`plan.json`}. Award 8 if equal or greater. Deduct 2 per missing test, minimum 0. |
+| B3 | Task IDs traceable | 7 | Each task \PYG{l+s+sb}{`id`} from the plan appears in the spec — as a test name, \PYG{l+s+sb}{`describe`} block name, or comment. Award proportionally: \PYG{l+s+sb}{`(found / total) × 7`}, rounded to nearest integer. |
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} C — Locator \PYGZam{} selector discipline (20 pts)}
+
+Verifies compliance with the \PYG{l+s+sb}{`data\PYGZhy{}testid`}\PYGZhy{}only locator rule from the guidelines.
+
+| \PYGZsh{} | Check | Points | How to evaluate |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| C1 | No banned text locators | 7 | Spec and POM must not use \PYG{l+s+sb}{`getByText(`}, \PYG{l+s+sb}{`getByLabel(`}, \PYG{l+s+sb}{`getByPlaceholder(`}, or \PYG{l+s+sb}{`getByRole(`} with a \PYG{l+s+sb}{`name:`} option. \PYG{g+gs}{**Allowed exception:**} \PYG{l+s+sb}{`getByRole(\PYGZsq{}dialog\PYGZsq{})`} and \PYG{l+s+sb}{`getByRole(\PYGZsq{}alert\PYGZsq{})`} without \PYG{l+s+sb}{`name:`}. Deduct 2 per violation, minimum 0. |
+| C2 | No raw CSS/XPath locators | 5 | Spec and POM must not use \PYG{l+s+sb}{`locator(\PYGZsq{}`} with CSS selectors, \PYG{l+s+sb}{`querySelector`}, \PYG{l+s+sb}{`\PYGZdl{}()`}, \PYG{l+s+sb}{`\PYGZdl{}\PYGZdl{}()`}, or XPath (\PYG{l+s+sb}{`//`}). Deduct 2 per violation, minimum 0. |
+| C3 | No arbitrary waits | 5 | No \PYG{l+s+sb}{`waitForTimeout(`} calls anywhere in spec or POM. Award 5 if absent. Award 0 if any found. |
+| C4 | Every test has assertions | 3 | Every \PYG{l+s+sb}{`test(`} block contains at least one \PYG{l+s+sb}{`expect(`} call (directly or via POM assert methods). Deduct 1 per test without assertions, minimum 0. |
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} D — Architecture compliance (15 pts)}
+
+Verifies the generated code follows the project structure from the guidelines.
+
+| \PYGZsh{} | Check | Points | How to evaluate |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| D1 | Spec file location | 2 | File exists at \PYG{l+s+sb}{`e2e/\PYGZob{}plan\PYGZhy{}name\PYGZcb{}.spec.ts`}. Award 2 if correct, 0 if missing or wrong path. |
+| D2 | POM file exists | 3 | A Page Object class exists in \PYG{l+s+sb}{`support/pages/`} for this feature. Award 3 if present with at least navigation and assertion methods. Award 1 if the file exists but is minimal/empty. Award 0 if missing. |
+| D3 | Fixture file exists | 3 | A fixture file exists in \PYG{l+s+sb}{`fixtures/`} using \PYG{l+s+sb}{`test.extend\PYGZlt{}T\PYGZgt{}()`}. Award 3 if present and exports \PYG{l+s+sb}{`test`}. Award 1 if the file exists but doesn\PYGZsq{}t follow the \PYG{l+s+sb}{`test.extend`} pattern. Award 0 if missing. |
+| D4 | Routes from routes.ts | 4 | Route paths in POM and spec are imported from \PYG{l+s+sb}{`support/data/routes.ts`} — no hardcoded path strings like \PYG{l+s+sb}{`\PYGZsq{}/hr/people\PYGZsq{}`} or \PYG{l+s+sb}{`\PYGZsq{}/employee/\PYGZsq{}`}. Award 4 if fully compliant. Deduct 1 per hardcoded route, minimum 0. |
+| D5 | Auth via storageState | 3 | Feature tests do not call login functions or import \PYG{l+s+sb}{`loginHelpers`}. Auth is inherited from the Playwright config\PYGZsq{}s \PYG{l+s+sb}{`storageState`} setup. Award 3 if compliant. Award 0 if manual login logic is present. |
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} E — Data \PYGZam{} mock integrity (10 pts)}
+
+Verifies real API usage, no mocks, and proper test data conventions.
+
+| \PYGZsh{} | Check | Points | How to evaluate |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| E1 | No mock/intercept calls | 4 | Spec and POM must not use \PYG{l+s+sb}{`page.route(`}, \PYG{l+s+sb}{`page.unroute(`}, or any request interception. Award 4 if absent. Award 0 if any found. |
+| E2 | No hardcoded credentials | 3 | No password strings, email literals, or credential values in spec or fixture. Credentials must come from \PYG{l+s+sb}{`constants.ts`} or environment variables. Award 3 if clean. Deduct 1 per violation, minimum 0. |
+| E3 | E2E\PYGZus{} data prefix | 3 | Persistent test data (created entities, titles, names) uses the \PYG{l+s+sb}{`E2E\PYGZus{}`} prefix. Award 3 if all test data follows the convention. Award 1 if partially followed. Award 0 if no \PYG{l+s+sb}{`E2E\PYGZus{}`} prefix is used despite creating data. \PYG{g+gs}{**If the test is read\PYGZhy{}only and creates no data, award full points.**} |
+\end{MintedVerbatim}

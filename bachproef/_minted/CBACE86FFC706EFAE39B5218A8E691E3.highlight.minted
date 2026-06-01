@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+Task hierarchy — every plan MUST follow this order:
+
+\PYG{k}{1.} Smoke test (always priority 1)
+\PYG{k}{2.} Incremental step tests (priority 2\PYGZhy{}N)
+\PYG{k}{3.} Full happy path test
+\PYG{k}{4.} Edge cases and validation tests
+\end{MintedVerbatim}

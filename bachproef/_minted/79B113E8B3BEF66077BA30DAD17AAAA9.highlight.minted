@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{ROUTES}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{HR\PYGZus{}PEOPLE}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}/hr/people\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{HR\PYGZus{}PEOPLE\PYGZus{}DETAIL\PYGZus{}EVALUATIONS}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}/evaluations\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{HR\PYGZus{}EVALUATION\PYGZus{}WIZARD\PYGZus{}CREATE}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}/evaluations/create\PYGZsq{}}\PYG{p}{,}
+\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{as}\PYG{+w}{ }\PYG{k+kd}{const}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{ROUTE\PYGZus{}GLOBS}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{HR\PYGZus{}EVALUATION\PYGZus{}WIZARD\PYGZus{}OVERVIEW}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}**/hr/people/*/evaluations/create/overview\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{HR\PYGZus{}EVALUATION\PYGZus{}WIZARD\PYGZus{}SCHEDULE}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}**/hr/people/*/evaluations/create/schedule\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{HR\PYGZus{}EVALUATION\PYGZus{}WIZARD\PYGZus{}SUMMARY}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}**/hr/people/*/evaluations/create/summary\PYGZsq{}}\PYG{p}{,}
+\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{as}\PYG{+w}{ }\PYG{k+kd}{const}
+\end{MintedVerbatim}

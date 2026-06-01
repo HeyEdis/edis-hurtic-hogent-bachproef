@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}schedules an evaluation and returns to the evaluations page\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{page}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{evaluationWizard}\PYG{p}{,}
+\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{wizard}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nx}{EvaluationWizardPage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{wizard}\PYG{p}{.}\PYG{n+nx}{goToSummaryStep}\PYG{p}{(}\PYG{n+nx}{evaluationWizard}\PYG{p}{.}\PYG{n+nx}{appUrl}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{evaluationWizard}\PYG{p}{.}\PYG{n+nx}{personId}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{wizard}\PYG{p}{.}\PYG{n+nx}{editTitle}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}E2E\PYGZus{}Evaluation wizard happy path\PYGZsq{}}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{wizard}\PYG{p}{.}\PYG{n+nx}{submitEvaluation}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{wizard}\PYG{p}{.}\PYG{n+nx}{assertScheduled}\PYG{p}{(}\PYG{n+nx}{evaluationWizard}\PYG{p}{.}\PYG{n+nx}{appUrl}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{evaluationWizard}\PYG{p}{.}\PYG{n+nx}{personId}\PYG{p}{)}
+\PYG{p}{\PYGZcb{})}
+\end{MintedVerbatim}

@@ -1,0 +1,6 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{APP\PYGZus{}URL}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{process}\PYG{p}{.}\PYG{n+nx}{env}\PYG{p}{.}\PYG{n+nx}{VITE\PYGZus{}APP\PYGZus{}URL}
+\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{DEV\PYGZus{}PLAN\PYGZus{}PERSON\PYGZus{}ID}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{process}\PYG{p}{.}\PYG{n+nx}{env}\PYG{p}{.}\PYG{n+nx}{DEV\PYGZus{}PLAN\PYGZus{}PERSON\PYGZus{}ID}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{APP\PYGZus{}URL}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{DEV\PYGZus{}PLAN\PYGZus{}PERSON\PYGZus{}ID}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

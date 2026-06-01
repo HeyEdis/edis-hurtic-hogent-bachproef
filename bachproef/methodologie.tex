@@ -94,7 +94,168 @@ Na deze fase kan een conclusie gevormd worden als de ontwikkelde aanpak de produ
 \chapter{Nulmeting van de huidige staat}
 \label{ch:fase1}
 
-\chapter{Requirements-analyse}
+Deze fase onderzoekt in welke mate de bestaande kwaliteitsmechanismen van talentguide vandaag bruikbare signalen geven over de stabiliteit van de applicatie. De analyse vertrekt vanuit drie meetpunten: de CI-pipeline in GitHub Actions, de fouten die in Sentry geregistreerd zijn en het moment waarop die fouten zichtbaar worden. Die nulmeting is nodig om later te kunnen beoordelen of een aangepaste teststrategie defecten vroeger detecteert en de betrouwbaarheid van de applicatie beter ondersteunt.
+
+\section{CI-pipeline als eerste kwaliteitscontrole}
+
+De GitHub Actions-pipeline moet normaal de eerste technische kwaliteitspoort vormen bij een pull request. In de onderzochte situatie geraakt die controle echter niet tot bij de testfase. De pipeline faalt al tijdens de installatie van de afhankelijkheden. Daardoor draaien de geautomatiseerde testen niet en ontstaat er geen betrouwbaar signaal over nieuwe of gewijzigde functionaliteit.
+
+\subsection{Probleem: testen worden niet uitgevoerd}
+
+Het centrale probleem is dus niet dat individuele testen falen, maar dat de pipeline de testfase niet bereikt. Wanneer de installatie blokkeert, kan de pipeline geen regressies detecteren en ontwikkelaars ook niet waarschuwen voor defecte functionaliteit. De kwaliteitspoort verliest daardoor haar rol als objectieve controle voor nieuwe code.
+
+\subsection{Oorzaak: patching in een onvolledige monorepo-context}
+
+De fout ontstaat door de combinatie van de monorepo-structuur en het moment waarop `patch-package` wordt uitgevoerd. In een monorepo worden afhankelijkheden vaak centraal geïnstalleerd en daarna gedeeld met verschillende workspaces. Wanneer een subpackage, zoals de `emails`-workspace, tijdens zijn `postinstall`-script al `patch-package` uitvoert, kan de relevante dependency op dat moment nog ontbreken in de lokale context van die workspace. Het patchproces vindt dan wel een patchbestand, maar geen overeenkomende geïnstalleerde module. Daardoor faalt de volledige CI-run.
+
+\subsection{Mogelijke oplossing}
+
+De meest directe oplossing is om het patchproces uit te voeren op het niveau waar de afhankelijkheden effectief beschikbaar zijn. Concreet betekent dit dat `patch-package` beter op rootniveau gecentraliseerd wordt. Daarnaast kan een guard in de betrokken workspace controleren of de dependency lokaal beschikbaar is voordat het patchproces start. Zo probeert een workspace niet te patchen in een installatiecontext die nog niet volledig opgebouwd is.
+
+\section{Sentry-erroranalyse}
+
+Sentry geeft een aanvullend beeld van de productkwaliteit nadat de applicatie draait. Voor deze analyse werden de Sentry-issues onderzocht voor de projecten `api` en `client`, over de environments `development`, `staging` en `production`. De periode loopt van 13 januari 2026 tot en met 12 april 2026. De cijfers zijn gebaseerd op de Sentry API-export van het issue-overzicht. Waar relevant wordt ook de event count uit Sentry vermeld.
+
+\subsection{Globale observaties}
+
+In Discover werden voor de projecten `api` en `client` samen 2.992 events gevonden binnen de onderzochte periode. Wanneer de analyse beperkt wordt tot events met niveau `error`, blijven 2.832 fout-events over. De verdeling over de environments is ongelijk: 2.078 error-events kwamen uit `production`, 375 uit `staging` en 379 uit `development`. Ongeveer 73,4\% van de geregistreerde error-events werd dus pas in productie zichtbaar. `development` en `staging` vingen samen ongeveer 26,6\% van de fouten op.
+
+Tabel~\ref{tab:sentry-environment-verdeling} geeft de verdeling van Sentry-issues en error-events per environment voor de projecten `api` en `client`.
+
+\begin{table}[H]
+    \centering
+    \caption{Verdeling van Sentry-issues en error-events per environment voor de projecten `api` en `client`.}
+    \label{tab:sentry-environment-verdeling}
+    \begin{tabular}{lrrrr}
+        \toprule
+        Environment & Issues & Error-events & Gebruikers & Aandeel error-events \\
+        \midrule
+        production & 90 & 2.078 & 52 & 73,4\% \\
+        staging & 58 & 375 & 26 & 13,2\% \\
+        development & 60 & 379 & 32 & 13,4\% \\
+        \midrule
+        Totaal & 208 & 2.832 & 110 & 100\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+De Sentry event count-endpoint toont daarnaast een duidelijke piek op 18 en 19 februari 2026. Op 18 februari werden 1.389 accepted error events geregistreerd en op 19 februari nog eens 806. Samen vertegenwoordigen die twee dagen een groot deel van de foutactiviteit in de volledige analyseperiode. Dat patroon wijst op een regressie of een tijdelijke systeemtoestand die meerdere flows tegelijk beïnvloedde.
+
+Opvallend is ook dat bijna alle error-events als `handled` geregistreerd staan. In Discover zijn 2.819 van de 2.832 error-events `handled` en 13 `unhandled`. Dat betekent niet automatisch dat de gebruikersimpact laag is. Een `handled` fout kan nog altijd betekenen dat een formulier niet verzendt, een pagina geen data toont of een flow vroegtijdig stopt. Voor de gebruiker ontstaat dan een stille fout: de applicatie blijft technisch draaien, maar de taak waarvoor de gebruiker de applicatie opent, geraakt niet afgerond.
+
+Voor het `client`-project gaf Sentry in dezelfde periode geen issues terug voor `production`, `staging` of `development`. Dat resultaat mag niet gelezen worden als bewijs dat de frontend foutloos werkte. Het wijst vooral op een observability-gat: ofwel registreerde de client geen fouten, ofwel werden clientfouten niet onder het verwachte project, environment of filterprofiel opgeslagen. Voor een volledige nulmeting moet de clientinstrumentatie daarom apart gecontroleerd worden.
+
+\section{Meest voorkomende problemen}
+
+De belangrijkste probleemclusters zijn geselecteerd op basis van frequentie, gebruikersimpact en relevantie voor de betrouwbaarheid van de applicatie. Eén cluster kan meerdere Sentry-issues bevatten wanneer die technisch verwant zijn.
+
+Tabel~\ref{tab:sentry-probleemclusters} vat de belangrijkste probleemclusters in Sentry samen.
+
+\begin{table}[H]
+    \centering
+    \caption{Samenvatting van de belangrijkste probleemclusters in Sentry.}
+    \label{tab:sentry-probleemclusters}
+    \begin{tabular}{p{0.18\textwidth} p{0.22\textwidth} p{0.12\textwidth} p{0.14\textwidth} p{0.24\textwidth}}
+        \toprule
+        Probleemcluster & Belangrijkste issues & Productie-events & Getroffen gebruikers & Kernimpact \\
+        \midrule
+        Inputvalidatie & API-B0, API-H4, API-H1, API-B1 & 1.040+ & beperkt zichtbaar & Login, registratie en uitnodigingen blokkeren. \\
+        Database- en dataconsistentie & API-B8, API-FJ & 231+ & 12+ & Queries of dataverrijking falen door ongeldige of ontbrekende data. \\
+        Autorisatie en sessies & API-BB, API-BN, API-DR & 252+ & beperkt zichtbaar & Toegang wordt geweigerd of tokens kunnen niet gevalideerd worden. \\
+        ML/Azure-integratie & API-JB, API-JV, API-JD, API-JE, API-FT & meerdere tientallen & 10+ & Aanbevelingen, scores en gap-berekeningen vallen uit. \\
+        Clientobservability & client-project zonder issues & 0 geregistreerd & onbekend & Frontendfouten zijn niet betrouwbaar zichtbaar in Sentry. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Inputvalidatie in GraphQL-resolvers}
+
+Het meest voorkomende cluster bestaat uit validatiefouten in GraphQL-resolvers. Het duidelijkste voorbeeld is API-B0, een `Invalid input`-fout in `loginResolver.ts`. Die issue telt 896 events in `production`, 37 in `staging` en 18 in `development`. Daarnaast verschijnen vergelijkbare validatiefouten in flows voor uitnodigingen, accountcreatie, registratie, e-mailbevestiging en externe integraties. De fout blijft dus niet beperkt tot één geïsoleerde schermactie, maar komt terug op meerdere toegangspunten waar gebruikersdata of tokens worden verwerkt.
+
+Voor de gebruiker betekent dit dat basisflows zoals inloggen, registreren of een uitnodiging valideren kunnen vastlopen. Omdat de meeste events `handled` zijn, ziet de gebruiker mogelijk geen technische crash. De flow kan wel stoppen of een generieke foutmelding tonen. Functioneel blijft dat ernstig: de applicatie blijft actief, maar de gebruiker kan zijn taak niet afronden.
+
+\subsection{Database- en dataconsistentiefouten}
+
+Het tweede cluster bestaat uit databasefouten. API-B8 is hierbij de grootste issue: ze telt 214 events in `production`, 66 in `staging` en 135 in `development`. De oorspronkelijke titel verwijst naar een ongeldige UUID bij het opvragen van een space, maar recente events binnen dezelfde gegroepeerde issue tonen ook andere databaseproblemen, zoals `duplicate key violations`, `check constraint violations` en verbindingsproblemen met de database. De grouping in Sentry toont daardoor dat het niet om één zuivere foutoorzaak gaat. Het gaat eerder om een patroon waarbij ongeldige of inconsistente data pas in de databanklaag wordt tegengehouden.
+
+Een verwante fout is API-FJ. Daarbij probeert `hydrateActivityData` de eigenschap `title` uit te lezen van een `null`-object. Die issue telt 17 productie-events en 7 unieke gebruikers. De fout wijst erop dat de applicatie bij het verrijken van profielgeschiedenis veronderstelt dat elk gekoppeld object nog bestaat. Wanneer een onderliggende vacature, opleiding of andere bron ontbreekt, stopt de verwerking in plaats van gecontroleerd terug te vallen op een leeg of alternatief resultaat.
+
+\subsection{Autorisatie- en sessiefouten}
+
+Een derde terugkerend cluster bestaat uit autorisatieproblemen. API-BB registreert 140 productie-events met de melding `Insufficient permissions`, terwijl API-BN nog eens 45 productie-events met een gelijkaardige fout bevat. Daarnaast registreert API-DR 67 productie-events waarbij de applicatie een access token niet kan verifiëren. Deze fouten ontstaan op het snijpunt tussen authenticatie, sessiebeheer en rechtencontrole.
+
+Niet elke autorisatiefout is automatisch een softwaredefect. Een geweigerde actie kan ook een correcte beveiligingsbeslissing zijn. De frequentie en prioriteit in Sentry tonen wel dat deze gevallen vandaag als errors worden behandeld. Daardoor vermengt de monitoring verwachte gebruikerssituaties met echte applicatiefouten, wat het moeilijker maakt om de meest urgente defecten te onderscheiden.
+
+\subsection{Fouten in de Azure Machine Learning-integratie}
+
+Een inhoudelijk belangrijk cluster bevindt zich in de `AzureMlDriver`. Verschillende issues verwijzen naar endpoints voor overall scores, gap-berekeningen, contentaanbevelingen, discover-resultaten en probability requests. Voorbeelden zijn API-JB, API-JV, API-JD, API-JE en API-FT. De meldingen verwijzen naar `Bad Gateway`, `Internal Server Error` of mislukte retries na meerdere pogingen. Deze fouten raken kernfunctionaliteit van talentguide, omdat scores, aanbevelingen en gap-analyses afhankelijk zijn van de beschikbaarheid en correctheid van de ML-service.
+
+De impact verschilt van een gewone validatiefout. Wanneer de externe ML-service onbereikbaar is of intern crasht, kan de API vaak geen inhoudelijk alternatief berekenen. De gebruiker ervaart dit als een pagina die geen aanbevelingen toont, een berekening die niet voltooid wordt of een carrièrepad dat niet geladen raakt. Omdat dezelfde driver in meerdere flows voorkomt, kan één instabiele externe afhankelijkheid meerdere productonderdelen tegelijk beïnvloeden.
+
+\subsection{Ontbrekende clientregistratie}
+
+Het `client`-project bevatte voor de onderzochte periode geen geregistreerde issues. Dat is opvallend, omdat de API wel errors registreert die rechtstreeks door gebruikersacties veroorzaakt worden. Wanneer de frontend geen eigen fouten registreert, blijven client-side `TypeErrors`, mislukte rendering, geblokkeerde knoppen of onvolledige browserflows buiten beeld. De nulmeting kan daardoor vooral backend- en integratiefouten beschrijven, maar niet met dezelfde zekerheid aantonen hoe vaak gebruikers in de browser vastlopen.
+
+\section{Waarschijnlijke oorzaken}
+
+De Sentry-data toont niet alleen welke fouten vaak voorkomen, maar ook welke structurele oorzaken vermoedelijk terugkeren. De oorzaken hieronder zijn afgeleid uit de issue-titels, culprits, events en de verhouding tussen `development`, `staging` en `production`.
+
+\subsection{Validatie gebeurt te laat of te verspreid}
+
+Veel fouten ontstaan doordat input pas diep in een resolver, driver of databankoperatie wordt afgekeurd. Wanneer de applicatie pas bij de databank ontdekt dat een ID geen UUID is, of pas in een resolver merkt dat een token ongeldig is, wordt de foutafhandeling kwetsbaar. Een robuustere aanpak valideert data al aan de rand van de API en vertaalt verwachte validatiefouten naar duidelijke functionele responses in plaats van naar generieke errors.
+
+\subsection{Domeinregels worden pas door de databank afgedwongen}
+
+De databasefouten tonen dat bepaalde domeinregels, zoals unieke combinaties of geldige datumvolgordes, pas op databankniveau worden tegengehouden. Dat is nuttig als laatste verdedigingslaag, maar onvoldoende als enige controle. Wanneer de applicatielaag geen voorafgaande validatie of idempotente verwerking uitvoert, verschijnt een normale gebruikersactie in Sentry als technische databasefout.
+
+\subsection{De pre-productieomgevingen vangen regressies onvoldoende vroeg op}
+
+Slechts ongeveer een kwart van de events werd in `development` of `staging` geregistreerd. Dat wijst erop dat regressies vaak pas zichtbaar worden nadat ze `production` bereiken. De geblokkeerde CI-pipeline versterkt dit probleem: wanneer automatische testen niet draaien, verschuift kwaliteitscontrole naar runtime-monitoring in plaats van preventieve detectie voor release.
+
+\subsection{Externe ML-afhankelijkheden zijn onvoldoende afgeschermd}
+
+De `AzureMlDriver`-fouten wijzen op een kwetsbare koppeling met externe ML-services. `Bad Gateway`, `Internal Server Error` en herhaalde retry-fouten suggereren dat de API sterk afhankelijk is van de beschikbaarheid en inputtolerantie van de ML-laag. Zonder duidelijke timeouts, fallbackgedrag en gezondheidscontroles kan een tijdelijk probleem in de ML-service meteen zichtbaar worden als een geblokkeerde gebruikersflow.
+
+\subsection{De observability is onvolledig}
+
+De afwezigheid van clientissues is een afzonderlijke oorzaak van onzekerheid in de nulmeting. Wanneer alleen het `api`-project betrouwbare data oplevert, blijft het verband tussen backendfouten en concrete browserervaring deels indirect. Een volledige kwaliteitsmeting vereist dat client- en serverfouten samen zichtbaar zijn, bij voorkeur met consistente release-, environment- en user-context.
+
+\section{Mogelijke oplossingen}
+
+De oplossingen moeten zowel preventief als reactief werken. Preventieve maatregelen voorkomen dat defecten `production` bereiken. Reactieve maatregelen zorgen dat resterende fouten sneller zichtbaar, begrijpelijk en herstelbaar worden.
+
+\subsection{Herstel de CI-pipeline als releasevoorwaarde}
+
+De eerste prioriteit is dat de pipeline opnieuw tot aan de testfase geraakt. Daarvoor moet `patch-package` in een stabiele installatiecontext draaien en mag de `emails`-workspace geen `postinstall`-fout veroorzaken wanneer dependencies nog niet beschikbaar zijn. Zodra de installatie betrouwbaar is, kan de pipeline opnieuw dienen als minimale releasevoorwaarde voor unit-, integratie- en E2E-testen.
+
+\subsection{Centraliseer contract- en inputvalidatie}
+
+Validatie voor login, registratie, uitnodigingen, space-ID's en externe integraties hoort zoveel mogelijk aan de API-rand te gebeuren. Schema-validatie kan ervoor zorgen dat ongeldige input wordt omgezet naar voorspelbare foutresponses. Daarmee vermindert het aantal technische Sentry-errors en krijgt de gebruiker een duidelijker functioneel signaal.
+
+\subsection{Maak dataverwerking idempotent en null-safe}
+
+Databasefouten zoals `duplicate key violations` en null-referenties kunnen beperkt worden door vooraf te controleren of records bestaan, of een actie veilig opnieuw uitgevoerd mag worden en welke fallback geldt wanneer gekoppelde data ontbreekt. Voor profielgeschiedenis betekent dit bijvoorbeeld dat ontbrekende bronnen niet de volledige hydratatie mogen blokkeren. De applicatie kan dan een gedeeltelijk resultaat tonen en de ontbrekende relatie apart loggen.
+
+\subsection{Scherm de ML-integratie af met fallbackgedrag}
+
+Voor de Azure ML-integratie zijn timeouts, retrylimieten, circuit breakers en fallbackresponses nodig. Wanneer een aanbevelings- of gap-endpoint tijdelijk faalt, hoeft de volledige gebruikersflow niet te stoppen. De applicatie kan bijvoorbeeld een vorige berekening tonen, een lege maar verklaarde toestand weergeven of een later-opnieuw-proberenboodschap tonen. Daarnaast moeten health checks en synthetische testen de beschikbaarheid van ML-endpoints vóór release controleren.
+
+\subsection{Maak autorisatiefouten beter onderscheidbaar}
+
+Niet elke geweigerde actie hoeft als hoogprioritaire error in Sentry te verschijnen. Verwachte autorisatie-uitkomsten kunnen als waarschuwing, audit-event of functionele foutresponse behandeld worden. Echte defecten, zoals een tokenvalidatie die onverwacht faalt voor geldige sessies, blijven dan beter zichtbaar tussen de ruis.
+
+\subsection{Controleer en activeer clientobservability}
+
+Tot slot moet gecontroleerd worden of de frontend correct naar het `client`-project rapporteert. Daarbij horen een correcte DSN, environmentnaam, releasekoppeling, source maps en een testevent per environment. Pas wanneer client- en api-errors samen zichtbaar zijn, kan de nulmeting betrouwbaar beschrijven waar gebruikers werkelijk vastlopen.
+
+\section{Synthese}
+
+De nulmeting toont dat talentguide al nuttige kwaliteitsinstrumenten heeft, maar dat die instrumenten vandaag onvoldoende preventief werken. De CI-pipeline blokkeert voor de testfase, terwijl Sentry vooral fouten toont die al in productie terechtkomen. De grootste probleemclusters bevinden zich rond inputvalidatie, dataconsistentie, autorisatie, externe ML-afhankelijkheden en ontbrekende clientobservability.
+
+Voor het vervolg van de bachelorproef betekent dit dat een verbeterde teststrategie zich niet alleen moet richten op meer testen, maar vooral op de juiste detectiemomenten. E2E-testen en gerichte integratietesten zijn vooral waardevol wanneer ze de kritieke flows afdekken die vandaag in Sentry terugkomen: authenticatie, uitnodigingen, profielgeschiedenis, spacebeheer en ML-gedreven aanbevelingen. Zo kan de testaanpak verschuiven van reactief foutonderzoek naar preventieve kwaliteitsborging.
+
+
+\chapter{Richtlijnen en benodigdheden}
 \label{ch:fase2}
 
 In dit hoofdstuk is vastgelegd welke onderdelen nodig zijn om een AI-ondersteunde E2E-testworkflow voor talentguide te bouwen. De focus ligt op de volledige keten: routes omzetten naar user stories, user stories vertalen naar testtaken, Playwright testen genereren met een ralph-loop en de output beoordelen. Voor deze keten functionele en niet-functionele requirements opgesteld voor een bruikbare en onderhoudbare oplossing.
@@ -107,13 +268,38 @@ Deze workflow bestaat uit meerdere opeenvolgende onderdelen. Elk onderdeel heeft
 Dit artefact vertrekt vanuit de routes van de applicatie en zet deze om naar user stories. Daarbij is vastgelegd wat de rol van de route is, de betrokken pagina of componenten, het doel van de gebruiker, de acceptatiecriteria, de happy flow, de belangrijkste interacties en de nodige precondities.
 Dit onderdeel is nodig omdat een route op zichtzelf te weinig context bevat voor de AI-agent om een betekenisvolle E2E-test te genereren. De route toont waar de eindgebruiker terechtkomt niet welk gedrag getest moet worden. Door deze vertaling ontstaat een tussenlaag die functionele betekenis toevoegt aan de route.
 
-\subsection{Richtlijnen voor de E2E-testen}
+\subsection{E2E-test richtlijnen}
 Dit artefact bestaat uit technische richtlijnen waaraan Playwright-testen moeten voldoen. Hierin is vastgelegd dat testen gebruikersgedrag moeten controleren, dat elke test onafhankelijk uitvoerbaar moet zijn, dat echte endpoints gebruikt moeten worden, en testId’s aan componenten moet toegewezen worden. Dit is uitgebreider in de opzet vermeld. Daarnaast beschrijft het de testarchitectuur en is bepaald waar elk onderdeel leeft.
-Dit onderdeel is noodzakelijk om de kwaliteit te waarborgen zodat vermeden kan worden dat agents syntactisch correcte testen generen, maar afwijken van de projectconventies. 
+Dit onderdeel is noodzakelijk om de kwaliteit te waarborgen zodat vermeden kan worden dat agents syntactisch correcte testen generen, maar afwijken van de projectconventies.
+
+\subsection{Vertaling van user-stories naar concrete deeltaken}
+Dit artefact vertaald de functionele beschrijving uit de user story naar een uitvoerbaar plan voor de agent. Dit levert een planbestand op waarin elke taak, concreet is beschreven met een prioriteitsvolgorde.
+Dit onderdeel is nodig omdat een volledige user story te groot is om in één keer betrouwbaar te laten implementeren. Dit vaardigheidsbestand splits het op in kleine deeltaken zodat de iteratieve uitvoersingsloop stapsgewijs de test kan uitwerken.
+
+\subsection{Ralph  - de iteratieve uitvoeringsloop}
+Dit artefact is het Ralph-init vaardigheidsbestand, dit bestand maakt de iteratieve uitvoerinsloop mogelijk. Deze stap voorziet de structuur waarmee de agent planbestanden kan verwerken, taken in prioritietsvolgorde kan uitvoeren en voortgang kan bijhouden. 
+Deze loop vertrekt vanuit een voorbereid planbestand, waarbij de agent per iteratie een onvoltooide taak selecteert, de relevante technische context opzoekt en implementeert die de nodige aanpassingen in de testcode of ondersteunende bestanden. Wanneer een taak aantoonbaar voltooid is, is het planbestand bijgewerkt.
+Dit onderdeel is noodzakelijk doordat het implementeren van alle testlogica in één keer niet betrouwbare resultaten oplevert. De iteratieve loop maakt het mogelijk om de basis stap te bewijzen, daarna de happy flow uit te breiden en vervolgens aanvullende cases toe te voegen.
+
+\subsection{Introspectie vaardigheidsbestand}
+Dit vaardigheidsbestand dient als een reflectiestap  voor de agent na de implementatie. Het gaat na wat tijdens de uitvoering moeilijk verliep en welke verbeteringen daaruit afgeleid kunnen worden.
+Daarbij is gekeken naar terugkerende problemen zoals ontbrekende richtlijnen, verkeerde aannames, fragiele selectors, testdata-problemen, onduidelijke route-informatie of stappen die meerdere keren herwerkt moesten worden.
+Het doel van dit bestand is niet om specifieke testen te beoordelen maar om de volledige workflow te verbeteren. Wanneer dezelfde fouten zich herhalen is deze kennis teruggekoppeld naar het juiste niveau.
+Dit onderdeel is nodig omdat AI-ondersteunde workflows gevoelig zijn voor herhaalde fouten wanneer instructies onvolledig of dubbelzinnig zijn. Dit bestand maakt het dat de workflow bijleert uit zijn fouten en beter wordt voor verdere uitwerking.
+
+\subsection{Evaluatie vaardigheidsbestand}
+Dit vaardigheidsbestand beoordeelt of de gegenereerde Playwright testen voldoen aan de vooraf bepaalde criteria. Hier is nagegaan als de coverage structuur klopt, of de taken uit het plan correct zijn uitgevoerd, als de E2E-test richtlijnen zijn gevolgd. 
+Deze stap maakt het mogelijk om de volledige opzet van een test objectief te laten beoordelen. Hiermee is een kwaliteitsmeting gedaan van de gegenereerde test.
+
+\section{Samenhang van de workflowketen}
+
+Figuur ~\ref{fig:e2e-workflow-procesmodel} geeft de workflowketen weer als een procesmodel. Het begint bij gekende routes, deze worden omgezet naar user stories. Vervolgens is een planbestand aangemaakt van die user stories en is het hier opgesplits in deeltaken. Deze deeltaken worden meegeven aan de Ralph-loop die samen met de gedefinieerde E2E richtlijnen, Playwright testen genereerd. Na de testgeneratie beoordeelt de agent of er terugkerende fouten waren in het implementatie proces. Zo wel is een instrospectie uitgevoerd en zijn nieuwe richtlijnen toegevoegd aan het vaardigheidsbestand.
 
 \begin{figure}[h]
     \centering
     \begin{tikzpicture}[
+        scale=0.68,
+        transform shape,
         node distance=1.1cm and 1.2cm,
         startend/.style={
             ellipse,
@@ -163,8 +349,8 @@ Dit onderdeel is noodzakelijk om de kwaliteit te waarborgen zodat vermeden kan w
         \node[gateway, below=2.0cm of andstart] (andjoin) {+};
         
         % Output
-        \node[activity, below=1.05cm of andjoin] (tests) {Playwright-\\testen gemaakt\\volgens richtlijnen};
-        \node[startend, minimum width=2.5cm, below=1.05cm of tests] (working) {Gebruiker heeft\\werkende\\E2E-testen};
+        \node[activity, below=1.20cm of andjoin] (tests) {Playwright-\\testen gemaakt\\volgens richtlijnen};
+        \node[activity, minimum width=2.5cm, below=1.05cm of tests] (working) {Gebruiker heeft\\werkende\\E2E-testen};
         
         % Decision after working tests
         \node[gateway, below=1.05cm of working] (choice) {X};
@@ -205,18 +391,1371 @@ Dit onderdeel is noodzakelijk om de kwaliteit te waarborgen zodat vermeden kan w
     \label{fig:e2e-workflow-procesmodel}
 \end{figure}
 
+\section{Coverage-niveaus}
 
-Figuur ~\ref{fig:e2e-workflow-procesmodel} visualiseert deze samenhang als een lineaire pipeline met een feedbackloop. De hoofdrichting loopt van routes naar gegenereerde Playwright-testen en evaluatie. De feedbackloop loopt vanuit introspectie terug naar de richtlijnen en vaardigheidsbestanden, zodat latere testgeneratie beter gestuurd wordt.
+Om de agent tijdens de testgeneratie te sturen, zijn drie coverage-niveaus gebruikt: smoke coverage, happy-flow coverage en extended coverage. Deze niveaus vormen een hiërarchie die bepaalt in welke volgorde de testen worden opgebouwd. Daarnaast dienen ze achteraf als evaluatiekader om te beoordelen in welke mate een route of routegroep getest is.
 
 
+\subsection{Smoke coverage}
+
+Smoke coverage is het eerste coverage-niveau. Een route of routegroep bereikt smoke coverage wanneer een Playwright test de route kan openen en kan vaststellen dat de belangrijkste pagina-elementen renderen en de juiste authenticatiecontext gebruikt is. Dit niveau bewijst enkel dat de route bereikbaar is en niet dat de functionaliteiten werken. 
+
+\subsection{Happy-flow coverage}
+
+Happy-flow coverage is het minimale niveau om een route of routegroep functioneel getest te beschouwen. Binnen dit niveau is de primaire gebruikersflow eerst incrementeel opgebouwd in afzonderlijke testen. Zodra deze slagen, is de vollidgevolledige end-to-end happy flow in één doorlopende test gevalideerd. Door elke stap afzonderlijk te testen, blijven fouten lokaliseerbaar en kan de workflow de volledige happy flow gecontroleerd opbouwen. Dit niveau is pas bereikt wanneer de volledige primaire gebruikersflow uit de user story in één doorlopende test succesvol uitgevoerd is.
+
+\subsection{Extended coverage}
+
+Extended coverage bouwt verder op happy-flow coverage. Dit niveau bevat bijkomende scenario's buiten de primaire happy flow, zoals alternatieve verlopen, foutpaden, lege toestanden, bevestigingsdialogen, cleanup gedrag en edge cases. De uitwerking van dit niveau verhoogt de robuustheid van de testset en biedt inzicht in het gedrag van de applicatie buiten het standaardscenario. Binnen het proof-of-concept is het niet noodzakelijk om dit voor elke route volledig uit te werken.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{0.22\textwidth}|p{0.36\textwidth}|p{0.32\textwidth}|}
+        \hline
+        \textbf{Coverage-niveau} & \textbf{Betekenis} & \textbf{Minimumbewijs} \\
+        \hline
+        Smoke coverage & De route of routegroep opent en de belangrijkste pagina-elementen renderen. & Een eerste Playwright-test navigeert naar de route en controleert zichtbare hoofdcomponenten via stabiele \texttt{data-testid}-locators. \\
+        \hline
+        Happy-flow coverage & De primaire gebruikersflow uit de user story slaagt end-to-end. & Minstens één volledige Playwright-test voert de flow in één doorlopende test uit en controleert de verwachte eindtoestand. \\
+        \hline
+        Extended coverage & Scenario's buiten de primaire happy flow worden getest, zoals alternatieve verlopen, foutpaden, lege toestanden, bevestigingsdialogen, cleanup gedrag en edge cases. & Extra Playwright-testen dekken relevante scenario's naast de happy flow. \\
+        \hline
+    \end{tabular}
+    \caption{Coverage-niveaus voor de AI-ondersteunde E2E-testworkflow}
+    \label{tab:coverage-niveaus}
+\end{table}
+
+Deze indeling ondersteunt de ontwikkeling en beoordeling van gegenereerde testen volgens een vast patroon. Elk coverage niveau heeft daarin een eigen functie: smoke coverage bewijst de bereikbaarheid van de route, happy-flow coverage valideert de primaire gebruikersflow en extended coverage geeft bijkomend inzicht in alternatieve verlopen. Door deze volgorde consequent te volgen is de testgeneratie minder afhankelijk van ad-hocbeslissingen van de agent en ontstaat er een controleerbaar proces dat de kwaliteit van de testen verhoogt.
+
+
+\section{Functionele requirements}
+
+In deze sectie zijnd e functionliteiten beschreven voor elk onderdeel van de workflow. Dit zijn alle functioanliteiten dat de workflow nodig heeft om routes om te zetten anar gestructureerde user storeis, planbestanden, gegenereerde testen, uitvoerbaarde testresultaten en evalaueerbare ouput.
+
+De eisen zijn georderd volgens de opeenvolgende onderdelen van de workflowketen. Daardoor is het zichtbaar welke functionaliteiten bij welk vaardigheidsbestand/artefact horen. 
+
+\subsection{Route analyse en user storygeneratie}
+Deze vereisten horen bij het user storygeneratie vaardigheidsbestand. Hier is vertrokken vanuit \texttt{RouteConfig.tsx} dit bestand dient als bron van waarheid waar elke route van talentguide is gedefinieerd. Dit workflow mag geen routes verzinnen buiten deze configuratie.
+
+\begin{longtable}{p{0.08\textwidth}p{0.40\textwidth}p{0.12\textwidth}p{0.30\textwidth}}
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endhead
+    
+    FR1 & De workflow moet routes uitlezen uit \texttt{RouteConfig.tsx} van de client. & Must & Dit bestand is de bron van waarheid voor de beschikbare talentguide-routes. \\
+    \midrule
+    FR2 & De workflow moet routes organiseren per rol en parent-childrelatie. & Must & User stories worden bewaard in rolmappen zoals \texttt{public}, \texttt{employee} en \texttt{admin}. Dynamische detailroutes krijgen een parentbestand en onderliggende childroutes krijgen een eigen childbestand. \\
+    \midrule
+    FR3 & De workflow moet sequentiële wizardflows als een samenhangende routegroep kunnen behandelen. & Must & Meerdere staproutes worden in dat geval samengebracht in één user-storybestand, omdat de happy flow de volledige sequentie moet doorlopen. \\
+    \midrule
+    FR4 & De workflow moet per route of routegroep een user-storybestand kunnen genereren volgens het passende template. & Must & Er is een ander template voor standaardroutes, parentroutes, childroutes en wizardflows. \\
+    \midrule
+    FR5 & Elk user-storybestand moet de testrelevante informatie bevatten die nodig is om E2E-tests te plannen. & Must & Minimaal gaat het om routegegevens, rol, page component, beschrijving, user story, acceptatiecriteria, happy flow, key interactions en preconditions. \\
+    \midrule
+    FR6 & De workflow moet parent-childrelaties expliciet opnemen in de user-storybestanden. & Must & Parentbestanden bevatten hun childroutes; childbestanden verwijzen naar hun parent en erven relevante preconditions. \\
+    \midrule
+    FR7 & De workflow moet de relevante componentboom analyseren voordat een user story wordt opgesteld. & Must & De analyse omvat minstens de top-level page component, child components, interactieve elementen, data-afhankelijkheden en conditionele UI. \\
+    \midrule
+    FR8 & De workflow moet specifieke en testbare user stories en acceptatiecriteria formuleren. & Must & De output moet aansluiten bij het werkelijke gedrag van de route en mag niet beperkt blijven tot generieke renderbeschrijvingen. \\
+    \midrule
+    FR9 & De workflow moet bestaande user-storybestanden herkennen en overslaan. & Must & Wanneer voor een route of routegroep al een user-storybestand bestaat, mag dit niet automatisch overschreven of samengevoegd worden. \\
+    
+    \bottomrule
+    \caption[Functionele requirements voor routeanalyse en user-storygeneratie]{Functionele requirements voor routeanalyse en user-storygeneratie.}
+    \label{tab:fr-routeanalyse-userstories}
+    \endlastfoot
+\end{longtable}
+
+
+\subsection{Planbestanden genereren}
+Deze vereisten horen bij het vaardigheidsbestand dat user stories omzet naar \texttt{plan.json } bestanden. Deze bestanden bepalen welke testen de agent moet scrhijven en in welke volgorde.
+
+\begin{longtable}{p{0.08\textwidth}p{0.40\textwidth}p{0.12\textwidth}p{0.30\textwidth}}
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endhead
+    
+    FR10 & De workflow moet een user-storybestand kunnen omzetten naar een \texttt{plan.json}-bestand. & Must & Het planbestand is de directe input voor de testgeneratie. \\
+    \midrule
+    FR11 & De workflow moet voor het opstellen van het plan relevante codebasecontext analyseren. & Must & Dit omvat page components, bestaande POM's, fixtures, routeconstanten, bestaande \texttt{data-testid}-attributen en bestaande specs. \\
+    \midrule
+    FR12 & Het planbestand moet de broncontext van de user story bewaren. & Must & Minimaal bevat \texttt{source} de user story, route, rol en page component. \\
+    \midrule
+    FR13 & Het planbestand moet de user story opsplitsen in kleine, concrete en afzonderlijk testbare taken. & Must & Elke taak beschrijft een observeerbaar gedrag en komt idealiter overeen met een Playwright-\texttt{test()}-blok. \\
+    \midrule
+    FR14 & Elke taak moet een uniek ID, titel, beschrijving, acceptatiecriteria, prioriteit en \texttt{passes}-status bevatten. & Must & Deze velden maken uitvoering, opvolging en evaluatie traceerbaar. \\
+    \midrule
+    FR15 & De taken moeten de vaste coverage-hiërarchie volgen. & Must & De volgorde is: smoke test, incrementele happy-flowstappen, volledige happy-flowtest en daarna validatie- of edge-casetests. \\
+    \midrule
+    FR16 & Taken moeten concrete en verifieerbare acceptatiecriteria bevatten. & Must & Criteria moeten gekoppeld zijn aan observeerbare Playwright-asserties, niet aan vage formuleringen zoals ``werkt correct''. \\
+    \midrule
+    FR17 & De workflow moet de voorgestelde taakverdeling aan de gebruiker kunnen voorleggen. & Should & De gebruiker kan de granulariteit, scope en prioriteit controleren voordat het planbestand wordt gebruikt. \\
+    \midrule
+    FR18 & Wanneer een \texttt{plan.json} al bestaat, mag de workflow bestaande taken niet wijzigen. & Must & Nieuwe taken worden toegevoegd; bestaande taken, inclusief \texttt{passes}-waarden, beschrijvingen en criteria, blijven behouden. \\
+    \midrule
+    FR19 & De workflow moet E2E-conventies expliciet kunnen opnemen in de taakbeschrijvingen van het planbestand. & Must & De agent krijgt per taak mee welke locator-, route-, data- en teststructuurregels gevolgd moeten worden. \\
+    \midrule
+    FR20 & De workflow moet ontbrekende \texttt{data-testid}-attributen kunnen opnemen als onderdeel van de implementatietaak. & Must & Wanneer stabiele locators ontbreken, moet het plan vermelden welke attributen toegevoegd moeten worden. \\
+    \midrule
+    FR21 & De workflow moet testtaken kunnen koppelen aan de bestaande Playwright-structuur. & Must & Taken moeten aangeven welke spec, POM, fixture, helper of routeconstante gebruikt of aangemaakt moet worden. \\
+    \midrule
+    FR22 & De workflow moet taken kunnen formuleren die echte API- en data-afhankelijkheden valideren. & Must & Voor data-fetching UI-controls volstaat renderen niet; het plan moet aangeven dat opgehaalde data zichtbaar of bruikbaar moet zijn in de test. \\
+    
+    \bottomrule
+    \caption[Functionele requirements voor planbestandgeneratie]{Functionele requirements voor planbestandgeneratie.}
+    \label{tab:fr-planbestandgeneratie}
+\end{longtable}
+
+\subsection{Testgenratie via Ralph en E2E richtlijnen}
+Deze vereisten horen bij de Ralph loop en de E2E richtlijnen. Ralph voert voorbereide plannen uit en de E2E richtlijnen sturen aan hoe de Playwright testen binnen talentguide moeten worden opgebouwd.
+
+
+\begin{longtable}{p{0.08\textwidth}p{0.40\textwidth}p{0.12\textwidth}p{0.30\textwidth}}
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endhead
+    
+    FR23 & De workflow moet de Ralph-loop pas uitvoeren wanneer user stories en \texttt{plan.json}-bestanden beschikbaar zijn. & Must & Ralph vertrekt vanuit voorbereide artefacten en is niet verantwoordelijk voor de voorafgaande user-story- of plangeneratie. \\
+    \midrule
+    FR24 & De workflow moet een specifiek plan of alle onvoltooide plannen kunnen verwerken. & Must & Een gebruiker kan gericht een story laten uitvoeren of alle plannen met onvoltooide taken laten verwerken. \\
+    \midrule
+    FR25 & De workflow moet telkens de hoogste prioriteitstaak met \texttt{passes: false} selecteren. & Must & Taken worden uitgevoerd volgens de volgorde uit het planbestand. \\
+    \midrule
+    FR26 & De workflow moet voor testimplementatie de E2E-richtlijnen, het planbestand, het progressbestand en de user story als context gebruiken. & Must & De agent moet featurecontext, taakstatus en projectconventies kennen voordat testcode wordt geschreven. \\
+    \midrule
+    FR27 & De workflow moet ontbrekende testinfrastructuur kunnen aanmaken of uitbreiden. & Must & Dit omvat specbestanden, POM's, fixtures, helpers, routeconstanten en ontbrekende \texttt{data-testid}-attributen. \\
+    \midrule
+    FR28 & De workflow moet Playwright-testen genereren volgens de bestaande projectstructuur. & Must & Specs horen in \texttt{e2e/}, fixtures in \texttt{fixtures/}, page objects in \texttt{support/pages/} en gedeelde data in \texttt{support/data/}. \\
+    \midrule
+    FR29 & De workflow moet gegenereerde tests kunnen uitvoeren met de bestaande Playwright-configuratie. & Must & Een taak of plan geldt pas als uitgevoerd wanneer de relevante Playwright-uitvoering slaagt. \\
+    \midrule
+    FR30 & De workflow moet na elke afgeronde taak het progressbestand aanvullen en de bijhorende \texttt{passes}-status bijwerken. & Must & Hierdoor blijft zichtbaar wat geïmplementeerd, beslist, geblokkeerd of gewijzigd werd. \\
+    \midrule
+    FR31 & De workflow moet de volledige spec uitvoeren wanneer alle taken van een plan zijn afgerond. & Must & Pas wanneer de volledige spec slaagt, kan het plan als volledig uitgevoerd gelden. \\
+    \midrule
+    FR32 & De workflow moet een human-in-the-loopmodus ondersteunen. & Should & In deze modus kan de gebruiker na een iteratie feedback geven voordat de workflow verdergaat. \\
+    \midrule
+    FR33 & De workflow moet een autonome modus kunnen ondersteunen. & Could & In AFK-modus kan de agent beslissingen zelfstandig nemen en blokkades in het progressbestand documenteren. \\
+    
+    \bottomrule
+    \caption[Functionele requirements voor testgeneratie via Ralph]{Functionele requirements voor testgeneratie via Ralph en E2E-richtlijnen.}
+    \label{tab:fr-ralph-e2e}
+\end{longtable}
+
+\subsection{Evaluatie van de gegenereerde testen}
+Deze vereisten horen bij het evaluatie vaardigheidsbestand. Dit bestand maakt niet uit van de hoofdworkflow maar is door de gebruiker afzonderlijk opgeroepen om de gegenereerde testen te beoordelen.
+
+\begin{longtable}{p{0.08\textwidth}p{0.40\textwidth}p{0.12\textwidth}p{0.30\textwidth}}
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endhead
+    
+    FR34 & De workflow moet een afzonderlijke evaluatiestap kunnen ondersteunen voor afgeronde planbestanden. & Could & De evaluatie wordt apart door de gebruiker opgeroepen en maakt geen deel uit van de automatische hoofdflow. \\
+    \midrule
+    FR35 & De evaluatiestap moet gegenereerde testoutput kunnen beoordelen aan de hand van vaste criteria. & Could & De criteria omvatten coverage-structuur, taakuitvoering, locatorgebruik, architectuurconformiteit en data- en mockintegriteit. \\
+    \midrule
+    FR36 & De evaluatiestap moet een scoreerbaar evaluatiebestand kunnen opleveren. & Could & De output is een evaluatiebestand met score, deelcriteria, motivering per onderdeel en conclusie. \\
+    
+    \bottomrule
+    \caption[Functionele requirements voor evaluatie van testoutput]{Functionele requirements voor evaluatie van gegenereerde testoutput.}
+    \label{tab:fr-evaluatie-testoutput}
+\end{longtable}
+
+
+\subsection{Bijsturen van de richtlijnen}
+Deze vereisten zijn voor het introspectie vaardigheidsbestand. Deze stap is bedoel om terugkerende fouten, ontbrekende richtlijnen en frictiepunten te analyseren en gericht terug te koppelen naar de sturingsbestanden van de workflow.
+
+\begin{longtable}{p{0.08\textwidth}p{0.40\textwidth}p{0.12\textwidth}p{0.30\textwidth}}
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{ID} & \textbf{Functionele requirement} & \textbf{Prioriteit} & \textbf{Toelichting} \\
+    \midrule
+    \endhead
+    
+    FR37 & De workflow moet een afzonderlijke introspectiestap kunnen ondersteunen na testgeneratie. & Should & Introspectie wordt apart opgeroepen en maakt geen deel uit van de automatische hoofdflow. \\
+    \midrule
+    FR38 & De introspectiestap moet terugkerende frictie, ontbrekende richtlijnen en foutpatronen kunnen identificeren. & Should & De analyse baseert zich op uitvoeringservaring, progress logs, reviewfeedback en terugkerende testproblemen. \\
+    \midrule
+    FR39 & De introspectiestap moet verbeteringen kunnen koppelen aan het juiste artefact. & Should & Bijsturing kan gericht zijn op E2E-richtlijnen, user-storyvaardigheid, planvaardigheid, prompts, testdata, POM's of helpers. \\
+    
+    \bottomrule
+    \caption[Functionele requirements voor introspectie en bijsturing]{Functionele requirements voor introspectie en bijsturing.}
+    \label{tab:fr-introspectie-bijsturing}
+\end{longtable}
+
+
+\section{Niet-functionele requirements}
+
+De niet-functionele requirements beschrijven de kwaliteitskenmerken waaraan de AI-ondersteunde E2E-testworkflow en de gegenereerde testoutput moeten voldoen. Waar functionele requirements beschrijven wat de workflow moet kunnen uitvoeren, leggen niet-functionele requirements vast hoe goed, controleerbaar en bruikbaar die uitvoering moet zijn.
+
+De requirements worden gestructureerd volgens relevante ISO 25010-categorieën uit de theorie over niet-functionele requirements. Voor deze workflow zijn vooral functionele geschiktheid, onderhoudbaarheid en bruikbaarheid relevant. Elke NFR wordt uitgewerkt met een categorie, indicator, meetvoorschrift en norm.
+
+\subsubsection{Functionele compleetheid van de testoutput}
+
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Functionele geschiktheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Functionele geschiktheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR1 \\
+    \midrule
+    Indicator & Functionele compleetheid \\
+    \midrule
+    Meetvoorschrift & Tel per afgerond \texttt{plan.json}-bestand het aantal taken met \texttt{passes: true} en vergelijk dit met het totale aantal geplande taken. Controleer daarna of het plan minstens de noodzakelijke smoke- en happy-flowtaken bevat en uitvoert. \\
+    \midrule
+    Norm & Bij afronding van een \texttt{plan.json}-bestand hebben alle smoke- en happy-flowtaken binnen dat plan \texttt{passes: true}. Extended coverage is wenselijk binnen het proof of concept. \\
+    
+    \bottomrule
+    \caption[NFR1: functionele compleetheid]{Functionele compleetheid van de testoutput.}
+    \label{tab:nfr-functionele-compleetheid}
+\end{longtable}
+
+\subsubsection{Correctheid van de gegenereerde tests}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Functionele geschiktheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Functionele geschiktheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR2 \\
+    \midrule
+    Indicator & Functionele correctheid \\
+    \midrule
+    Meetvoorschrift & Vergelijk elke gegenereerde test met de bijhorende user story, acceptatiecriteria en taakbeschrijving uit het \texttt{plan.json}-bestand. Controleer of de assertions het bedoelde gebruikersgedrag en de verwachte eindtoestand valideren. \\
+    \midrule
+    Norm & Geen enkele gegenereerde test valideert gedrag dat buiten de bijhorende user story of taakbeschrijving valt. Elke happy-flowtest controleert aantoonbaar de verwachte eindtoestand uit de user story en behaalt minstens de drempelwaarde \texttt{Acceptable}. \\
+    
+    \bottomrule
+    \caption[NFR2: functionele correctheid]{Correctheid van de gegenereerde tests.}
+    \label{tab:nfr-functionele-correctheid}
+\end{longtable}
+
+\subsubsection{Toepasselijkheid voor E2E-validatie}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Functionele geschiktheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Functionele geschiktheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR3 \\
+    \midrule
+    Indicator & Functionele toepasselijkheid \\
+    \midrule
+    Meetvoorschrift & Voer na testgeneratie de afzonderlijke evaluatiestap uit op de gegenereerde testen. Noteer per geëvalueerde test of die minstens de drempelwaarde \texttt{Acceptable} behaalt volgens de opgegeven testrichtlijnen. \\
+    \midrule
+    Norm & Minstens 90\% van de geëvalueerde testen behaalt de drempelwaarde \texttt{Acceptable} volgens de opgegeven testrichtlijnen. \\
+    
+    \bottomrule
+    \caption[NFR3: functionele toepasselijkheid]{Toepasselijkheid van de gegenereerde tests voor E2E-validatie.}
+    \label{tab:nfr-functionele-toepasselijkheid}
+\end{longtable}
+
+\subsubsection{Modulariteit van de gegenereerde testcode}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Onderhoudbaarheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Onderhoudbaarheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR4 \\
+    \midrule
+    Indicator & Modulariteit \\
+    \midrule
+    Meetvoorschrift & Ga voor elke gegenereerde test na of de onderdelen volgens de E2E-richtlijnen verdeeld zijn over de correcte folders en bestanden. \\
+    \midrule
+    Norm & Minstens 90\% van de architectuurcriteria uit de E2E-richtlijnen is voldaan voor de gegenereerde testoutput. \\
+    
+    \bottomrule
+    \caption[NFR4: modulariteit]{Modulariteit van de gegenereerde testcode.}
+    \label{tab:nfr-modulariteit}
+\end{longtable}
+
+\subsubsection{Herbruikbaarheid van testondersteuning}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Herbruikbaarheid van testondersteuning} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Herbruikbaarheid van testondersteuning} \\
+    \midrule
+    \endhead
+    
+    ID & NFR5 \\
+    \midrule
+    Indicator & Herbruikbaarheid \\
+    \midrule
+    Meetvoorschrift & Controleer of ondersteunende bestanden, zoals page objects, fixtures, helpers en supportbestanden, inzetbaar zijn in andere testen binnen dezelfde routegroep of in vergelijkbare gegenereerde testen. \\
+    \midrule
+    Norm & Minstens 50\% van de gegenereerde testoutput is herbruikbaar in andere testen binnen dezelfde routegroep of in vergelijkbare gegenereerde testen. \\
+    
+    \bottomrule
+    \caption[NFR5: herbruikbaarheid]{Herbruikbaarheid van testondersteuning.}
+    \label{tab:nfr-herbruikbaarheid}
+\end{longtable}
+
+\subsubsection{Analyseerbaarheid van testgeneratie en testfalen}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Onderhoudbaarheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Onderhoudbaarheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR6 \\
+    \midrule
+    Indicator & Analyseerbaarheid \\
+    \midrule
+    Meetvoorschrift & Controleer per testgeneratiesessie of het systeem elke uitgevoerde stap in \texttt{progress.md} logt. Ga daarbij na of het logbestand per stap vermeldt welke taak uitgevoerd is, welke bestanden aangepast zijn, welke verificatie plaatsvond en wat de uitkomst van die stap was. \\
+    \midrule
+    Norm & Voor elke uitgevoerde routegroep bestaat een \texttt{progress.md}-bestand dat de uitgevoerde taken, gewijzigde bestanden, verificatiecommando's, blockers en uitkomsten van de stappen beschrijft. Terugkerende foutpatronen zijn via introspectie gekoppeld aan een bestaande of nieuwe richtlijn. \\
+    
+    \bottomrule
+    \caption[NFR6: analyseerbaarheid]{Analyseerbaarheid van testgeneratie en testfalen.}
+    \label{tab:nfr-analyseerbaarheid}
+\end{longtable}
+
+\subsubsection{Testbaarheid van de gegenereerde testoutput}
+
+Deze NFR beoordeelt of de gegenereerde testen objectief uitgevoerd en beoordeeld kunnen worden. Een test die niet lokaal of in de pipeline uitvoerbaar is, kan niet als bruikbare E2E-output beschouwd worden.
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Onderhoudbaarheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Onderhoudbaarheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR7 \\
+    \midrule
+    Indicator & Testbaarheid \\
+    \midrule
+    Meetvoorschrift & Voer de gegenereerde testen lokaal uit met de bestaande Playwright-configuratie en controleer of ze ook geschikt zijn voor uitvoering binnen de CI/CD-pipeline. Controleer daarbij of de testuitvoer duidelijk aangeeft welke testen slagen of falen. \\
+    \midrule
+    Norm & Bij afronding van een plan is de bijhorende gegenereerde test lokaal uitvoerbaar met Playwright en geeft de testuitvoer een eenduidige pass/fail-uitkomst. Dezelfde test is zonder structurele aanpassing uitvoerbaar binnen de bestaande CI/CD-pipeline. \\
+    
+    \bottomrule
+    \caption[NFR7: testbaarheid]{Testbaarheid van de gegenereerde testoutput.}
+    \label{tab:nfr-testbaarheid}
+\end{longtable}
+
+\subsubsection{Herkenbare geschiktheid van workflowoutput}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Bruikbaarheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Bruikbaarheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR8 \\
+    \midrule
+    Indicator & Herkenbare geschiktheid \\
+    \midrule
+    Meetvoorschrift & Geef een ontwikkelaar de user story, het \texttt{plan.json}-bestand, het \texttt{progress.md}-bestand en de gegenereerde spec van een routegroep. Meet hoeveel tijd de ontwikkelaar nodig heeft om te bepalen welke route of routegroep getest is, welk coverage-niveau nagestreefd is en of de output inhoudelijk aansluit bij de bedoelde testscope. \\
+    \midrule
+    Norm & Een ontwikkelaar kan binnen 2 minuten beoordelen welke route of routegroep getest werd, welk coverage-niveau nagestreefd werd en of de gegenereerde output inhoudelijk aansluit bij de bedoelde testscope. \\
+    
+    \bottomrule
+    \caption[NFR8: herkenbare geschiktheid]{Herkenbare geschiktheid van workflowoutput.}
+    \label{tab:nfr-herkenbare-geschiktheid}
+\end{longtable}
+
+\subsubsection{Leerbaarheid van de workflow}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+    \toprule
+    \textbf{NFR} & \textbf{Bruikbaarheid} \\
+    \midrule
+    \endfirsthead
+    
+    \toprule
+    \textbf{NFR} & \textbf{Bruikbaarheid} \\
+    \midrule
+    \endhead
+    
+    ID & NFR9 \\
+    \midrule
+    Indicator & Leerbaarheid \\
+    \midrule
+    Meetvoorschrift & Analyseer na testgeneratie de introspectie-output. Controleer per terugkerend frictiepunt of introspectie dit punt koppelt aan een concrete richtlijn of voorgestelde aanpassing in het relevante vaardigheidsbestand. \\
+    \midrule
+    Norm & Wanneer een frictiepunt herhaaldelijk terugkomt tijdens testgeneratie, koppelt introspectie dit punt aan een concrete bijsturing van het passende vaardigheidsbestand of de relevante richtlijnen. \\
+    
+    \bottomrule
+    \caption[NFR9: leerbaarheid]{Leerbaarheid van de workflow.}
+    \label{tab:nfr-leerbaarheid}
+\end{longtable}
 
 
 
 \chapter{Opzet van het prototype}
 \label{ch:fase3}
 
+\section{Inleiding}
+
+Dit hoofdstuk werkt de technische opzet van de AI-ondersteunde E2E-testworkflow uit. Het prototype is de gestructureerde werkwijze waarmee route-informatie uit de applicatie wordt verrijkt, opgesplitst en uitgevoerd tot reviewbare E2E-testoutput. De gegenereerde testen vormen daarbij het zichtbare resultaat van de workflow, maar de workflow zelf blijft het centrale onderdeel van de proof of concept.
+
+De opbouw volgt de artefactketen van de workflow. Eerst wordt afgebakend wat het prototype wel en niet probeert aan te tonen. Daarna wordt uitgelegd hoe routes uit talentguide als startpunt dienen. Vervolgens komen de omzetting naar user stories, de vertaling naar \texttt{plan.json}, de Ralph-loop en de Playwright-testarchitectuur aan bod. Zo blijft zichtbaar hoe elke technische stap input levert voor de volgende stap.
+
+\section{Doel en afbakening van het prototype}
+
+De workflow vertrekt vanuit bestaande routes in de applicatie en bouwt daar stapsgewijs testartefacten rond op. Daarbij genereert de agent niet rechtstreeks testcode vanuit een algemene prompt. Eerst wordt de route-informatie omgezet naar een functionele beschrijving. Daarna wordt die beschrijving opgesplitst in afzonderlijk uitvoerbare taken. Pas daarna volgt de generatie van Playwright-testen. De tussenstappen maken expliciet welk gebruikersgedrag getest moet worden en welke taak de agent per stap moet uitvoeren.
+
+Het prototype is opgezet voor meerdere routevormen binnen talentguide. Dat gaat onder meer over enkelvoudige routes, rolgebonden routes, detailroutes met parameters en geneste parent-childroutes zoals wizardflows. Dit proof of concept toont echter niet aan dat alle routes in talentguide volledig getest en gevalideerd zijn. De latere evaluatie beperkt zich tot drie cases: \texttt{evaluation-wizard}, \texttt{people} en \texttt{coach-settings}.
+
+Binnen die afbakening is de kernvraag hoe routegegevens, user stories, planbestanden, Ralph-uitvoering en Playwright-conventies samen een bruikbaar uitvoeringsproces vormen. De evaluatie van de gegenereerde testen valt buiten dit deel. Daar wordt later nagegaan in welke mate de output van de workflow voldoet aan het evaluatiekader.
+
+De workflow vervangt ontwikkelaars niet volledig. De proof of concept onderzoekt vooral hoe het werk kan verschuiven van vanaf nul schrijven naar controleren, bijsturen en integreren. De ontwikkelaar blijft verantwoordelijk voor de scope, de inhoudelijke controle van user stories en planbestanden, de review van gegenereerde code en de uiteindelijke integratie in de codebase.
+
+\section{Routes als startpunt van de workflow}
+
+De workflow vertrekt vanuit de routes, omdat die bepalen welk deel van de applicatie door eindgebruikers bereikt kan worden. Voor E2E-testen is dat technisch belangrijk: een E2E-test start niet vanuit een losse component, maar vanuit een navigeerbaar gebruikerspad in de applicatie. Een route legt vast welk pad bezocht wordt, welke rol of authenticatiecontext nodig is, welke parameters in de URL voorkomen en welke componenten of childroutes geladen worden. In de clientcode staan deze routes centraal beschreven in \texttt{RouteConfig.tsx}. Daardoor vormt de routeconfiguratie een geschikt startpunt om de testscope traceerbaar af te bakenen voordat de workflow user stories en testtaken opstelt.
+
+Een route bevat op zichzelf nog te weinig functionele betekenis om meteen een bruikbare E2E-test te genereren. Het pad \texttt{/hr/people/:personId/evaluations/create/overview} toont bijvoorbeeld dat de eindgebruiker op de overviewpagina van de evaluatiewizard terechtkomt. Het zegt nog niet wat de gebruiker daar probeert te doen, welke precondities nodig zijn of welke interacties belangrijk zijn. De workflow moet daarom eerst bepalen welke functie een route heeft binnen de applicatie: staat de route op zichzelf, of maakt ze deel uit van een grotere gebruikersflow?
+
+De \texttt{evaluation-wizard} toont waarom die vraag nodig is. In \texttt{RouteConfig.tsx} is de wizard niet als een reeks losse pagina's beschreven, maar als een parentroute met childroutes voor de afzonderlijke stappen. De route \texttt{/hr/people/:personId/evaluations/create} laadt de wizard-shell, waarna de stappen \texttt{overview}, \texttt{schedule} en \texttt{summary} onder diezelfde flow vallen.
+
+\begin{minted}{tsx}
+    {
+        path: '/hr/people/:personId/evaluations/create',
+        element: <EvaluationWizardShell />,
+        children: [
+        {
+            index: true,
+            element: <Navigate to="overview" replace />,
+        },
+        {
+            path: 'overview',
+            element: <EvaluationWizardStep1 />,
+        },
+        {
+            path: 'schedule',
+            element: <EvaluationWizardStep2 />,
+        },
+        {
+            path: 'summary',
+            element: <EvaluationWizardStep3 />,
+        },
+        ],
+    }
+\end{minted}
+
+Dit fragment toont dat de drie stappen technisch verschillende childroutes hebben, maar functioneel samen de basisstructuur van een wizardflow vormen. Voor de workflow is dit de minimale routebasis waaruit de happy flow wordt afgeleid: de gebruiker start in \texttt{overview}, gaat via \texttt{schedule} naar \texttt{summary} en bevestigt daar de evaluatieplanning. De stappen mogen daarom niet als drie onafhankelijke user stories behandeld worden. Anders bestaat het risico dat de agent alleen controleert of elke childroute afzonderlijk laadt, zonder te testen of de gebruiker de volledige wizard van begin tot einde kan doorlopen.
+
+Daarom groepeert de workflow routes niet alleen op basis van hun URL, maar op basis van hun rol binnen een gebruikersactie. Bij een eenvoudige overzichtspagina kan een route samenvallen met een afzonderlijke user story. Bij een wizardflow is dat anders: de childroutes delen dezelfde parentroute, dezelfde rolcontext en hetzelfde einddoel. Bovendien hangen latere stappen af van keuzes uit eerdere stappen. Voor \texttt{evaluation-wizard} betekent dit dat de drie childroutes samen worden verwerkt als een user-storybestand. Daarin staat de volledige flow beschreven: de evaluatiescope bekijken, een of meer evaluatiedatums kiezen, de voorgestelde evaluatoren controleren en aanpassen, de samenvatting nakijken en de evaluatieplanning bevestigen.
+
+Zodra duidelijk is welke routes samen een functionele eenheid vormen, kan de workflow de technische route-informatie verrijken met rolcontext, paginabeschrijving, user stories, acceptatiecriteria, happy flow, belangrijke interacties, precondities en data-afhankelijkheden. Pas daarna is er voldoende context om een \texttt{plan.json} op te stellen en Ralph gericht Playwright-testen te laten genereren.
+
+\section{Van routes naar user stories}
+
+Na de groepering van routes moet de workflow technische route-informatie omzetten naar een beschrijving van gebruikersgedrag. Een route toont waar een gebruiker in de applicatie terechtkomt, maar niet welk doel de gebruiker daar probeert te bereiken. De route bevat ook geen volledige informatie over precondities, data-afhankelijkheden of interacties binnen het scherm. De user story vormt daarom de eerste inhoudelijke verrijking binnen de workflow. De user story koppelt de route aan een actor, een doel, acceptatiecriteria, een happy flow, belangrijke interacties, precondities en data-afhankelijkheden.
+
+Het sturende artefact \texttt{generate-user-stories.md} legt vast dat \texttt{RouteConfig.tsx} de bron is voor de route-informatie. Daarna moet de agent de componentboom achter de route onderzoeken. Dat onderzoek bestaat niet alleen uit het openen van de pagina, maar ook uit het nagaan welke interactieve elementen voorkomen, welke GraphQL-queries en mutaties data ophalen of wijzigen, welke data vooraf moet bestaan en welke schermtoestanden afhangen van state, permissies of beschikbare gegevens.
+
+Relevantie wordt in die stap niet berekend met een formele score. De agent leidt uit de onderzochte route, rol, componenten, interacties, data-afhankelijkheden en conditionele UI af welke gebruikersacties testbaar zijn. Daarmee wordt vermeden dat een user story beperkt blijft tot een algemene controle zoals "de pagina laadt". Een E2E-test moet niet alleen aantonen dat een route bereikbaar is, maar ook dat de gebruiker binnen die route een relevante flow kan uitvoeren.
+
+Wanneer een route een zelfstandige pagina voorstelt, of wanneer een childroute een onafhankelijk tabblad binnen een detailpagina is, kan die route in een apart user-storybestand beschreven worden. Wizardflows vragen een andere aanpak. Het workflowbestand maakt daarom een onderscheid tussen onafhankelijke childroutes en opeenvolgende stappen binnen eenzelfde proces. Onafhankelijke tabs kunnen apart beschreven worden, omdat ze los van elkaar bezocht kunnen worden. Opeenvolgende wizardstappen horen in één bestand, omdat ze samen één gebruikersactie vormen.
+
+\begin{minted}{markdown}
+    ### 3.2 Wizard exception
+    
+    Sequential multi-step flows (...) are treated as a single file:
+    
+    - All step routes listed in frontmatter.
+    - Acceptance criteria organised as sub-sections per step.
+    - One continuous happy flow covering the full sequence.
+\end{minted}
+
+Bij \texttt{evaluation-wizard} leidt die regel tot één user-storybestand voor de stappen \texttt{overview}, \texttt{schedule} en \texttt{summary}. Bovenaan dat bestand blijft zichtbaar uit welke routes en pagina's de user story is afgeleid. De koppeling met de oorspronkelijke routegroep blijft daardoor bewaard.
+
+\begin{minted}{markdown}
+    ---
+    routes:
+    - /hr/people/:personId/evaluations/create/overview
+    - /hr/people/:personId/evaluations/create/schedule
+    - /hr/people/:personId/evaluations/create/summary
+    role: admin
+    pages:
+    - EvaluationWizardStep1
+    - EvaluationWizardStep2
+    - EvaluationWizardStep3
+    type: wizard
+    ---
+\end{minted}
+
+Daarna beschrijft de user story de functionele betekenis van de flow. Voor \texttt{evaluation-wizard} gaat het niet alleen over het openen van drie schermen, maar over het plannen van een evaluatie. Vanuit de evaluations-tab start de HR-admin de wizard. Daarna bekijkt de HR-admin de evaluatiescope, kiest de HR-admin één of meer evaluatiedatums, controleert of wijzigt de HR-admin de geselecteerde evaluatoren, bekijkt de HR-admin de samenvatting met titel, datums, evaluatoren en items, en bevestigt de HR-admin de evaluatieplanning. Die beschrijving maakt zichtbaar welke gebruikersacties later naar Playwright-testen vertaald kunnen worden.
+
+De acceptatiecriteria zijn per wizardstap gegroepeerd. Die indeling behoudt de relatie met de routegroep en volgt tegelijk de volgorde van de gebruikersflow. In de eerste stap moet de overview de scope van de evaluatie tonen. In de tweede stap moet de HR-admin evaluatiedatums en evaluatoren kunnen instellen. In de derde stap moet de HR-admin de titel, datums, evaluatoren en items kunnen controleren voordat de evaluatieplanning bevestigd wordt. De user story bevat daardoor meer testbare informatie dan de routeconfiguratie zelf.
+
+Ook precondities krijgen in deze stap een duidelijke plaats. Voor \texttt{evaluation-wizard} is een admincontext nodig en moet de gekozen persoon een actief opleidingsplan hebben met minstens één te evalueren ontwikkelpunt. Zonder die precondities kan een test mogelijk wel naar de juiste URL navigeren, maar niet controleren of de volledige evaluatieflow uitvoerbaar is. De user story vormt zo een tussenlaag tussen technische navigatie en testbare gebruikerswaarde.
+
+\section{Van user stories naar plan.json}
+
+De user story beschrijft wat getest moet worden, maar is nog niet concreet genoeg voor de uitvoeringsloop. Daarom vertaalt de workflow de user story naar \texttt{plan.json}. Dat bestand dient als uitvoeringscontract: het legt vast welke testtaken Ralph moet uitvoeren, in welke volgorde die taken prioriteit krijgen en wanneer een taak als afgerond beschouwd mag worden.
+
+Het sturende bestand \texttt{user-story-to-plan-json.md} bepaalt dat elke taak overeenkomt met één afzonderlijk \texttt{test()}-blok. Die keuze dwingt de workflow om de user story op te splitsen in kleine, observeerbare gedragingen in plaats van één brede opdracht voor een volledige feature. Elke taak beschrijft welk gedrag getest wordt, welke acceptatiecriteria aantonen dat de taak geslaagd is en welke technische context Ralph later nodig heeft, zoals relevante Page Object Model-methodes, fixtures, \texttt{data-testid}-locators of routeconstanten. De concrete Playwright-conventies achter die technische context worden verder uitgewerkt in de sectie over de testarchitectuur.
+
+De taken volgen een vaste opbouw. Eerst komt altijd een smoke test die aantoont dat de route bereikbaar is en dat de belangrijkste layout zichtbaar wordt. Daarna volgen incrementele stappen uit de happy flow. Pas daarna komt een volledige happy-flowtest die de stappen samen doorloopt. Edge cases en validatieregels komen op het einde. Die volgorde voorkomt dat de agent meteen een grote geïntegreerde test probeert te schrijven zonder eerst te controleren of de afzonderlijke delen van de flow werken.
+
+\begin{minted}{markdown}
+    Task hierarchy — every plan MUST follow this order:
+    
+    1. Smoke test (always priority 1)
+    2. Incremental step tests (priority 2-N)
+    3. Full happy path test
+    4. Edge cases and validation tests
+\end{minted}
+
+In het \texttt{plan.json}-bestand voor \texttt{evaluation-wizard} is die opbouw zichtbaar aan de volgorde en prioriteiten van de taken. De eerste taak controleert of de wizard op stap 1 rendert:
+
+\begin{minted}{json}
+    {
+        "id": "eval-wizard-smoke",
+        "title": "Smoke - Wizard step 1 renders",
+        "priority": 1,
+        "passes": true
+    }
+\end{minted}
+
+Daarna volgen incrementele taken uit de happy flow: eerst de controle van de evaluatiescope in stap 1, vervolgens de datumselectie en evaluatorselectie in stap 2, en daarna de samenvatting in stap 3. De volledige happy-flowtest komt pas na die afzonderlijke stappen. De volgorde van de taken weerspiegelt dus de opbouw van de user story, maar zet die om naar kleine deeltaken die Ralph één voor één kan uitvoeren. Ralph hoeft daardoor niet zelf te bepalen welke test eerst geschreven moet worden; die keuze ligt al vast in het plan.
+
+Die opsplitsing maakt de uitvoeringsloop betrouwbaarder omdat ze de beslisruimte van Ralph verkleint. De agent hoeft niet de volledige user story tegelijk te interpreteren, maar krijgt telkens één afgebakende opdracht met een prioriteit, acceptatiecriteria en voortgangsstatus. Daardoor kan Ralph per iteratie één taak selecteren, implementeren, verifiëren en daarna markeren als afgerond. Het JSON-formaat ondersteunt die werkwijze omdat elke taak volgens dezelfde vaste velden beschreven wordt.
+
+Het veld \texttt{passes} maakt van \texttt{plan.json} tegelijk een plannings- en voortgangsartefact. Nieuwe taken starten met \texttt{passes: false}. Ralph selecteert daarna telkens de hoogste prioriteit die nog niet geslaagd is. Wanneer een taak geïmplementeerd en geverifieerd is, kan ze op \texttt{true} gezet worden. Daardoor blijft zichtbaar welke delen van de user story al in testcode zijn omgezet en welke onderdelen nog openstaan.
+
+Daarnaast bevat elke deeltaak een titel, beschrijving en acceptatiecriteria. Die velden sturen Ralph op verschillende niveaus aan: de titel maakt het doel van de taak snel herkenbaar, de beschrijving geeft de concrete implementatieopdracht en de acceptatiecriteria bepalen wanneer de taak als geslaagd beschouwd kan worden. Daardoor wordt de taak niet alleen uitvoerbaar voor Ralph, maar ook controleerbaar voor de ontwikkelaar die het plan naleest of de gegenereerde test achteraf reviewt.
+
+Deze tussenstap is nodig omdat de workflow hier controle krijgt voordat Ralph testcode genereert. Zonder \texttt{plan.json} zou de agent rechtstreeks vanuit de user story moeten beslissen welke scenario's eerst komen, hoe groot elke test wordt en wanneer de user story voldoende afgedekt is. Dat verhoogt het risico op overgeslagen stappen of te brede testen. Door de testscope eerst in afzonderlijke taken met prioriteit en acceptatiecriteria te verdelen, kan de ontwikkelaar het plan nalezen, bijsturen en aanvullen voordat de uitvoeringsloop start.
+
+\section{Testgeneratie via de Ralph-loop}
+
+Binnen deze workflow start Ralph pas nadat de user story en het bijhorende \texttt{plan.json}-bestand zijn opgesteld. \texttt{ralph-init.md} beschrijft daarom niet hoe de testscope wordt gekozen, maar hoe de uitvoering van die scope wordt opgestart. Het artefact voorziet een script en prompttemplates waarmee Codex de geplande taken iteratief kan uitvoeren. Ralph vormt daarmee de uitvoeringslaag van de workflow: bestaande artefacten worden gelezen, een afgebakend aantal iteraties wordt uitgevoerd en de voortgang wordt per story vastgelegd.
+
+De centrale component van die uitvoeringslaag is het script \texttt{scripts/ralph.sh}. Dat script vormt de ingang tot de Ralph-loop en wordt aangeroepen met argumenten die bepalen hoe breed en hoe autonoom de uitvoering verloopt. Het eerste argument kan een iteratieaantal zijn. Daarmee bepaalt de ontwikkelaar hoeveel keer Ralph maximaal een taak probeert uit te voeren. Met \texttt{--story=<naam>} kan de uitvoering beperkt worden tot één specifiek planbestand.
+
+De flag \texttt{--hitl} activeert een human-in-the-loopmodus. In die modus voert Ralph één deeltaak met de hoogste prioriteit uit en stopt de loop daarna, zodat de ontwikkelaar de wijziging kan nakijken en bijsturen. De flag \texttt{--afk} activeert een autonome modus waarin Ralph meerdere taken na elkaar kan verwerken binnen het opgegeven iteratieaantal. \texttt{--afk} activeert ook \texttt{--yolo}, waardoor de uitvoering niet telkens op toestemming wacht. Committen gebeurt in deze opzet via de promptregels, niet via een aparte \texttt{--commit}-flag: na een afgeronde taak moet de voortgang worden bijgewerkt en moet de wijziging als afzonderlijke commit worden vastgelegd.
+
+In het script worden die argumenten eerst uitgelezen en omgezet naar interne variabelen. Het iteratieaantal wordt opgeslagen in \texttt{ITERATIONS}, de gekozen story in \texttt{STORY}, en de uitvoeringsmodus in booleans zoals \texttt{HITL} en \texttt{AFK}.
+
+\begin{minted}{bash}
+    ITERATIONS=5
+    STORY=""
+    HITL=false
+    AFK=false
+    SANDBOX=false
+    YOLO=false
+    
+    while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --hitl) HITL=true; ITERATIONS=1 ;;
+    --afk) AFK=true; YOLO=true ;;
+    --sandbox) SANDBOX=true ;;
+    --yolo) YOLO=true ;;
+    --story=*) STORY="${1#*=}" ;;
+    [0-9]*) ITERATIONS="$1" ;;
+    esac
+    shift
+    done
+\end{minted}
+
+Op basis van die variabelen bepaalt het script welke plannen uitgevoerd worden. Wanneer \texttt{--story=evaluation-wizard} wordt meegegeven, verwerkt de loop alleen het planbestand voor die story. Wanneer geen story wordt meegegeven, scant het script de plannenmap en selecteert het alle \texttt{plan.json}-bestanden waarin nog openstaande taken voorkomen. Daardoor kan dezelfde loop gebruikt worden voor één afgebakende case of voor meerdere onafgewerkte plannen.
+
+Het iteratieaantal bepaalt hoeveel keer de loop maximaal probeert een taak uit te voeren. Een aanroep zoals \texttt{./scripts/ralph.sh 3 --story=evaluation-wizard} geeft Ralph drie iteraties voor één planbestand. Als er meer deeltaken openstaan dan het opgegeven aantal iteraties, stopt de loop niet omdat het plan inhoudelijk klaar is, maar omdat het ingestelde iteratiebudget bereikt is. Daarna kan hetzelfde commando opnieuw uitgevoerd worden of kan een hoger aantal iteraties worden meegegeven. Zo blijft de uitvoering controleerbaar: de ontwikkelaar kiest of Ralph één taak, enkele taken of een volledige reeks mag verwerken.
+
+Als er geen specifieke story is meegegeven, bouwt het script een lijst op met planbestanden die nog \texttt{passes: false} bevatten:
+
+\begin{minted}{bash}
+    PLAN_FILES=()
+    if [[ -n "$STORY" ]]; then
+    PLAN_FILES=("${PLANS_DIR}/${STORY}.json")
+    else
+    while IFS= read -r -d '' plan_file; do
+    if grep -q '"passes"[[:space:]]*:[[:space:]]*false' "$plan_file"; then
+    PLAN_FILES+=("$plan_file")
+    fi
+    done < <(find "$PLANS_DIR" -maxdepth 1 -name '*.json' -type f -print0 | sort -z)
+    fi
+\end{minted}
+
+Voor elk geselecteerd plan bepaalt het script welke user story en welk voortgangsbestand bij dat plan horen. De user story wordt uit het \texttt{source.user\_story}-veld van het plan gehaald. Het voortgangsbestand krijgt dezelfde naam als het plan, maar met de extensie \texttt{.progress.md}. Als dat bestand nog niet bestaat, maakt de loop het aan. Daardoor krijgt elke story een eigen uitvoeringsgeschiedenis.
+
+\begin{minted}{bash}
+    STORY_NAME=$(basename "$PLAN" .json)
+    PROGRESS="${PLANS_DIR}/${STORY_NAME}.progress.md"
+    USER_STORY_RAW=$(grep -o '"user_story"[[:space:]]*:[[:space:]]*"[^"]*"' "$PLAN" | head -1 | cut -d'"' -f4 || true)
+\end{minted}
+
+Per iteratie combineert het script drie soorten context: de user story, het planbestand en de voortgangslog. Die context wordt samen met een prompttemplate aan \texttt{codex exec} doorgegeven. De loop werkt dus niet vanuit een losse instructie, maar vanuit de actuele toestand van de workflowartefacten.
+
+\begin{minted}{bash}
+    PROMPT=$(cat "$PROMPT_FILE")
+    CONTEXT="@${PLAN} @${PROGRESS}"
+    if [[ -n "$USER_STORY" && -f "$USER_STORY" ]]; then
+    CONTEXT="@${USER_STORY} ${CONTEXT}"
+    fi
+    
+    run_codex_exec $CODEX_FLAGS "$CONTEXT $PROMPT" || true
+\end{minted}
+
+De loop stopt niet alleen op basis van het iteratieaantal. Na elke iteratie controleert het script of de uitvoer het signaal \texttt{<promise>COMPLETE</promise>} bevat. Dat signaal betekent dat het huidige plan als afgerond beschouwd wordt. Zonder specifieke story kan de loop daarna doorgaan naar het volgende planbestand met open taken. Op het einde controleert het script nog eens of er in de volledige plannenmap nog taken met \texttt{passes: false} staan.
+
+\begin{minted}{bash}
+    if [[ "$HITL" != true && "$COMPLETE_DETECTED" == true ]]; then
+    echo "Plan ${STORY_NAME} complete!"
+    break
+    fi
+\end{minted}
+
+De Ralph-loop vormt de brug tussen planning en testcode. \texttt{plan.json} legt vast wat er moet gebeuren, maar voert zelf niets uit. De loop koppelt dat plan aan een herhaalbaar commando, een prompttemplate, een voortgangsbestand en een gekozen uitvoeringsmodus. Zo kan de ontwikkelaar de testgeneratie gecontroleerd starten, beperken tot één story, uitbreiden naar meerdere plannen of tijdelijk meer autonomie geven via \texttt{--afk}.
+
+Het voortgangsbestand documenteert wat er per iteratie is gebeurd. Een fragment uit \texttt{evaluation-wizard.progress.md} toont hoe uitvoering, keuzes en verificatie samen worden bijgehouden:
+
+\begin{minted}{markdown}
+    ## 2026-05-12 - eval-wizard-step2-dates
+    
+    - Added Step 2 coverage for selecting the first evaluation date, adding a follow-up date picker, selecting a follow-up date, and removing it.
+    - Decision: selected a same-month follow-up date one day after the first date to keep the date picker interaction focused on this task without adding month navigation.
+    - Verified with `cd apps/client && npx playwright test e2e/evaluation-wizard.spec.ts` on 2026-05-12: 4 passed.
+\end{minted}
+
+Zo'n logregel toont welke taak uitgevoerd werd, welke keuze tijdens de uitvoering gemaakt werd en met welk commando de taak geverifieerd werd. De ontwikkelaar kan daardoor achteraf reconstrueren hoe een gegenereerde test tot stand kwam. De Ralph-loop sluit daarmee de kernketen van het prototype af: routes bepalen de technische scope, user stories voegen functionele betekenis toe, \texttt{plan.json} maakt de testtaken uitvoerbaar en Ralph zet die taken via een herhaalbare uitvoeringsloop om naar reviewbare Playwright-output.
+
+\section{Playwright-testarchitectuur}
+
+De uitvoeringsloop vertrekt niet enkel vanuit het \texttt{plan.json}-bestand. At runtime worden ook de E2E-richtlijnen geladen, zodat de agent weet hoe een geplande taak technisch in de talentguide-codebase moet worden uitgewerkt. Zonder extra technische richtlijnen krijgt Ralph te veel vrijheid: de agent kan tekstlocators gebruiken, routes zelf invullen, mocks toevoegen, loginlogica in elke test schrijven of alle interacties rechtstreeks in een spec-bestand plaatsen. De Playwright-architectuur beperkt die vrijheid en maakt van de geplande taak een test die past binnen de bestaande projectstructuur.
+
+\subsection{E2E-richtlijnen als technisch contract}
+
+Het bestand \texttt{e2e-testing-guidelines.md} werkt als technisch contract voor Ralph. De richtlijnen leggen vast welke keuzes verplicht zijn bij het schrijven van E2E-testen voor talentguide. Het gaat onder meer om observeerbaar gebruikersgedrag testen, elke test afzonderlijk uitvoerbaar houden, echte staging-API's gebruiken, stabiele \texttt{data-testid}-locators toepassen, een gedrag per test bewaren en routes uit \texttt{routes.ts} halen.
+
+Dit zijn de richtlijnen die Ralph bij het schrijven van Playwright-output moet volgen:
+
+\begin{itemize}
+    \item E2E-testen controleren observeerbaar gebruikersgedrag en geen interne implementatiedetails.
+    \item Elke test moet afzonderlijk uitvoerbaar zijn, zonder gedeelde state of afhankelijkheid van testvolgorde.
+    \item E2E-testen gebruiken de echte staging-API. Alleen externe third-party services mogen gemockt worden.
+    \item Elementen worden via \texttt{data-testid} gezocht, omdat zichtbare tekst in talentguide vertaald wordt.
+    \item Een test controleert een gedrag. Meerdere assertions kunnen, zolang ze datzelfde gedrag ondersteunen.
+    \item Routes komen uit \texttt{routes.ts}. Als een route ontbreekt, mag Ralph die niet zelf verzinnen.
+    \item Voor er testcode ontstaat, moeten de kritieke user journey, de pagina's, de interacties en het testplan vastliggen.
+    \item Het testplan volgt een vaste volgorde: smoke test, incrementele happy-flowstappen, volledige happy flow en daarna validatie- of edgecases.
+    \item De eerste test werkt als tracer bullet. Die test moet falen op de verwachte ontbrekende laag en daarna groen worden voordat de rest van de taken wordt uitgevoerd.
+    \item Spec-bestanden bevatten alleen scenario-opbouw. Fixture-setup, locators, routestrings en herbruikbare interacties horen in aparte lagen.
+    \item Ontbrekende \texttt{data-testid}-attributen worden toegevoegd aan de React-componenten die effectief DOM renderen.
+    \item Locators blijven in Page Object Models staan en gebruiken \texttt{page.getByTestId()}. Tekstlocators, CSS-klassen en XPath zijn uitgesloten.
+    \item Authenticatie loopt via \texttt{storageState}, zodat featuretesten niet telkens opnieuw door de loginflow gaan.
+    \item Herbruikbare testcontext komt uit fixtures via \texttt{test.extend<T>()}, bijvoorbeeld \texttt{appUrl}, \texttt{personId} en voorgedefinieerde stagingdata.
+    \item Page Object Models bevatten navigatie, interacties, assertions en routecontroles voor een pagina of flow.
+    \item Helpers komen in \texttt{support/helpers/} wanneer logica gedeeld wordt over meerdere POM's of fixtures.
+    \item Gedeelde data komt in \texttt{support/data/}: routes in \texttt{routes.ts}, constanten in \texttt{constants.ts}, types in \texttt{sharedTypes.ts}.
+    \item Datumberekeningen gebruiken \texttt{date-fns}, zodat testen geen losse of moeilijk controleerbare datumlogica bevatten.
+    \item Data die door E2E-testen persistent in de databank terechtkomt, krijgt de prefix \texttt{E2E\_}. Die prefix maakt testdata later makkelijker terug te vinden en op te ruimen.
+    \item Verificatie gebeurt met gerichte Playwright-commando's, eerst per spec en daarna waar nodig met de volledige E2E-suite.
+    \item De uitvoeringsomgeving moet \texttt{.env.test}, credentials, staging-URL, seeddata en de Playwright-projectconfiguratie correct aanbieden.
+\end{itemize}
+
+Die richtlijnen begrenzen Ralph technisch op drie niveaus. Eerst bepalen ze wat een E2E-test mag controleren: observeerbaar gebruikersgedrag, een afgebakende flow en geen interne implementatiedetails. Daarna bepalen ze hoe de output in de codebase moet landen: specs blijven scenario's beschrijven, terwijl locators, routeopbouw, fixtures, authenticatie en gedeelde data in aparte ondersteunende bestanden terechtkomen. Ten slotte bepalen ze hoe de output controleerbaar blijft: via een tracer bullet, gerichte Playwright-verificatie, progress logging en expliciete uitvoeringsvoorwaarden.
+
+Die begrenzing is nodig omdat een AI-agent vaak de snelste werkende oplossing kiest. Voor talentguide is die oplossing niet altijd juist. Een tekstlocator kan in de lokale omgeving werken, maar breekt zodra de taal of vertaling verandert. Een interne mock kan een test stabieler maken, maar haalt de E2E-waarde weg omdat de echte API-keten niet meer gecontroleerd wordt. Een hardcoded route kan vandaag kloppen, maar verdwijnt uit beeld wanneer de routeconfiguratie verandert. Loginlogica in elke test kan de test ook onnodig traag en instabiel maken.
+
+De regel rond \texttt{data-testid} maakt de locatorstrategie expliciet. talentguide is meertalig. Zichtbare tekst is daardoor geen stabiele basis voor E2E-testen. Een test die op tekst zoekt, kan falen zonder dat de gebruikersflow stuk is. Daarom moet Ralph ontbrekende \texttt{data-testid}-attributen toevoegen en in de testcode met \texttt{page.getByTestId()} werken. De regels rond POM's, fixtures, \texttt{storageState} en \texttt{routes.ts} hebben dezelfde functie: ze verhinderen dat herbruikbare testlogica verspreid raakt over losse spec-bestanden.
+
+De keuze voor echte staging-API's hoort ook in deze technische laag. E2E-testen moeten nagaan of de gebruikersflow door de volledige applicatieketen loopt: UI, routing, authenticatie, API en databank. Interne mocks zouden de test makkelijker controleerbaar maken, maar dan wordt niet meer getest of talentguide als geheel werkt. Die keuze brengt extra risico mee rond testdata en beschikbaarheid van de stagingomgeving. Daarom koppelen de richtlijnen echte API-calls aan fixtures, \texttt{E2E\_}-testdata, seeddata en CI-voorwaarden.
+
+\subsection{Page Object Model en fixtures}
+
+De Playwright-output bestaat uit meerdere bestanden die samen een kleine testarchitectuur vormen. Die opbouw is belangrijker dan het spec-bestand alleen. Zonder die opsplitsing zou Ralph alle informatie in een \texttt{test()}-blok kunnen plaatsen: URL's, testpersonen, locators, datumlogica, acties en assertions. Dat levert werkende code op, maar geen onderhoudbare testcode. Bij een wizardflow zoals \texttt{evaluation-wizard} wordt dat probleem snel zichtbaar, omdat dezelfde navigatiestappen terugkomen in de smoke test, de incrementele staptesten en de volledige happy flow.
+
+De eerste laag bestaat uit gedeelde data. Waarden die door meerdere E2E-bestanden gebruikt worden, staan in \texttt{constants.ts}. Daardoor hoeft Ralph geen staging-URL, testgebruiker of vaste testpersoon in een spec te hardcoden.
+
+\begin{minted}{typescript}
+    const APP_URL = process.env.VITE_APP_URL
+    const DEV_PLAN_PERSON_ID = process.env.DEV_PLAN_PERSON_ID
+    
+    export { APP_URL, DEV_PLAN_PERSON_ID }
+\end{minted}
+
+Die keuze maakt de test afhankelijk van de omgeving in plaats van van losse waarden in gegenereerde code. Als de stagingpersoon wijzigt, moet de aanpassing in de configuratie of gedeelde constante gebeuren en niet in elke spec afzonderlijk. Types die over meerdere fixtures, POM's of specs gedeeld worden, horen op dezelfde manier in \texttt{sharedTypes.ts}. Een type dat alleen bij een fixture hoort, kan lokaal in die fixture blijven. Zo ontstaat er geen extra gedeeld bestand zonder hergebruik.
+
+De tweede laag bestaat uit fixtures. Fixtures leveren de context waarmee een scenario kan starten. Voor \texttt{evaluation-wizard} gaat het om de applicatie-URL en de persoon waarvoor de wizard geopend wordt. Die waarden staan niet rechtstreeks in het spec-bestand, maar worden via \texttt{test.extend<T>()} beschikbaar gemaakt.
+
+\begin{minted}{typescript}
+    export type EvaluationWizardData = {
+        appUrl: string
+        personId: string
+    }
+    
+    type EvaluationWizardFixtures = {
+        evaluationWizard: EvaluationWizardData
+    }
+    
+    export const test = base.extend<EvaluationWizardFixtures>({
+        evaluationWizard: async ({}, use) => {
+            await use({
+                appUrl: APP_URL,
+                personId: DEV_PLAN_PERSON_ID,
+            })
+        },
+    })
+\end{minted}
+
+Fixtures lossen een ander probleem op dan POM's. De fixture bepaalt met welke testcontext een scenario draait. De POM bepaalt wat er op het scherm gebeurt. Die scheiding is nodig omdat stagingdata en interactielogica anders door elkaar terechtkomen. Bij AI-gegenereerde testen verhoogt dat de kans op gekopieerde waarden, dubbele setup en onduidelijke fouten.
+
+De derde laag is het Page Object Model. Zonder Page Object Model zouden gegenereerde testen snel onoverzichtelijk worden. Een agent kan dan per test opnieuw dezelfde route opbouwen, dezelfde knoppen zoeken, dezelfde datumselectie schrijven en dezelfde assertions plaatsen. Het Page Object Model haalt die interactielogica uit de spec. In \texttt{evaluationWizardPage.ts} staan de navigatie, routecontroles, klikacties en zichtbaarheidcontroles. De klasse gebruikt routeconstanten uit \texttt{routes.ts}, \texttt{data-testid}-locators en Playwright-assertions. Ook datumselectie volgt de richtlijnen: \texttt{date-fns} berekent de datum, zodat de test geen ruwe \texttt{Date}-berekening bevat.
+
+\begin{minted}{typescript}
+    async goToOverview(appUrl: string, personId: string): Promise<void> {
+        await this.page.goto(
+        `${appUrl}${ROUTES.HR_PEOPLE}/${personId}${ROUTES.HR_PEOPLE_DETAIL_EVALUATIONS}`,
+        )
+        
+        const scheduleButton = this.page.getByTestId('evaluations-schedule-button')
+        await expect(scheduleButton).toBeVisible({ timeout: 30000 })
+        await scheduleButton.click()
+        
+        await this.page.waitForURL(ROUTE_GLOBS.HR_EVALUATION_WIZARD_OVERVIEW)
+        await expect(this.page.getByTestId('evaluation-wizard')).toBeVisible()
+    }
+    
+    async selectDate(slotIndex: number, daysFromToday: number): Promise<void> {
+        await this.page.getByTestId(`evaluation-wizard-date-input-${slotIndex}`).click()
+        
+        const targetDate = addDays(startOfToday(), daysFromToday)
+        const dayButton = this.page.getByTestId(
+        `datepicker-day-${format(targetDate, 'yyyy-MM-dd')}`,
+        )
+        await expect(dayButton).toBeVisible()
+        await dayButton.click()
+    }
+\end{minted}
+
+In deze POM-methodes komen de richtlijnen concreet terug. Routes staan niet als losse URL's in de test, maar worden samengesteld met gedeelde routeconstanten. Elementen worden opgezocht via test-ID's. De datumlogica gebruikt een helperbibliotheek. Zo hangt de test minder af van tekst, styling of kleine wijzigingen in de componentstructuur. Dezelfde methodes kunnen daarna opnieuw gebruikt worden in andere taken van hetzelfde plan.
+
+De laatste laag is het spec-bestand. Daar komt de taakopbouw uit \texttt{plan.json} samen met de technische lagen uit Playwright. De spec roept fixturedata en POM-methodes op, maar definieert zelf geen locators, routes of stagingwaarden.
+
+\begin{minted}{typescript}
+    test('schedules an evaluation and returns to the evaluations page', async ({
+        page,
+        evaluationWizard,
+    }) => {
+        const wizard = new EvaluationWizardPage(page)
+        
+        await wizard.goToSummaryStep(evaluationWizard.appUrl, evaluationWizard.personId)
+        await wizard.editTitle('E2E_Evaluation wizard happy path')
+        await wizard.submitEvaluation()
+        await wizard.assertScheduled(evaluationWizard.appUrl, evaluationWizard.personId)
+    })
+\end{minted}
+
+Door die opbouw blijft de spec beperkt tot de vraag welke gedraging getest wordt. De fixture levert de context, de POM voert de interacties uit, \texttt{constants.ts} en \texttt{routes.ts} leveren gedeelde waarden en \texttt{sharedTypes.ts} bewaart types die op meerdere plaatsen nodig zijn. De architectuur maakt de Ralph-output daardoor controleerbaar per laag: testscope in de spec, gebruikersinteractie in de POM, testcontext in de fixture en gedeelde afspraken in de supportbestanden.
+
+\subsection{Authenticatie en gedeelde routegegevens}
+
+Authenticatie is een terugkerend probleem bij E2E-testen. Als elke featuretest opnieuw door de loginflow gaat, wordt elke test afhankelijk van dezelfde extra stappen: loginpagina openen, cookieconsent verwerken, e-mail invullen, wachtwoord invullen en wachten op redirect. Een test voor de evaluation-wizard test dan niet alleen de wizard, maar ook telkens opnieuw de loginflow. Dat vervuilt de scope en maakt fouten moeilijker te interpreteren. Een falende test kan dan liggen aan de wizard, maar ook aan login, sessieopbouw, redirects of timing.
+
+Daarom gebruikt de Playwright-configuratie \texttt{storageState}. Een setup-project voert de authenticatiestap uit en bewaart de sessie. Het \texttt{chromium}-project gebruikt die sessie daarna voor de gewone featuretesten. Alleen de login-spec blijft apart, omdat die de publieke loginflow zelf controleert.
+
+\begin{minted}{typescript}
+    projects: [
+    {
+        name: 'setup',
+        testMatch: 'support/auth.setup.ts',
+    },
+    {
+        name: 'chromium',
+        testMatch: 'e2e/**/*.spec.ts',
+        testIgnore: 'e2e/login.spec.ts',
+        use: {
+            ...devices['Desktop Chrome'],
+            storageState: path.join(__dirname, 'playwright/.auth/user.json'),
+        },
+        dependencies: ['setup'],
+    },
+    {
+        name: 'chromium-public',
+        testMatch: 'e2e/login.spec.ts',
+        use: { ...devices['Desktop Chrome'] },
+    },
+    ]
+\end{minted}
+
+Deze configuratie houdt de featuretesten gericht. De sessie komt nog altijd uit de echte applicatieomgeving, maar de loginlogica staat niet in elk scenario. Dat sluit aan bij de taakopdeling uit \texttt{plan.json}: een taak over \texttt{evaluation-wizard} blijft een taak over de wizard. Login wordt alleen getest waar login zelf het onderwerp is.
+
+Gedeelde routegegevens doen hetzelfde voor navigatie. Zonder routeconstanten kan Ralph routes zelf afleiden uit user stories, componentnamen of eerdere testcode. Dat lijkt klein, maar geeft de agent opnieuw te veel vrijheid. Een route kan verkeerd gegokt worden, een dynamisch segment kan op de verkeerde plaats komen, of dezelfde route kan op verschillende manieren in verschillende testen verschijnen. \texttt{routes.ts} voorkomt dat door routepaden en globpatronen centraal te houden.
+
+\begin{minted}{typescript}
+    export const ROUTES = {
+        HR_PEOPLE: '/hr/people',
+        HR_PEOPLE_DETAIL_EVALUATIONS: '/evaluations',
+        HR_EVALUATION_WIZARD_CREATE: '/evaluations/create',
+    } as const
+    
+    export const ROUTE_GLOBS = {
+        HR_EVALUATION_WIZARD_OVERVIEW: '**/hr/people/*/evaluations/create/overview',
+        HR_EVALUATION_WIZARD_SCHEDULE: '**/hr/people/*/evaluations/create/schedule',
+        HR_EVALUATION_WIZARD_SUMMARY: '**/hr/people/*/evaluations/create/summary',
+    } as const
+\end{minted}
+
+Dynamische segmenten, zoals \texttt{personId}, worden pas toegevoegd op de plaats waar de route gebruikt wordt. Daardoor blijven de routeconstanten algemeen bruikbaar. De spec en POM hoeven niet zelf te bepalen hoe talentguide-routes in elkaar zitten. Als een route ontbreekt, moet die route bewust aan het gedeelde bestand toegevoegd worden. Dat maakt de routekeuze zichtbaar in review.
+
+De Playwright-testarchitectuur koppelt zo twee contracten aan elkaar. \texttt{plan.json} geeft Ralph de taakvolgorde en het te testen gedrag. \texttt{e2e-testing-guidelines.md} geeft tijdens de uitvoering de technische spelregels. POM's, fixtures, \texttt{storageState} en routeconstanten zorgen ervoor dat de gegenereerde testcode niet alleen werkt, maar ook controleerbaar blijft voor de ontwikkelaar.
+
+\section{Review, bijsturing en integratie}
+
+De workflow eindigt niet zodra Ralph een Playwright-test heeft geschreven. De output moet nog worden nagekeken, bijgestuurd en geintegreerd. Dat hoort bij de opzet van de POC. De ontwikkelaar blijft verantwoordelijk voor de scope, de technische kwaliteit en de beslissing of een gegenereerde wijziging klaar is voor opname in de testreeks.
+
+Review is nodig omdat Ralph niet alleen spec-bestanden kan aanpassen. De loop kan ook \texttt{data-testid}-attributen toevoegen aan React-componenten, routegegevens uitbreiden, fixtures aanmaken en POM-methodes wijzigen. Dat zijn wijzigingen aan meerdere lagen van de codebase. Zonder review is niet duidelijk of de agent alleen testbaarheid heeft toegevoegd, of onbedoeld bestaand applicatiegedrag heeft geraakt.
+
+Voor de uitvoering controleert de ontwikkelaar of de user story en het bijhorende \texttt{plan.json}-bestand de juiste testscope beschrijven. Tijdens of na de Ralph-loop worden de wijzigingen aan React-componenten, POM's, fixtures, specs en gedeelde testdata nagekeken. De review is daardoor geen losse eindcontrole, maar een controlemechanisme doorheen de workflow.
+
+Het progress-bestand ondersteunt die controle. Het is niet alleen verslaggeving, maar technische traceerbaarheid. Per iteratie staat erin welke taak uitgevoerd werd, welke bestanden of testattributen wijzigden, welke keuze onderweg gemaakt werd en welk verificatiecommando is gebruikt. Daardoor hoeft de review niet alleen op basis van de Git-diff te gebeuren.
+
+\begin{minted}{markdown}
+    ## 2026-05-12 - eval-wizard-step3-summary
+    
+    - Added Step 3 summary coverage for reaching the summary step, verifying the title input,
+    editing it with an `E2E_` value, and checking the evaluators, dates, and items summary sections.
+    - Added data-testid attributes for the Step 3 title input, evaluators summary card,
+    dates summary card, items summary section, Back button, and Schedule Evaluation button.
+    - Added the summary route glob to the shared Playwright route data.
+    - RED confirmed before React changes: the test failed because `evaluation-wizard-title-input` was missing.
+    - Verified with `cd apps/client && npx playwright test e2e/evaluation-wizard.spec.ts`
+    on 2026-05-12: 6 passed.
+\end{minted}
+
+Deze logregel maakt zichtbaar wat de Ralph-loop precies heeft veranderd. De taak voegde niet alleen een test toe, maar ook test-ID's en routegegevens. De RED-stap verklaart waarom de React-code aangepast werd: de stabiele locator ontbrak nog. Zulke informatie helpt bij review, omdat de reden achter een wijziging niet altijd volledig uit de code zelf blijkt.
+
+Bijsturing kan op verschillende momenten gebeuren. In human-in-the-loopmodus voert Ralph een enkele taak met de hoogste prioriteit uit en stopt de loop daarna voor review. Die modus past vooral bij taken waarbij de testscope, locatorstrategie of POM-structuur nog onzeker is. Feedback kan dan gaan over de testnaam, assertions, cleanup, testdata of de verdeling tussen spec en POM. Daarna kan Ralph de wijziging aanpassen en opnieuw verifieren.
+
+De autonome modus heeft een beperktere plaats in deze POC. Met \texttt{--afk} kan Ralph meerdere taken na elkaar uitvoeren binnen het opgegeven iteratiebudget. Dat is bruikbaar wanneer de user story, het plan en de richtlijnen voldoende duidelijk zijn. Toch blijft review nodig, omdat Ralph in die modus zelf keuzes maakt en eventuele blockers in het progress-bestand noteert.
+
+Integratie betekent meer dan een spec-bestand aanvaarden. Bij \texttt{evaluation-wizard} kwamen er ook test-ID's in componenten, extra routegegevens, een fixture en POM-methodes bij. De ontwikkelaar moet daarom controleren of die wijzigingen passen binnen de bestaande conventies en of ze geen applicatiegedrag veranderen buiten het testbaar maken van UI-elementen. Ook lokale betrouwbaarheid blijft een controlepunt.
+
+Testdata vraagt apart aandacht. De full happy path voor \texttt{evaluation-wizard} maakt een evaluatieplanning aan met een titel die begint met \texttt{E2E\_}. Die prefix is geen cleanup-mechanisme op zich. De prefix maakt persistente testdata herkenbaar in de databank, zodat die data achteraf eenvoudiger gelokaliseerd en verwijderd kan worden. Het progress-bestand vermeldt ook dat er geen client- of API-helper gevonden werd om de aangemaakte evaluatie automatisch te verwijderen. Dat is geen evaluatieresultaat, maar wel een integratiepunt: E2E-testen tegen echte API's hebben beheerbare testdata nodig.
+
+Deze reviewfase past bij de centrale claim van de workflow. AI neemt het ontwikkelwerk niet volledig over. De nadruk verschuift naar user stories controleren, plannen bijsturen, gegenereerde code beoordelen en testoutput integreren. De workflow ondersteunt E2E-testontwikkeling, maar blijft afhankelijk van menselijke controle.
+
+\section{Developmentomgeving en CI/CD-context}
+
+De Playwright-output moet eerst lokaal uitvoerbaar zijn. De client gebruikt daarvoor de Playwright-configuratie in \texttt{apps/client}, een \texttt{.env.test}-bestand voor omgevingsvariabelen en het script \texttt{test:e2e} uit \texttt{package.json}. Daarmee kan een ontwikkelaar een specifieke spec of de volledige E2E-reeks uitvoeren vanuit dezelfde projectcontext waarin Ralph de bestanden genereert.
+
+\begin{minted}{json}
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "lint": "eslint .",
+        "preview": "vite preview",
+        "test:e2e": "playwright test"
+    }
+\end{minted}
+
+Dit script is de basis voor lokale verificatie. De Ralph-loop gebruikt meestal een specifieker commando, bijvoorbeeld \texttt{cd apps/client \&\& npx playwright test e2e/evaluation-wizard.spec.ts}. Eerst wordt de betrokken spec gecontroleerd. Daarna kan dezelfde configuratie gebruikt worden voor een bredere E2E-run. Die volgorde past bij de tracer-bulletaanpak: eerst de kleinste relevante test groen krijgen, daarna pas breder verifieren.
+
+De Playwright-configuratie is afgestemd op E2E-testen tegen een echte applicatieomgeving. De base URL komt uit \texttt{VITE\_APP\_URL} of \texttt{BASE\_URL}. Screenshots worden alleen bij falen bewaard, traces worden bijgehouden bij falen of retries en de resultaten worden in een Playwright-rapport geschreven.
+
+\begin{minted}{typescript}
+    use: {
+        baseURL: process.env.VITE_APP_URL || process.env.BASE_URL,
+        screenshot: 'only-on-failure',
+        trace: 'retain-on-failure-and-retries',
+        video: 'on-first-retry',
+    },
+    
+    reporter: [
+    ['html', { outputFolder: './playwright/report' }],
+    ['json', { outputFile: './playwright/report/results.json' }],
+    ['list'],
+    ],
+\end{minted}
+
+Die instellingen helpen bij het onderzoeken van falende testen. Bij E2E-testen kan een fout voortkomen uit timing, authenticatie, testdata of een verschil tussen lokale en stagingomgeving. Screenshots, traces, video's en rapporten maken dat gedrag achteraf beter controleerbaar.
+
+Voor CI/CD bestaat een pull-requestworkflow die Playwright-testen kan uitvoeren. Die workflow is geen bewijs dat de gegenereerde testreeks al stabiel of volledig gevalideerd is. De workflow toont wel dat de gegenereerde output aansluit op een bestaand uitvoeringspad. Daarvoor moeten een aantal voorwaarden aanwezig zijn: een \texttt{.env.test}-bestand, geldige credentials, een staging-URL, Playwright-browsers en seeddata die past bij de scenario's.
+
+\begin{minted}{yaml}
+    - name: Create client test env file
+    run: |
+    printf '%s\n' \
+    'VITE_APP_ENV=testing' \
+    'CI=true' \
+    'VITE_APP_URL=https://${{ vars.CLIENT_BASE_URL_DEVELOPMENT }}' \
+    'BASE_URL=https://${{ vars.CLIENT_BASE_URL_DEVELOPMENT }}' \
+    'VALID_USERNAME=${{ vars.VALID_USERNAME }}' \
+    'VALID_PASSWORD=${{ secrets.VALID_SEEDED_TEST_USER_PASSWORD }}' \
+    > apps/client/.env.test
+    
+    - name: Run changed Playwright tests
+    run: npm run test:e2e --workspace=apps/client -- --only-changed=origin/$GITHUB_BASE_REF
+    
+    - name: Run Playwright tests
+    run: npm run test:e2e --workspace=apps/client --
+\end{minted}
+
+De YAML-stappen maken zichtbaar hoe de CI-context wordt opgebouwd. Eerst worden de testvariabelen naar \texttt{apps/client/.env.test} geschreven. Daarna installeert de workflow de Playwright-browser en draait de client de E2E-opdracht. De gegenereerde testen kunnen dus in dezelfde testopzet terechtkomen als bestaande Playwright-testen, op voorwaarde dat de stagingomgeving en testdata overeenkomen met wat de scenario's nodig hebben.
+
+Die voorwaarden zijn niet louter praktische details. Een E2E-test tegen een echte staging-API kan falen wanneer een seedpersoon ontbreekt, wanneer credentials verlopen zijn, wanneer de stagingomgeving niet bereikbaar is of wanneer eerdere persistente testdata de uitgangssituatie verandert. Daarom kan CI/CD-aansluiting niet als eindbewijs gelden. Het toont vooral dat de output technisch uitvoerbaar is binnen de bestaande ontwikkelworkflow. De beoordeling van stabiliteit en volledigheid hoort bij de evaluatie.
+
+De developmentomgeving en CI/CD-context sluiten de technische POC-opzet af. User stories en \texttt{plan.json} bepalen wat Ralph moet bouwen. De E2E-richtlijnen sturen hoe Ralph dat tijdens de uitvoering doet. Lokale verificatie en de PR-workflow tonen waar de output uitgevoerd en nagekeken kan worden. Het resultaat is geen volledig autonome teststraat, maar een uitvoeringspad dat ontwikkelaars kunnen reviewen, herhalen en verder integreren.
+
+\section{Notities voor verdere uitwerking}
+
+\begin{itemize}
+    \item Controleer later of de codefragmenten in LaTeX als listings of verkorte tekstfragmenten worden opgenomen.
+    \item Sectie 8 bevat geen evaluatiescore of conclusie over de kwaliteit van \texttt{evaluation-wizard}; dat hoort bij het evaluatiehoofdstuk.
+    \item Sectie 9 formuleert CI/CD als context en geschiktheid, niet als bewijs dat de volledige gegenereerde testreeks al stabiel in CI/CD draait.
+\end{itemize}
+
+\section{Afbakening van de evaluatiescope}
+
+De technische opzet vertrekt vanuit de routepopulatie van talentguide. Daardoor moet de workflow met meer dan een type route kunnen omgaan: eenvoudige pagina's, rolgebonden routes, detailroutes met parameters en opeenvolgende wizardflows. Dat betekent niet dat elke route binnen deze bachelorproef volledig getest of gevalideerd wordt. De evaluatie werkt met drie cases die elk een ander soort routegedrag tonen.
+
+Die afbakening voorkomt dat de proof of concept breder lijkt dan de uitgevoerde controle. De POC beschrijft eerst het uitvoeringsproces: routes worden omgezet naar user stories, daarna naar \texttt{plan.json}-taken en vervolgens via de Ralph-loop naar Playwright-output. De vraag of die output goed genoeg is, hoort bij het evaluatiehoofdstuk. Hier gaat het alleen over de keuze van de cases en de reden waarom net die cases passen bij de technische opzet.
+
+\texttt{evaluation-wizard} is de eerste case. Deze routegroep bevat een meerstapsflow met childroutes voor \texttt{overview}, \texttt{schedule} en \texttt{summary}. Een eenvoudige laadtest is hier niet genoeg. De routegroep moet als een doorlopende gebruikersactie behandeld worden, anders ontstaan drie losse routetesten in plaats van een test voor het plannen van een evaluatie. Daarom is deze case geschikt om te controleren of user stories, \texttt{plan.json}, Page Object Models, fixtures en happy-flowtaken op elkaar aansluiten.
+
+\texttt{people} vormt de tweede case. Die route ligt dichter bij lijstbeheer, detailnavigatie en CRUD-achtig gedrag. Daar speelt geen vaste wizardvolgorde, maar wel de vraag welke acties binnen een overzicht of detailcontext E2E-waardig zijn. De case controleert dus of dezelfde aanpak ook bruikbaar blijft wanneer de route niet uit opeenvolgende stappen bestaat.
+
+\texttt{coach-settings} is de derde case. Deze route is kleiner en heeft minder uitgebreide traceerbaarheidsinformatie dan \texttt{evaluation-wizard} en \texttt{people}. Net daarom blijft de route nuttig. Een evaluatie met alleen de sterkste output zou weinig zeggen over de grenzen van de aanpak. Deze case toont waar documentatie, voortgangslogging en testartefacten sneller zwakker worden.
+
+De drie cases vormen geen statistisch representatieve steekproef van alle talentguide-routes. Ze dienen als casusgerichte evaluatie. \texttt{evaluation-wizard} toont een opeenvolgende wizardflow, \texttt{people} toont lijstbeheer en navigatie, en \texttt{coach-settings} toont een beperktere instellingenroute. Daarmee kan de evaluatie later nagaan of de gegenereerde Playwright-output uitvoerbaar, richtlijnconform, functioneel dekkend en traceerbaar genoeg is voor review en verdere integratie.
+
+Scores, kwaliteitsniveaus en conclusies horen hier nog niet thuis. Die uitspraken volgen pas nadat de output beoordeeld is met het evaluatiekader. Deze afbakening trekt vooral de grens tussen de technische POC-opzet en de latere beoordeling van de gegenereerde testen.
+
+\section{Samenvatting}
+
+De AI-ondersteunde E2E-testworkflow begint bij de routeconfiguratie. Routes bepalen welke gebruikerspaden technisch bereikbaar zijn binnen talentguide. Daarna geven user stories betekenis aan die routes: actor, doel, precondities, acceptatiecriteria, happy flow en belangrijke interacties. \texttt{plan.json} zet die user story om naar afzonderlijke taken die Ralph een voor een kan uitvoeren.
+
+Die tussenstappen beperken de vrijheid van de agent. Ralph hoeft niet zelf te gokken welke route relevant is, welke gebruikersactie getest moet worden of welke taak eerst komt. Het plan beschrijft wat getest moet worden. De E2E-richtlijnen bepalen hoe de Playwright-test technisch in de codebase terechtkomt. Zo blijven testscope en testarchitectuur gescheiden.
+
+De Playwright-laag werkt die scheiding uit in code. Specs beschrijven het scenario. Page Object Models bevatten navigatie en interactielogica. Fixtures leveren testcontext. Routeconstanten houden navigatie centraal. \texttt{storageState} voorkomt dat elke featuretest opnieuw door de loginflow moet gaan. \texttt{data-testid}-locators zijn verplicht omdat talentguide meertalig is en zichtbare tekst daardoor geen stabiele locatorbasis vormt. De keuze voor echte staging-API's behoudt de E2E-waarde van de testen, maar maakt seeddata, persistente testdata en uitvoeringsvoorwaarden belangrijker.
+
+De workflow stopt niet zodra Ralph code heeft geschreven. Review, bijsturing en integratie blijven nodig. De ontwikkelaar controleert de user story, het planbestand, de gegenereerde spec, de POM, de fixtures, de toegevoegde \texttt{data-testid}-attributen en de gedeelde testdata. Het progress-bestand helpt daarbij, omdat per iteratie zichtbaar blijft welke taak uitgevoerd werd, welke keuzes gemaakt zijn en hoe de wijziging geverifieerd werd.
+
+De developmentomgeving en CI/CD-context tonen waar de output uitgevoerd kan worden. Dat is geen bewijs dat de volledige gegenereerde testreeks al stabiel of volledig gevalideerd is. Lokale Playwright-commando's, rapporten, traces en de pull-requestworkflow maken verificatie mogelijk wanneer \texttt{.env.test}, credentials, staging-URL, Playwright-browsers en seeddata kloppen. De technische opzet maakt integratie dus mogelijk, maar kwaliteit en betrouwbaarheid moeten apart beoordeeld worden.
+
+De POC-opzet vertrekt dus van route-informatie, bouwt daar controleerbare testartefacten rond en levert reviewbare Playwright-output op. De claim blijft bewust beperkt: de workflow vervangt de ontwikkelaar niet, maar verschuift een deel van het werk van vanaf nul schrijven naar controleren, bijsturen en integreren. Het evaluatiehoofdstuk beoordeelt daarna in welke mate die output bruikbaar is binnen het ontwikkelproces van talentguide.
+
 \chapter{Evaluatie}
-\label{ch:fase5}
+\label{ch:fase4}
 
-\lipsum[21-25]
+\section{Inleiding}
 
+Dit hoofdstuk evalueert de gegenereerde E2E-testoutput van het prototype. De centrale vraag is in welke mate de AI-ondersteunde workflow Playwright-testen oplevert met voldoende uitvoerbaarheid, functionele dekking, richtlijnconformiteit en traceerbaarheid. Op basis daarvan volgt een beoordeling van de workflow als mogelijke basis voor geautomatiseerde kwaliteitscontrole binnen het ontwikkelproces van talentguide.
+
+De evaluatie sluit aan op de onderzoeksvraag, maar herhaalt de volledige POC-opzet niet. De methodologie beschrijft de opbouw van de workflow; dit hoofdstuk beoordeelt de praktische waarde van de output. Technische uitvoerbaarheid en een duidelijke pass/fail zijn daarbij belangrijk, maar vormen geen volledige kwaliteitsbeoordeling. De output moet ook aansluiten bij de user story, de E2E-richtlijnen, de verwachte happy flow en de artefacten waarmee de uitvoering achteraf te volgen is.
+
+De beoordeling is daarom casusgericht. De evaluatie onderzoekt niet of alle routes binnen talentguide volledig afgedekt zijn. Het hoofdstuk onderzoekt wel of de workflow voor drie geselecteerde routes output kan genereren met voldoende kwaliteit voor opname in de codebase na review. Menselijke review blijft nodig, omdat scorepercentages, gegenereerde code en statuslogs pas betekenis krijgen na gezamenlijke controle.
+
+\section{Afbakening en evaluatiemethode}
+
+Voor deze evaluatie zijn drie routes geselecteerd: \texttt{evaluation-wizard}, \texttt{people} en \texttt{coach-settings}. De routes tonen drie verschillende kwaliteitsprofielen. \texttt{evaluation-wizard} is de sterke case, \texttt{people} haalt een hoge score maar wordt begrensd door minimumcriteria, en \texttt{coach-settings} toont bruikbare output met duidelijke beperkingen op het vlak van traceerbaarheid.
+
+De selectie is bedoeld als casusgerichte evaluatie van de workflow. De selectie vormt geen statistisch representatieve steekproef van alle talentguide-routes en claimt geen exacte tijdsbesparing. De evaluatie maakt wel zichtbaar welke artefacten de workflow oplevert, wat de kwaliteit van deze artefacten is voor de geselecteerde routes en welke menselijke controle nodig blijft voordat de output verantwoord in de codebase kan worden opgenomen.
+
+De beoordeling gebruikt vier evaluatiedimensies:
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.28,l] X[0.72,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Dimensie & Evaluatiefunctie \\
+        Functionele dekking & Gaat na of de gegenereerde testen de relevante happy-flowstappen en verwachte eindtoestand behandelen. \\
+        Richtlijnconformiteit & Gaat na of de output aansluit bij de afgesproken Playwright- en E2E-richtlijnen, zoals locatorgebruik, routegebruik, fixtures en teststructuur. \\
+        Uitvoerbaarheid & Gaat na of de testoutput technisch kan draaien en een duidelijke pass/fail oplevert zonder structurele blocker. \\
+        Traceerbaarheid & Gaat na of de route terug te volgen is via user story, plan.json, progressinformatie en gegenereerde testcode. \\
+    \end{tblr}
+    \caption{Evaluatiedimensies voor de gegenereerde testoutput.}
+    \label{tab:evaluatie-dimensies}
+\end{table}
+
+Deze aanpak houdt kwantitatieve observatie en kwalitatieve interpretatie gescheiden. De score geeft een eerste indicatie, maar de finale beoordeling volgt pas nadat de minimumcriteria voor het bijbehorende kwaliteitsniveau zijn gecontroleerd.
+
+\section{Kwaliteitsniveaus en minimumcriteria}
+
+De evaluatiescore bepaalt eerst een voorlopig kwaliteitsniveau. Daarna volgt een controle op de bijbehorende minimumcriteria. Bij een ontbrekend minimumcriterium wordt het finale kwaliteitsniveau verlaagd naar het hoogste niveau met volledig behaalde minimumcriteria. Daardoor kan een route met een hoge totaalscore toch lager eindigen wanneer een essentieel kwaliteitscriterium ontbreekt.
+
+Binnen deze evaluatie staat \texttt{Acceptable} voor gegenereerde testoutput met voldoende kwaliteit voor opname in de codebase na reguliere code review. Dit niveau vraagt geen perfecte output. Wel vereist het niveau lokale bruikbaarheid, een betekenisvolle pass/fail, afwezigheid van structurele blockers en voldoende aanknopingspunten voor review en bijsturing.
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.22,l] X[0.78,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Niveau & Betekenis binnen deze evaluatie \\
+        Needs rework & De testoutput moet eerst inhoudelijk of technisch worden bijgestuurd voordat opname in de codebase verantwoord is. \\
+        Acceptable & De testoutput heeft voldoende kwaliteit om na reguliere code review in de codebase opgenomen te worden. De output moet minimaal technisch bruikbaar zijn, een duidelijke pass/fail geven, relevante happy-flowstappen behandelen en voldoende controleerbaar zijn voor verdere review. \\
+        Good & De output voldoet aan Acceptable en bevat daarnaast een doorlopende full happy-flowtest voor controle van de primaire gebruikersflow en verwachte eindtoestand. De testvolgorde en richtlijnconformiteit zijn grotendeels correct. \\
+        Excellent & De output voldoet aan Good en bevat relevante extended coverage wanneer de user story of het plan extended coverage vereist. De output sluit sterk aan bij de richtlijnen rond locators, routes, testdata, authenticatie, page objects, fixtures en traceerbaarheid. \\
+    \end{tblr}
+    \caption{Kwaliteitsniveaus en betekenis binnen deze evaluatie.}
+    \label{tab:evaluatie-kwaliteitsniveaus}
+\end{table}
+
+Deze niveaulogica voorkomt een beslissende rol voor scorepercentages op zichzelf. Een hoge score blijft belangrijk, maar wordt pas overtuigend wanneer de output ook voldoet aan de minimumverwachtingen van het kwaliteitsniveau. De routebesprekingen koppelen daarom telkens score, bewijs en finale interpretatie aan elkaar.
+
+\section{Overzicht van de geselecteerde routes}
+
+Tabel~\ref{tab:evaluatie-routes-overzicht} geeft een overzicht van de drie routes in dit hoofdstuk. Per route staan het voorlopige niveau op basis van de score, de score zelf, het finale kwaliteitsniveau na toepassing van de minimumcriteria en de kerninterpretatie voor de verdere bespreking.
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.18,l] X[0.18,l] X[0.10,r] X[0.18,l] X[0.36,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Route & Voorlopig niveau & Score & Finaal niveau & Interpretatie \\
+        \texttt{evaluation-wizard} & Excellent & 95\% & Excellent & Sterke output over alle dimensies, met volledige uitvoerbaarheid en sterke traceerbaarheid. \\
+        \texttt{people} & Good & 89\% & Acceptable & Hoge score, maar begrensd door minimumcriteria omdat een doorlopende full happy-flowtest ontbreekt. \\
+        \texttt{coach-settings} & Acceptable & 64\% & Acceptable & Functioneel bruikbaar, maar zwak op traceerbaarheid door ontbrekende plan- en progressartefacten. \\
+    \end{tblr}
+    \caption{Overzicht van de geselecteerde evaluatieroutes.}
+    \label{tab:evaluatie-routes-overzicht}
+\end{table}
+
+De routes staan bewust van sterk naar beperkter. Eerst toont \texttt{evaluation-wizard} de mogelijkheid van Excellent-output in een gunstige case. Daarna maakt \texttt{people} duidelijk waarom een hoge score niet automatisch tot Good leidt. Ten slotte toont \texttt{coach-settings} het belang van traceerbaarheid voor onderhoudbare opname in de codebase.
+
+De volgende secties werken deze routecases verder uit. De evaluatie blijft beperkt tot de afgesproken routes en koppelt elke interpretatie aan lokale artefacten, zoals evaluatiebestanden, plan- en progressbestanden en de gegenereerde Playwright-testen.
+
+\section{Bewijsmatrix en geselecteerde listings}
+
+De routebeoordeling steunt op lokale artefacten. De evaluatiebestanden geven per route de score, de dimensiebeoordeling en het finale kwaliteitsniveau. De \texttt{plan.json}- en \texttt{progress.md}-bestanden tonen of de gegenereerde taken traceerbaar zijn uitgevoerd. De Playwright-bestanden tonen welke gebruikersflows uiteindelijk testcode kregen.
+
+\begin{table}[H]
+    \centering
+    \scriptsize
+    \begin{tblr}{
+            colspec={X[0.16,l] X[0.36,l] X[0.24,l] X[0.24,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Route & Evaluatieclaim & Fragmentfunctie & Captionfunctie \\
+        \texttt{evaluation-wizard} & De route haalt Excellent doordat de output uitvoerbaar, functioneel sterk, richtlijnconform en traceerbaar is. & Vat de score 53/56, de vier dimensies en het finale Excellent-niveau samen. & Plaatst de route als sterkste case in het evaluatiekader. \\
+        \texttt{evaluation-wizard} & De full happy-flowtest bestaat, maar start via een helper op Step 3. & Toont de compacte teststructuur van de full happy-flowtest en de nuance rond \texttt{goToSummaryStep}. & Onderbouwt waarom Excellent verdedigbaar is, maar niet als perfecte dekking wordt voorgesteld. \\
+        \texttt{evaluation-wizard} & Uitvoering en status zijn traceerbaar. & Toont de verificatieregel met het Playwright-commando en pass count. & Onderbouwt de claim over status op basis van code en uitvoering. \\
+        \texttt{people} & De route scoort hoog, maar blijft finaal Acceptable door het ontbreken van een doorlopende full happy-flowtest. & Vat de score 50/56 en de minimumcriteria-redenering samen. & Legt uit waarom scorepercentage niet automatisch het finale niveau bepaalt. \\
+        \texttt{people} & De route bevat afzonderlijke happy-flowstappen, maar geen enkele test voor de volledige flow in een keer. & Toont afzonderlijke \texttt{Search}, \texttt{Filters} en \texttt{Navigation}-blokken. & Onderbouwt de begrenzing tot Acceptable zonder de output als slecht te formuleren. \\
+        \texttt{people} & De taken zijn wel volledig traceerbaar afgewerkt. & Toont afzonderlijke taken met \texttt{passes: true} en gelogde uitvoering per iteratie. & Onderbouwt het ontbrekende minimumcriterium voor Good als kernprobleem, niet uitvoerbaarheid of traceerbaarheid. \\
+        \texttt{coach-settings} & De testcode is functioneel bruikbaar, maar de workflowtraceerbaarheid is zwak. & Vat de score 36/56, de lage traceerbaarheid en het finale Acceptable-niveau samen. & Plaatst de route als voorbeeld van bruikbare code met beperkte documenterende artefacten. \\
+        \texttt{coach-settings} & De settings-flow controleert persistente status na reload. & Toont een flow met activering van een niet-geselecteerd level, controle en hercontrole na reload. & Onderbouwt de functionele bruikbaarheid van de Playwright-code. \\
+        \texttt{coach-settings} & \texttt{coach-settings.json} en \texttt{coach-settings.progress.md} ontbreken. & Deze bestanden bestaan lokaal niet. & Behandelt het ontbrekende bewijs als traceerbaarheidsbeperking, niet als aan te vullen inhoud binnen dit hoofdstuk. \\
+    \end{tblr}
+    \caption{Bewijsmatrix voor de geselecteerde evaluatieclaims.}
+    \label{tab:evaluatie-bewijsmatrix}
+\end{table}
+
+De volgende vijf listings worden gebruikt als compacte bewijsfragmenten. Volledige bestanden worden niet overgenomen; elk fragment toont alleen het deel met directe relevantie voor de evaluatieclaim.
+
+\begin{listing}[H]
+    \begin{minted}{typescript}
+        test.describe('Full happy path', () => {
+            test('schedules an evaluation and returns to the evaluations page', async ({
+                page,
+                evaluationWizard,
+            }) => {
+                const wizard = new EvaluationWizardPage(page)
+                
+                await wizard.goToSummaryStep(evaluationWizard.appUrl, evaluationWizard.personId)
+                await wizard.editTitle('E2E_Evaluation wizard happy path')
+                await wizard.submitEvaluation()
+                await wizard.assertScheduled(evaluationWizard.appUrl, evaluationWizard.personId)
+            })
+        })
+    \end{minted}
+    \caption{\texttt{evaluation-wizard.spec.ts}: full happy-flowtest met Step 3-helper.}
+    \label{lst:evaluation-wizard-happy-flow}
+\end{listing}
+
+Deze listing ondersteunt de Excellent-classificatie van \texttt{evaluation-wizard}, omdat het fragment een full happy-flowtest toont met E2E-herkenbare testdata, een submitactie en controle van de verwachte route na planning. Tegelijk blijft een nuance aanwezig: de helper \texttt{goToSummaryStep} brengt de test naar Step 3. Daardoor is de flow iets minder volledig dan een test vanaf de evaluations-tab.
+
+\begin{listing}[H]
+    \begin{minted}{markdown}
+        - Added full happy path coverage for reaching Step 3, editing the title with an `E2E_` prefix, submitting the wizard, verifying redirect to the person's evaluations page, and verifying a success notification.
+        - Added a success notification dispatch after the schedule mutation succeeds with `evaluation-wizard-success-notification`.
+        - RED confirmed before the app change: the test reached the evaluations page but failed because the success notification was missing.
+        - Cleanup note: no client or API deletion mutation/helper for evaluations was found, so persisted data is kept identifiable with the `E2E_` title prefix.
+        - Verified with `cd apps/client && npx playwright test e2e/evaluation-wizard.spec.ts` on 2026-05-12: 7 passed.
+        
+        ## 2026-05-12 - eval-wizard-exit-confirmation
+        
+        - Added exit confirmation coverage for opening the modal from Step 2, cancelling to stay on the schedule route, and confirming to navigate away.
+        - Verified with `cd apps/client && npx playwright test e2e/evaluation-wizard.spec.ts` on 2026-05-12: 8 passed.
+    \end{minted}
+    \caption{\texttt{evaluation-wizard.progress.md}: uitvoering en pass count.}
+    \label{lst:evaluation-wizard-progress}
+\end{listing}
+
+Deze listing toont waarom de traceerbaarheid van \texttt{evaluation-wizard} sterk is. Het progressbestand vermeldt wat werd toegevoegd, welke RED-situatie werd vastgesteld, welke cleanupbeperking bestaat en met welk commando de Playwright-testen zijn uitgevoerd.
+
+\begin{listing}[H]
+    \begin{minted}{typescript}
+        test.describe('Search', () => {
+            test('filters people by name and restores the full list when cleared', async ({
+                page,
+                peopleData,
+            }) => {
+                const peoplePage = new PeoplePage(page)
+                
+                await peoplePage.goTo(peopleData.appUrl)
+                const initialRowCount = await peoplePage.countRows()
+                await peoplePage.searchByName(peopleData.searchPersonName)
+                const filteredRowCount = await peoplePage.countRows()
+                await peoplePage.clearSearch()
+                const restoredRowCount = await peoplePage.countRows()
+                
+                expect(filteredRowCount).toBeGreaterThan(0)
+                expect(restoredRowCount).toBeGreaterThan(filteredRowCount)
+                expect(restoredRowCount).toBeGreaterThanOrEqual(initialRowCount)
+            })
+        })
+    \end{minted}
+    \caption{\texttt{people.spec.ts}: afzonderlijke happy-flowstappen.}
+    \label{lst:people-search-flow}
+\end{listing}
+
+Deze listing toont concrete happy-flowstappen voor \texttt{people}. De route behandelt zoekgedrag, filtering, navigatie, creatie en empty-state coverage in afzonderlijke blokken. Een test voor de volledige primaire flow van navigatie naar detailpagina als een doorlopende happy flow ontbreekt.
+
+\begin{listing}[H]
+    \begin{minted}{json}
+        {
+            "id": "people-navigate-to-detail",
+            "title": "Navigate to person detail page",
+            "acceptance_criteria": [
+            "test passes: clicking a person row navigates to /hr/people/:id (toHaveURL)",
+            "data-testid attribute exists on clickable person rows (add if missing)"
+            ],
+            "priority": 4,
+            "passes": true
+        }
+    \end{minted}
+    \caption{\texttt{people.json}: taak met \texttt{passes: true}.}
+    \label{lst:people-plan-passes}
+\end{listing}
+
+Deze listing ondersteunt de traceerbaarheidsclaim voor \texttt{people}. Het planbestand maakt de expliciete acceptatiecriteria en geslaagde status van de afzonderlijke navigatietaak zichtbaar. De zwakte zit daardoor niet in uitvoering of statusopvolging, maar in het ontbrekende minimumcriterium voor Good: een doorlopende full happy-flowtest.
+
+\begin{listing}[H]
+    \begin{minted}{typescript}
+        test('checking an unselected level adds it to the saved settings', async ({ page }) => {
+            const settingsPage = new CoachSettingsPage(page)
+            
+            let checkedLevels = await settingsPage.captureCheckedLevels()
+            let levelToCheck = findUncheckedLevel(checkedLevels)
+            
+            if (!levelToCheck) {
+                await settingsPage.toggleLevel('EXPERT')
+                checkedLevels = await settingsPage.captureCheckedLevels()
+                levelToCheck = findUncheckedLevel(checkedLevels)
+            }
+            
+            await settingsPage.toggleLevel(levelToCheck!)
+            await settingsPage.assertLevelChecked(levelToCheck!)
+            
+            await settingsPage.reloadAndWait()
+            await settingsPage.assertLevelChecked(levelToCheck!)
+        })
+    \end{minted}
+    \caption{\texttt{coach-settings.spec.ts}: persistente settings-flow.}
+    \label{lst:coach-settings-persistence}
+\end{listing}
+
+Deze listing toont de functionele bruikbaarheid van de \texttt{coach-settings}-testcode. De test wijzigt een instelling, controleert de zichtbare status en verifieert na reload de bewaarde wijziging. De listing lost de ontbrekende plan- en progressartefacten niet op. Deze ontbrekende artefacten blijven een traceerbaarheidsbeperking.
+
+Voor \texttt{coach-settings} is bewust geen lege of kunstmatige listing toegevoegd voor ontbrekende artefacten. De beperking wordt als volgt vastgelegd:
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.32,l] X[0.18,l] X[0.50,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Verwacht artefact & Lokale status & Betekenis voor de evaluatie \\
+        \texttt{Bronnen/plans/coach-settings.json} & Ontbreekt & De geplande taken, prioriteiten en \texttt{passes}-status kunnen niet worden gecontroleerd. \\
+        \texttt{Bronnen/plans/coach-settings.progress.md} & Ontbreekt & De uitvoering, blockers, scopecorrecties en verificatiegeschiedenis kunnen niet worden gecontroleerd. \\
+    \end{tblr}
+    \caption{Ontbrekende traceerbaarheidsartefacten voor \texttt{coach-settings}.}
+    \label{tab:coach-settings-ontbrekende-artefacten}
+\end{table}
+
+\section{Evaluation-wizard: voorbeeld van Excellent-output}
+
+De \texttt{evaluation-wizard}-route levert de sterkste output binnen deze evaluatie. De route behaalt 53 op 56 punten, of 95\%. Het voorlopige niveau is Excellent en blijft ook na toepassing van de minimumcriteria Excellent. Deze beoordeling volgt niet alleen uit het percentage, maar uit de combinatie van functionele dekking, richtlijnconformiteit, uitvoerbaarheid en traceerbaarheid.
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.28,l] X[0.13,r] X[0.59,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Dimensie & Score & Interpretatie \\
+        Functionele dekking & 9/10 & Smoke, incrementele wizardstappen, full happy-flowtest en exit confirmation zijn aanwezig. \\
+        Richtlijnconformiteit & 24/26 & De output gebruikt stabiele locators, routeconstanten, storageState, fixtures en page objects volgens de lokale Playwright-afspraken. \\
+        Uitvoerbaarheid & 8/8 & Het progressbestand noteert lokale uitvoering met \texttt{npx playwright test e2e/evaluation-wizard.spec.ts} en een eindstatus van 8 passed. \\
+        Traceerbaarheid & 12/12 & De route heeft een planbestand, progressbestand, beschreven beslissingen en een \texttt{passes}-status in overeenstemming met de uitvoering. \\
+    \end{tblr}
+    \caption{Dimensiescore voor \texttt{evaluation-wizard}.}
+    \label{tab:evaluation-wizard-dimensiescore}
+\end{table}
+
+De route is vooral sterk omdat de gegenereerde output niet bij een smoke test stopt. De wizard wordt stapsgewijs opgebouwd: Step 1 controleert de scope, Step 2 behandelt datums en evaluatoren, Step 3 controleert de samenvatting en de full happy-flowtest voert de planning uit. De exit confirmation vormt aanvullende dekking. Daarmee voldoet de route aan de logica van Excellent: de output bevat een bruikbare kernflow, relevante extra dekking en sterke traceerbaarheid.
+
+Toch blijft de beoordeling voorzichtig. De full happy-flowtest gebruikt \texttt{goToSummaryStep} en start daardoor niet volledig vanaf de evaluations-tab. Het evaluatiebestand behandelt dit als een kleine verzwakking van het end-to-endkarakter, niet als een blokkade. De route blijft Excellent omdat de overige minimumcriteria zijn afgedekt en omdat uitvoering, beslissingen en pass-status goed gedocumenteerd zijn.
+
+\section{People: hoge score met begrenzing door minimumcriteria}
+
+De \texttt{people}-route behaalt 50 op 56 punten, of 89\%. Op basis van de score krijgt de route voorlopig Good, maar het finale niveau wordt Acceptable. De output is dus niet slecht. De route heeft volledige uitvoerbaarheid en volledige traceerbaarheid, maar mist een doorlopende full happy-flowtest. Volgens het evaluatiekader vormt deze doorlopende flow een minimumcriterium voor Good.
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.28,l] X[0.13,r] X[0.59,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Dimensie & Score & Interpretatie \\
+        Functionele dekking & 8/10 & De lijstweergave, zoekfunctie, filter, navigatie naar detail, creatie en empty state zijn afgedekt. \\
+        Richtlijnconformiteit & 22/26 & De output volgt de meeste Playwright-richtlijnen, maar verliest punten doordat de full happy-flowtest ontbreekt. \\
+        Uitvoerbaarheid & 8/8 & Het progressbestand noteert per iteratie verificatie met het Playwright-commando. \\
+        Traceerbaarheid & 12/12 & Het planbestand en progressbestand bestaan, alle zes taken staan op \texttt{passes: true} en de beslissingen zijn per iteratie vastgelegd. \\
+    \end{tblr}
+    \caption{Dimensiescore voor \texttt{people}.}
+    \label{tab:people-dimensiescore}
+\end{table}
+
+Deze route maakt zichtbaar waarom het evaluatiekader niet alleen op percentages steunt. De afzonderlijke testen behandelen reele onderdelen van de gebruikersflow: zoeken, filteren, navigeren, een persoon aanmaken en een lege zoekresultaatstatus controleren. Daardoor is de output bruikbaar en reviewbaar. Een test voor de volledige kernflow van lijst naar zoekactie en detailpagina ontbreekt echter.
+
+Het finale niveau blijft daarom Acceptable. Dat is een positieve, maar begrensde beoordeling: de output kan na reguliere code review bruikbaar zijn voor opname in de codebase, maar voldoet niet aan de strengere minimumvoorwaarde voor Good. De route onderbouwt daarmee waarom minimumcriteria naast scorepercentages nodig zijn.
+
+\section{Coach-settings: Acceptable-output met beperkte traceerbaarheid}
+
+De \texttt{coach-settings}-route behaalt 36 op 56 punten, of 64\%. Het voorlopige en finale niveau zijn beide Acceptable. Deze route heeft een ander kwaliteitsprofiel dan \texttt{people}: de Playwright-code zelf is functioneel bruikbaar, maar de traceerbaarheid van het uitvoeringsproces is zwak omdat \texttt{coach-settings.json} en \texttt{coach-settings.progress.md} ontbreken.
+
+\begin{table}[H]
+    \centering
+    \begin{tblr}{
+            colspec={X[0.28,l] X[0.13,r] X[0.59,l]},
+            row{1}={font=\bfseries},
+            hlines,
+            vlines
+        }
+        Dimensie & Score & Interpretatie \\
+        Functionele dekking & 8/10 & De paginaweergave, expertiselevels, toggleactie en persistentie na reload worden gecontroleerd. \\
+        Richtlijnconformiteit & 20/26 & De testcode gebruikt page objects, fixtures, routeconstanten en stabiele locators. \\
+        Uitvoerbaarheid & 6/8 & De code heeft geen duidelijke structurele CI-blocker, maar er is geen progressbestand met uitvoeringsbewijs. \\
+        Traceerbaarheid & 2/12 & Er is geen planbestand en geen progressbestand, waardoor taakstatus, beslissingen en verificatiegeschiedenis ontbreken. \\
+    \end{tblr}
+    \caption{Dimensiescore voor \texttt{coach-settings}.}
+    \label{tab:coach-settings-dimensiescore}
+\end{table}
+
+De geselecteerde listing toont een zinvolle settings-flow in de testcode. Een level wordt aangepast, de status wordt meteen gecontroleerd en na reload opnieuw bevestigd. Voor een eenvoudige instellingenpagina is deze controle functioneel relevant, omdat persistentie de verwachte eindtoestand is.
+
+De beperking ligt daarom niet primair bij de Playwright-code. Het probleem ligt bij de ontbrekende ondersteunende workflowartefacten. Zonder planbestand is niet zichtbaar welke taken en acceptatiecriteria vooraf waren vastgelegd. Zonder progressbestand is niet zichtbaar welke uitvoering plaatsvond, welke blockers opdoken en of \texttt{passes} overeenkomt met echte testuitvoer. Op basis van de beschikbare bewijsbasis blijft de route daarom Acceptable.
+
+\section{Overkoepelende interpretatie}
+
+De drie routecases maken duidelijk: technische uitvoerbaarheid is nodig, maar volstaat niet als kwaliteitscriterium. \texttt{evaluation-wizard} combineert uitvoerbaarheid met functionele dekking, richtlijnconformiteit en traceerbaarheid. \texttt{people} toont een technisch sterke route met een lager finaal niveau door het ontbrekende minimumcriterium voor Good. \texttt{coach-settings} toont bruikbare testcode met minder sterke onderbouwing door ontbrekende plan- en progressinformatie.
+
+Voor de onderzoeksvraag betekent dit: de AI-ondersteunde workflow kan in de onderzochte cases bruikbare Playwright-testoutput opleveren. De workflow ondersteunt ontwikkelaars door user stories, plan.json-taken, teststructuur en concrete Playwright-testen voort te brengen. Daardoor hoeven ontwikkelaars niet telkens vanaf nul happy flows, acceptatiecriteria, fixtures, testdata en teststructuur uit te werken. Deze ondersteuning vervangt de ontwikkelaar niet. Menselijke review blijft nodig om minimumcriteria, traceerbaarheid, richtlijnconformiteit en integratie in de codebase te bewaken.
+
+De vergelijking tussen \texttt{evaluation-wizard} en \texttt{people} onderbouwt vooral het belang van minimumcriteria. Een hoge score is nuttig als eerste indicatie, maar zegt niet automatisch of de output het vereiste kwaliteitsniveau haalt. De vergelijking tussen \texttt{evaluation-wizard} en \texttt{coach-settings} onderbouwt het belang van traceerbaarheid. Op zichzelf bruikbare testcode is moeilijker te beoordelen en te onderhouden wanneer taakopbouw, uitvoering en status niet zijn vastgelegd.
+
+\section{Beperkingen en verbeterpunten}
+
+De evaluatie blijft casusgericht. De drie routes tonen verschillende kwaliteitsprofielen, maar vormen geen statistisch representatieve steekproef van alle routes in talentguide. De resultaten mogen daarom niet gelezen worden als een algemene uitspraak over elke mogelijke route of over elke toekomstige uitvoering van de workflow.
+
+Een tweede beperking is het ontbreken van een kwantitatieve tijdsmeting. De evaluatie claimt dus geen exacte tijdsbesparing. Wel tonen de artefacten onderdelen waarvoor normaal ontwikkelaarswerk nodig is, zoals user-storygerichte taken, Playwright-teststructuur, fixtures, page objects en traceerbaarheidsinformatie. Het verdedigbare besluit luidt daarom: de workflow verschuift de opstartkost aannemelijk naar review, correctie en integratie.
+
+Een derde beperking ligt bij de CI/CD-status. De PRD en handoffs vermelden een gedeeltelijke uitvoering van de testen in de pipeline, terwijl de volledige opname van de gegenereerde testbestanden afhankelijk blijft van de PR met alle testbestanden. Deze evaluatie neemt deze status voorzichtig over en claimt geen continue CI/CD-uitvoering van de volledige gegenereerde testreeks. Voor een definitieve pipelineclaim blijft afzonderlijke verificatie van de PR- en pipelinecontext nodig.
+
+De belangrijkste verbeterpunten volgen uit de routecases. Voor \texttt{evaluation-wizard} kan de full happy-flowtest sterker worden door volledig vanaf de evaluations-tab te starten. Voor \texttt{people} is een doorlopende full happy-flowtest nodig om Good te kunnen halen. Voor \texttt{coach-settings} moeten vooral het planbestand en progressbestand worden toegevoegd of hersteld, zodat uitvoering, beslissingen en \texttt{passes}-status controleerbaar worden.
+
+\section{Samenvatting}
+
+De evaluatie toont bruikbare Playwright-testoutput door de AI-ondersteunde workflow in de geselecteerde cases. \texttt{evaluation-wizard} maakt Excellent-output aannemelijk bij een combinatie van functionele dekking, richtlijnconformiteit, uitvoerbaarheid en traceerbaarheid. \texttt{people} toont de beperking van een hoge score bij een ontbrekend minimumcriterium voor een hoger kwaliteitsniveau. \texttt{coach-settings} toont functioneel bruikbare testcode met minder sterke onderbouwing door ontbrekende plan- en progressartefacten.
+
+Daarmee ondersteunt de evaluatie de onderzoeksvraag op casusniveau. De workflow kan bijdragen aan geautomatiseerde kwaliteitscontrole binnen het ontwikkelproces van talentguide, maar alleen wanneer de gegenereerde output wordt gereviewd en wanneer traceerbaarheid behouden blijft. Menselijke controle blijft dus een vast onderdeel van de workflow. De evaluatie claimt geen statistische representativiteit, geen exacte tijdsbesparing en geen volledige CI/CD-opname van de hele gegenereerde testreeks.

@@ -1,0 +1,25 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{goToOverview}\PYG{p}{(}\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{personId}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}\PYG{p}{)}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{k+kr}{goto}\PYG{p}{(}
+\PYG{+w}{    }\PYG{l+s+sb}{`}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{appUrl}\PYG{l+s+si}{\PYGZcb{}\PYGZdl{}\PYGZob{}}\PYG{n+nx}{ROUTES}\PYG{p}{.}\PYG{n+nx}{HR\PYGZus{}PEOPLE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{personId}\PYG{l+s+si}{\PYGZcb{}\PYGZdl{}\PYGZob{}}\PYG{n+nx}{ROUTES}\PYG{p}{.}\PYG{n+nx}{HR\PYGZus{}PEOPLE\PYGZus{}DETAIL\PYGZus{}EVALUATIONS}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{)}
+
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{scheduleButton}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}evaluations\PYGZhy{}schedule\PYGZhy{}button\PYGZsq{}}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{scheduleButton}\PYG{p}{).}\PYG{n+nx}{toBeVisible}\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{timeout}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{30000}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{scheduleButton}\PYG{p}{.}\PYG{n+nx}{click}\PYG{p}{()}
+
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{waitForURL}\PYG{p}{(}\PYG{n+nx}{ROUTE\PYGZus{}GLOBS}\PYG{p}{.}\PYG{n+nx}{HR\PYGZus{}EVALUATION\PYGZus{}WIZARD\PYGZus{}OVERVIEW}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}evaluation\PYGZhy{}wizard\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{selectDate}\PYG{p}{(}\PYG{n+nx}{slotIndex}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{number}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{daysFromToday}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{number}\PYG{p}{)}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+sb}{`evaluation\PYGZhy{}wizard\PYGZhy{}date\PYGZhy{}input\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{slotIndex}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{).}\PYG{n+nx}{click}\PYG{p}{()}
+
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{targetDate}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{addDays}\PYG{p}{(}\PYG{n+nx}{startOfToday}\PYG{p}{(),}\PYG{+w}{ }\PYG{n+nx}{daysFromToday}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{dayButton}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}
+\PYG{+w}{    }\PYG{l+s+sb}{`datepicker\PYGZhy{}day\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{format}\PYG{p}{(}\PYG{n+nx}{targetDate}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}yyyy\PYGZhy{}MM\PYGZhy{}dd\PYGZsq{}}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{dayButton}\PYG{p}{).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{dayButton}\PYG{p}{.}\PYG{n+nx}{click}\PYG{p}{()}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added full happy path coverage for reaching Step 3, editing the title with an \PYG{l+s+sb}{`E2E\PYGZus{}`} prefix, submitting the wizard, verifying redirect to the person\PYGZsq{}s evaluations page, and verifying a success notification.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added a success notification dispatch after the schedule mutation succeeds with \PYG{l+s+sb}{`evaluation\PYGZhy{}wizard\PYGZhy{}success\PYGZhy{}notification`}.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }RED confirmed before the app change: the test reached the evaluations page but failed because the success notification was missing.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Cleanup note: no client or API deletion mutation/helper for evaluations was found, so persisted data is kept identifiable with the \PYG{l+s+sb}{`E2E\PYGZus{}`} title prefix.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Verified with \PYG{l+s+sb}{`cd apps/client \PYGZam{}\PYGZam{} npx playwright test e2e/evaluation\PYGZhy{}wizard.spec.ts`} on 2026\PYGZhy{}05\PYGZhy{}12: 7 passed.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 2026\PYGZhy{}05\PYGZhy{}12 \PYGZhy{} eval\PYGZhy{}wizard\PYGZhy{}exit\PYGZhy{}confirmation}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Added exit confirmation coverage for opening the modal from Step 2, cancelling to stay on the schedule route, and confirming to navigate away.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Verified with \PYG{l+s+sb}{`cd apps/client \PYGZam{}\PYGZam{} npx playwright test e2e/evaluation\PYGZhy{}wizard.spec.ts`} on 2026\PYGZhy{}05\PYGZhy{}12: 8 passed.
+\end{MintedVerbatim}

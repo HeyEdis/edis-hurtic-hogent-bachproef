@@ -1,0 +1,19 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kr}{type}\PYG{+w}{ }\PYG{n+nx}{EvaluationWizardData}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}
+\PYG{+w}{    }\PYG{n+nx}{personId}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kr}{type}\PYG{+w}{ }\PYG{n+nx}{EvaluationWizardFixtures}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{evaluationWizard}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{EvaluationWizardData}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{base}\PYG{p}{.}\PYG{n+nx}{extend}\PYG{o}{\PYGZlt{}}\PYG{n+nx}{EvaluationWizardFixtures}\PYG{o}{\PYGZgt{}}\PYG{p}{(\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{evaluationWizard}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}\PYGZcb{},}\PYG{+w}{ }\PYG{n+nx}{use}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{use}\PYG{p}{(\PYGZob{}}
+\PYG{+w}{            }\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{APP\PYGZus{}URL}\PYG{p}{,}
+\PYG{+w}{            }\PYG{n+nx}{personId}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{DEV\PYGZus{}PLAN\PYGZus{}PERSON\PYGZus{}ID}\PYG{p}{,}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{})}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZcb{})}
+\end{MintedVerbatim}

@@ -57,29 +57,27 @@ Het eindresultaat wordt als een succes beschouwd wanneer dit systeem objectief d
 \section{Literatuurstudie}%
 \label{sec:literatuurstudie}
 
-Het integreren van AI in de moderne werkomgeving vertegenwoordigt een van de meest complexe transformaties in Human Resource Managment \autocite{Tenakwah2025}. Het draagt bij aan het uitlijnen van de personeelsplanning door het verbeteren van efficiëntie en het optimaliseren van de besluitvorming, wat essentieel is voor strategische personeelsplanning.
-\bigskip
-\\
-Toch, blijkt uit de literatuur dat de rol van AI in de werkomgeving nieuwe spanningen creëert tussen toezicht en sturing. Succesvolle implementatie vereist het balanceren van technische capaciteit en menselijke autonomie \autocite{Tenakwah2025}. De verhoogde efficiëntie kan leiden tot een groeiende kloof tussen productiviteitsmaatstaven en het welzijn van de werknemer. Waardoor er een groter probleem ontstaat van het balanceren van efficiëntie, de veiligheid en het welzijn van de werknemer \autocite{Tenakwah2025}.
+\section{E2E-testen in de ontwikkelingscyclus}
 
-\subsection{De digitale kloof}
-De noodzaak voor deze oplossing wijst op de digitale kloof tussen de gebruikte tools in de HR omgeving en de adoptiegraad van deze applicaties door arbeiders, waardoor het leidt tot een gebrek aan accurate competentieprofielen en vervolgens tot een inefficiënte strategische personeelsplanning.
-\bigskip
-\\
-De literatuur wijst erop dat AI chatbots genormaliseerd zijn en effectief kunnen worden ingezet voor het leveren van directe antwoorden op de vragen van de werknemers. \autocite{Alkashami2025}. De oplossing voor de lage adoptiegraad ligt daarom in de inzet van een vertrouwd en laagdrempelig communicatiekanaal, zoals WhatsApp, dat de doelgroep al beheerst.
+\subsection{Waarom E2E-testen nodig zijn}
 
-\subsection{Robuuste end-to-end architectuur}
-Om de geëxtraheerde data betrouwbare te valideren is een robuuste end-to-end architectuur noodzakelijk om de volledige datastroom te beheren. De literatuur benadrukt dat een robuuste architectuur essentieel is voor ‘real-time analytics’ en het handhaven van gegevensintegritiet over verschillende database omgevingen \autocite{Khattach2025}.
-\bigskip
-\\
-Bij geavanceerde systemen waar data vanuit een ongestructureerde staat naar persistentie opslag vloeit, zal de architectuur meer dan alleen als doorgeefluik dienen. Ook zal het de verantwoordelijkheid van monitoring en kwaliteitscontrole op zich nemen. Het in kaart brengen van dit volledig proces is een voorwaarde om voorspelbare en accurate resultaten te behalen in een productieomgeving \autocite{Khattach2025}.
+Voor webapplicaties is de browserinterface een belangrijke plaats waar fouten zichtbaar worden voor eindgebruikers \autocite{DiMeglio2026}. Daarom volstaat het niet altijd om enkel afzonderlijke functies, componenten of API's te testen. E2E-testen controleren of volledige gebruikersstromen werken zoals verwacht, bijvoorbeeld door een applicatie via de browser te bedienen en daarbij navigatie, invoer, interacties en validaties te doorlopen. Web-GUI-testen sluiten aan bij die benadering, omdat deze testvorm de kwaliteit van een webapplicatie beoordeelt vanuit het perspectief van de eindgebruiker \autocite{DiMeglio2026}.
 
-\subsection{Human-in-the-Loop (HITL) en validatie}
-Het concept van HITL speelt een cruciale rol bij het bewaken van de accuraatheid van AI gedreven processen. Uit onderzoek blijkt dat de introductie van AI de rol van de mens niet afneemt, maar juist de verantwoording van manuele controle verhoogt: "AI will not reduce the importance of people - it will raise the expectations placed on them" \autocite{Schiel2025}. In een omgeving waar datakwaliteit directe gevolgen heeft in de besluitsvormingen bij organisaties, is een robuust ontwerp van HTIL processen noodzakelijk om te voorkomen dat governance frameworks worden ingehaald door technologie \autocite{Schiel2025}.
-\bigskip
-\\
-Verdere ontwikkelingen op dit gebied, zoals bij het COACH+ model, tonen aan dat de integratie van machine learning algoritmen met menselijke expertise essentieel zijn voor het automatisch controleren van outputs. Door een samenwerking tussen geautomatiseerde algoritmen en menselijke toezichthouders kan de geschiktheid van gegenereerde data voor release of gebruik worden vastgesteld \autocite{Slokom2024}. Voor de validatiepijplijn binnen de MtecPlus case betekent dit dat technische extractie en menselijke verificatie complementair moeten werken om hallucinaties te minimaliseren en de betrouwbaarheid van de competentieprofielen te maximaliseren.
+\textcite{DiMeglio2026} tonen aan dat web-GUI-testen in de praktijk worden toegepast met browserautomatiseringsframeworks zoals Selenium, Playwright, Cypress en Puppeteer. Deze frameworks maken het mogelijk om gebruikersinteracties herhaalbaar uit te voeren en te controleren of een applicatie zich correct gedraagt in realistische scenario's. Voor een SaaS-platform zoals talentguide sluit dat rechtstreeks aan bij productkwaliteit: afzonderlijke technische onderdelen moeten werken, maar gebruikers moeten ook volledige workflows betrouwbaar kunnen doorlopen.
 
+\subsection{E2E-testen als bewaking van gebruikersstromen}
+
+Onderzoek naar web-GUI-testen toont het belang aan van testen die complex UI-gedrag op applicatieniveau controleren \autocite{DiMeglio2026}. De waarde van E2E-testen ligt vooral in het bewaken van samenhang tussen verschillende onderdelen van een applicatie. Waar unit- en integratietesten specifieke functies of technische koppelingen controleren, richten E2E-testen zich op het gedrag van de applicatie als geheel. Dat maakt deze testvorm geschikt om gebruikersstromen te bewaken die meerdere schermen, componenten, invoervelden en achterliggende services combineren.
+
+\textcite{DiMeglio2026} tonen daarnaast dat web-GUI-testen in open-sourceprojecten kunnen meegroeien met de applicatiecode. Hun analyse van 472 webapplicaties toont een verband met meer ontwikkelactiviteit, meer contributors en actievere issue-trackers. Een rechtstreeks kwaliteitsvoordeel volgt daar niet uit. Wel toont de studie dat zulke testen passen binnen actieve ontwikkeling. In dit onderzoek worden E2E-testen daarom gezien als een manier om productkwaliteit al tijdens de ontwikkeling zichtbaar te maken.
+
+\subsection{Waarom E2E-testen onderhoud vragen}
+
+\textcite{DiMeglio2026} beschrijven dat scripted web-GUI-testen technische kennis vragen, omdat testcode geschreven en aangepast moet worden wanneer de applicatie verandert. De studie onderscheidt scripted testing van low-code-, capture-and-replay- en scriptless-benaderingen. Scripted testing biedt meer controle over selectors, assertions, testdata en teststructuur, maar vraagt ook meer programmeerkennis en onderhoud.
+
+Een belangrijk onderhoudsrisico bij web-GUI-testen is fragility: testen kunnen breken door kleine wijzigingen in de interface, de DOM-structuur of gebruikte selectors \autocite{DiMeglio2026}. Een ander risico is flakiness: testen falen dan niet-deterministisch, bijvoorbeeld door timingproblemen, asynchrone inhoud of wisselende testdata \autocite{DiMeglio2026}. Zulke problemen zijn belangrijk binnen een ontwikkelingsproces, omdat een foutief falende test het werk vertraagt, terwijl een foutief geslaagde test een vals gevoel van kwaliteit kan geven.
+
+De studie van \textcite{DiMeglio2026} nuanceert tegelijk het idee dat web-GUI-testen per definitie onstabiel zijn. Hun resultaten tonen dat web-GUI-testen in veel projecten relatief lang kunnen blijven bestaan en vaak slechts beperkt aangepast worden. Dat wijst erop dat E2E-testen onderhoudbaar kunnen zijn wanneer het ontwerp goed is en de testen stapsgewijs worden bijgewerkt. De uitdaging ligt dus niet enkel bij het schrijven van E2E-testen. Ook de testaanpak moet betrouwbaar, onderhoudbaar en toepasbaar blijven binnen de normale ontwikkelingscyclus.
 
 
 

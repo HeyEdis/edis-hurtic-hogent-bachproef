@@ -1,0 +1,23 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nx}{projects}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{name}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}setup\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{testMatch}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}support/auth.setup.ts\PYGZsq{}}\PYG{p}{,}
+\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{name}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}chromium\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{testMatch}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}e2e/**/*.spec.ts\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{testIgnore}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}e2e/login.spec.ts\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{use}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{p}{...}\PYG{n+nx}{devices}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}Desktop Chrome\PYGZsq{}}\PYG{p}{],}
+\PYG{+w}{        }\PYG{n+nx}{storageState}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{path.join}\PYG{p}{(}\PYG{n+nx}{\PYGZus{}\PYGZus{}dirname}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}playwright/.auth/user.json\PYGZsq{}}\PYG{p}{),}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{    }\PYG{n+nx}{dependencies}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}setup\PYGZsq{}}\PYG{p}{],}
+\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{name}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}chromium\PYGZhy{}public\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{testMatch}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}e2e/login.spec.ts\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{use}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{p}{...}\PYG{n+nx}{devices}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}Desktop Chrome\PYGZsq{}}\PYG{p}{]}\PYG{+w}{ }\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZcb{},}
+\PYG{p}{]}
+\end{MintedVerbatim}

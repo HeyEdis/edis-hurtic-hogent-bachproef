@@ -1,0 +1,14 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nx}{use}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{baseURL}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{process.env.VITE\PYGZus{}APP\PYGZus{}URL}\PYG{+w}{ }\PYG{o}{||}\PYG{+w}{ }\PYG{n+nx}{process}\PYG{p}{.}\PYG{n+nx}{env}\PYG{p}{.}\PYG{n+nx}{BASE\PYGZus{}URL}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{screenshot}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}only\PYGZhy{}on\PYGZhy{}failure\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{trace}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}retain\PYGZhy{}on\PYGZhy{}failure\PYGZhy{}and\PYGZhy{}retries\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nx}{video}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}on\PYGZhy{}first\PYGZhy{}retry\PYGZsq{}}\PYG{p}{,}
+\PYG{p}{\PYGZcb{},}
+
+\PYG{n+nx}{reporter}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}
+\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}html\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{outputFolder}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}./playwright/report\PYGZsq{}}\PYG{+w}{ }\PYG{p}{\PYGZcb{}],}
+\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}json\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{outputFile}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}./playwright/report/results.json\PYGZsq{}}\PYG{+w}{ }\PYG{p}{\PYGZcb{}],}
+\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}list\PYGZsq{}}\PYG{p}{],}
+\PYG{p}{],}
+\end{MintedVerbatim}

@@ -1,0 +1,143 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+name: introspect
+\PYG{g+gu}{description: End\PYGZhy{}of\PYGZhy{}session self\PYGZhy{}improvement — reviews friction (retries, rework, backtracking), audits skills and guidance files, and applies targeted improvements. Use at the end of a coding session, after completing a Ralph loop, or when prompted to reflect and improve tooling.}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{g+gh}{\PYGZsh{} Introspect}
+
+End\PYGZhy{}of\PYGZhy{}session self\PYGZhy{}improvement. Run this while you have rich context about what was just implemented and how it went. The goal is to make the \PYG{g+ge}{\PYGZus{}next\PYGZus{}} session better by capturing what this session taught you.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Step 1: Friction Log}
+
+Scan the session for signals that something could be improved:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Retried commands**} — wrong flags, missing deps, incorrect paths, typos
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Reworked code**} — changes that were reverted or significantly rewritten
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Test struggles**} — specs that took multiple attempts to pass
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Pattern mismatches**} — code written one way then corrected to match conventions
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Backtracking**} — decisions that had to be unwound
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Missing knowledge**} — things you had to discover that should have been documented
+
+Compile a brief friction log (bullet list). If the session was smooth, say so and skip to Step 4 for the documentation pass.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Step 2: Skill Audit}
+
+Identify which skills were used (or \PYG{g+ge}{\PYGZus{}should\PYGZus{}} have been used). Check these locations:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Project\PYGZhy{}specific skills: \PYG{l+s+sb}{`.cursor/skills/*/SKILL.md`} or \PYG{l+s+sb}{`.cursor/rules/*.md`} — project\PYGZhy{}level skills/rules
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Global skills: \PYG{l+s+sb}{`\PYGZti{}/.agents/skills/*/SKILL.md`} — global agent skills (global claude skills (\PYG{l+s+sb}{`\PYGZti{}/.claude/skills/*/SKILL.md`}) are symlinked to this directory)
+
+For each relevant skill, ask:
+
+\PYG{k}{1.} Was the guidance sufficient, or did I deviate from it?
+\PYG{k}{2.} Is there missing guidance that \PYG{g+ge}{\PYGZus{}caused\PYGZus{}} friction?
+\PYG{k}{3.} Would an addition here prevent this class of mistake across projects?
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Step 3: Prompt Audit}
+
+Review every prompt file that was used or referenced during this session — skill prompts, iteration prompts, system prompts, command prompts, or any \PYG{l+s+sb}{`.md`} file that instructed the model.
+
+For each prompt, ask:
+
+\PYG{k}{1.} Did the prompt\PYGZsq{}s instructions lead to correct behaviour, or did I have to deviate?
+\PYG{k}{2.} Did ambiguous or missing instructions \PYG{g+ge}{\PYGZus{}cause\PYGZus{}} friction logged in Step 1?
+\PYG{k}{3.} Could clearer wording, additional examples, or reordered steps prevent the same friction next time?
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Step 4: Apply Improvements}
+
+Work through each layer. The key rule: \PYG{g+gs}{**scope determines destination**}.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4a. Global skills (`\PYGZti{}/.agents/skills/` symlinked to `\PYGZti{}/.claude/skills/`)}
+
+Update ONLY if the improvement applies \PYG{g+gs}{**across codebases**}, not just the current one.
+
+Good candidates:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }A workflow skill missing a step that caused retries
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Ambiguous instructions that led to wrong interpretation
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }A common tool flag or pattern that should be documented
+
+Bad candidates (don\PYGZsq{}t add):
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Project\PYGZhy{}specific conventions (Angular prefix, Tailwind config)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Framework\PYGZhy{}specific patterns only this repo uses
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4b. CLAUDE.md / AGENTS.md (repo root)}
+
+Update ONLY with \PYG{g+gs}{**cross\PYGZhy{}cutting, non\PYGZhy{}feature\PYGZhy{}specific**} guidance that applies repo\PYGZhy{}wide.
+
+Good candidates:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Missing coding conventions that apply across all features
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Command patterns that are commonly needed but weren\PYGZsq{}t documented
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Architecture rules that apply repo\PYGZhy{}wide
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Inject function preferences, testing patterns, import conventions
+
+Bad candidates (don\PYGZsq{}t add):
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Feature\PYGZhy{}specific decisions or implementation details
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Temporary workarounds for a single feature
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4c. Feature\PYGZhy{}specific docs (`docs/`)}
+
+Everything specific to the current feature goes here:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Architectural decisions made during implementation
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Patterns established for this feature
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Gotchas and edge cases discovered
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Integration notes and API quirks
+
+Save as \PYG{l+s+sb}{`docs/\PYGZlt{}feature\PYGZhy{}slug\PYGZgt{}\PYGZhy{}learnings.md`} or append to an existing feature doc if one exists.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4d. Prompt improvements}
+
+Apply improvements identified in Step 3 to the prompt files. Follow the same scoping rules:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Global prompts**} (in \PYG{l+s+sb}{`\PYGZti{}/.agents/`}) — update only if the improvement applies across codebases
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Repo prompts**} — update if the improvement is specific to this repository
+
+Focus on:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Clarifying ambiguous instructions that caused wrong interpretation
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Adding missing steps or constraints that would have prevented friction
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Improving examples or adding edge case guidance
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Removing instructions that actively misled or conflicted with reality
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4e. Ralph prompt sync}
+
+If you updated any Ralph iteration prompts (\PYG{l+s+sb}{`prompts/ralph\PYGZhy{}iteration*.md`}), ensure all three variants stay consistent where they share the same sections:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`prompts/ralph\PYGZhy{}iteration.md`} (base)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`prompts/ralph\PYGZhy{}iteration\PYGZhy{}afk.md`} (autonomous)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`prompts/ralph\PYGZhy{}iteration\PYGZhy{}hitl.md`} (human\PYGZhy{}in\PYGZhy{}the\PYGZhy{}loop)
+
+Only the mode\PYGZhy{}specific sections (autonomous decision making, HITL review phase, introspect phase) should differ.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Step 5: Summary}
+
+Output a concise summary of what was improved and why:
+
+\PYG{l+s+sb}{```}
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{} Introspect Results}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Friction log}
+\PYG{l+s+sb}{\PYGZhy{} \PYGZlt{}what went wrong and why\PYGZgt{}}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Changes made}
+\PYG{l+s+sb}{\PYGZhy{} `path/to/file` — \PYGZlt{}what was added/changed and why\PYGZgt{}}
+
+\PYG{l+s+sb}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Skipped (feature\PYGZhy{}specific, already documented)}
+\PYG{l+s+sb}{\PYGZhy{} \PYGZlt{}items captured in docs/ instead\PYGZgt{}}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Rules}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Surgical edits only**} — add or modify what\PYGZsq{}s needed, never rewrite whole files
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Be specific and actionable**} — not \PYGZdq{}write better code\PYGZdq{} but \PYGZdq{}use \PYG{l+s+sb}{`injectX()`} instead of \PYG{l+s+sb}{`inject(XService)`}\PYGZdq{}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Include a why**} — every addition must explain its purpose
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**No duplicates**} — read existing content before adding; update rather than duplicate
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Earn your place**} — every rule added must prevent a \PYG{g+ge}{\PYGZus{}recurring class\PYGZus{}} of mistakes, not a one\PYGZhy{}off
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Keep improvements feature\PYGZhy{}agnostic**} — global skills, prompts, CLAUDE.md, and memory entries must never reference specific features, entities, routes, or domain concepts. Extract the general principle. If an example is needed, use a generic placeholder.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Never add secrets or credentials**} to any guidance file
+\end{MintedVerbatim}

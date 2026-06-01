@@ -1,0 +1,693 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+name: e2e\PYGZhy{}testing\PYGZhy{}guidelines
+\PYG{g+gu}{description: Apply Playwright e2e test guidelines: fixtures via test.extend, POM pages with inline locators, real API only, auth via storageState, data\PYGZhy{}testid locators, helpers and typed data in support/.}
+\PYG{g+gu}{\PYGZhy{}\PYGZhy{}\PYGZhy{}}
+
+\PYG{g+gh}{\PYGZsh{} E2E Testing with Playwright}
+
+This skill governs how to write, structure, and maintain end\PYGZhy{}to\PYGZhy{}end tests in \PYG{l+s+sb}{`apps/client/playwright/`}.
+Read the full file before generating any test code.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 1 — Philosophy}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 1.1 Research first}
+
+Before implementing, \PYG{g+gs}{**read the relevant Playwright documentation**}:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Best practices}](\PYG{n+na}{https://playwright.dev/docs/best\PYGZhy{}practices})
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Fixtures}](\PYG{n+na}{https://playwright.dev/docs/test\PYGZhy{}fixtures})
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Page Object Model}](\PYG{n+na}{https://playwright.dev/docs/pom})
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Locators}](\PYG{n+na}{https://playwright.dev/docs/locators})
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Assertions}](\PYG{n+na}{https://playwright.dev/docs/test\PYGZhy{}assertions})
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Authentication}](\PYG{n+na}{https://playwright.dev/docs/auth})
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }[\PYG{n+nt}{Parallelism \PYGZam{} sharding}](\PYG{n+na}{https://playwright.dev/docs/test\PYGZhy{}parallel})
+
+If the Playwright docs and this skill file conflict, \PYG{g+gs}{**this skill file wins**} — it encodes
+project\PYGZhy{}specific decisions made on top of Playwright defaults.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 1.2 Core principles}
+
+| Principle | What it means |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| \PYG{g+gs}{**Test user\PYGZhy{}visible behaviour**} | Click what users click, assert what users see. Never test implementation details. |
+| \PYG{g+gs}{**Isolate every test**} | Each test runs independently — no shared state, no execution\PYGZhy{}order dependency. |
+| \PYG{g+gs}{**Real API, no mocks**} | E2E tests hit the real staging API. Only mock external third\PYGZhy{}party services. |
+| \PYG{g+gs}{**`data\PYGZhy{}testid` everywhere**} | This is a multilingual app (lingui / i18n). Never locate by visible text. |
+| \PYG{g+gs}{**One behaviour per test**} | A test should verify one thing. Multiple assertions are fine if they support a single behaviour. |
+| \PYG{g+gs}{**Routes**} | Routes come from the routes.ts file. If they aren\PYGZsq{}t present don\PYGZsq{}t invent the route. Prompt the user to give you the correct route(s). |
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 1.3 Good tests vs bad tests}
+
+\PYG{g+gs}{**Good test — tests observable behaviour:**}
+
+\PYG{l+s+sb}{```ts}
+\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}save persists the new job and shows it in the list\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{myData}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nx}{CareerPathPage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{)}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{goToCareerPath}\PYG{p}{(}\PYG{n+nx}{myData}\PYG{p}{.}\PYG{n+nx}{appUrl}\PYG{p}{)}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{startEditingCurrentJob}\PYG{p}{()}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{addJobViaSearch}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}E2E\PYGZus{}Test Job\PYGZsq{}}\PYG{p}{)}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{clickSave}\PYG{p}{()}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{assertJobVisible}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}E2E\PYGZus{}Test Job\PYGZsq{}}\PYG{p}{)}
+\PYG{p}{\PYGZcb{})}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gs}{**Bad test — tests implementation details:**}
+
+\PYG{l+s+sb}{```ts}
+\PYG{c+c1}{// ❌ Checks internal state instead of what the user sees}
+\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}save updates sessionStorage\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{c+c1}{// ...}
+\PYG{+w}{  }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{raw}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{evaluate}\PYG{p}{(()}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{n+nx}{sessionStorage}\PYG{p}{.}\PYG{n+nx}{getItem}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}career\PYGZsq{}}\PYG{p}{))}
+\PYG{+w}{  }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nb}{JSON}\PYG{p}{.}\PYG{n+nx}{parse}\PYG{p}{(}\PYG{n+nx}{raw}\PYG{p}{).}\PYG{n+nx}{jobs}\PYG{p}{).}\PYG{n+nx}{toHaveLength}\PYG{p}{(}\PYG{l+m+mf}{2}\PYG{p}{)}
+\PYG{p}{\PYGZcb{})}
+
+\PYG{c+c1}{// ❌ Locates by translated text — breaks in other languages}
+\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}shows heading\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByText}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Career Path\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{p}{\PYGZcb{})}
+
+\PYG{c+c1}{// ❌ Depends on CSS class — breaks when designers refactor}
+\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}button is styled\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{locator}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}.btn\PYGZhy{}primary\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{p}{\PYGZcb{})}
+\PYG{l+s+sb}{```}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 2 — Workflow}
+
+\PYG{g+gs}{**Do not write any test code until steps 2.1–2.4 are complete.**}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.1 Identify critical user journeys}
+
+Ask the user: \PYG{g+ge}{*\PYGZdq{}Which user journeys are most critical to test?\PYGZdq{}*}
+
+You can\PYGZsq{}t test everything. Get the user to confirm which flows matter most.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.2 Map pages and interactions}
+
+For each journey, list:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The pages visited.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The interactions performed (click, fill, navigate, assert).
+
+Present this to the user. They confirm, add, or remove items.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.3 Build the test plan}
+
+Present a structured plan following this \PYG{g+gs}{**mandatory hierarchy**}:
+
+\PYG{l+s+sb}{```markdown}
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} Test Plan: \PYGZlt{}Feature Name\PYGZgt{}}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 1. Smoke test}
+\PYG{k}{\PYGZhy{} [ ]} Route renders — navigate to the route, assert key layout elements are visible via data\PYGZhy{}testid
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2. Incremental happy flow steps}
+\PYG{k}{\PYGZhy{} [ ]} Step 1 — first interaction/state from the happy flow
+\PYG{k}{\PYGZhy{} [ ]} Step 2 — next interaction/state from the happy flow
+\PYG{k}{\PYGZhy{} [ ]} ...
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 3. Full happy path (end\PYGZhy{}to\PYGZhy{}end)}
+\PYG{k}{\PYGZhy{} [ ]} Complete happy flow — all steps in sequence, assert final outcome
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4. Validation \PYGZam{} edge cases}
+\PYG{k}{\PYGZhy{} [ ]} Test name — description
+\PYG{l+s+sb}{```}
+
+\PYG{g+gs}{**Hierarchy rules:**}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The \PYG{g+gs}{**first test is always a smoke test**} — navigate to the route and verify the page renders with key sections visible. For parent routes with child tabs, each child route also gets a smoke test.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Incremental step tests**} break the user story\PYGZsq{}s happy flow into individual interactions. Each step is its own test, ordered sequentially.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The \PYG{g+gs}{**full happy path**} executes the entire happy flow end\PYGZhy{}to\PYGZhy{}end in a single test. Redundancy with step tests is intentional — it proves the integrated sequence works.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Edge cases and validation**} come last — error states, boundary conditions, and acceptance criteria not covered by the happy flow.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.4 Get user approval}
+
+\PYG{g+gs}{**Wait for explicit approval.**} The user may add, remove, or reorder tests.
+Only after approval, proceed to implementation in the listed order.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.5 Tracer bullet — first test must pass before continuing}
+
+Implement the first (highest\PYGZhy{}priority) task:
+
+\PYG{k}{1.} Add \PYG{l+s+sb}{`data\PYGZhy{}testid`} attributes to the React component if missing.
+\PYG{k}{2.} Create or update the POM page in \PYG{l+s+sb}{`support/pages/`}.
+\PYG{k}{3.} Create or update the fixture in \PYG{l+s+sb}{`fixtures/`}.
+\PYG{k}{4.} Add any missing routes to \PYG{l+s+sb}{`support/data/routes.ts`}.
+\PYG{k}{5.} Write the test in \PYG{l+s+sb}{`e2e/\PYGZlt{}feature\PYGZgt{}.spec.ts`}.
+\PYG{k}{6.} Run the spec file: \PYG{l+s+sb}{`cd apps/client \PYGZam{}\PYGZam{} npx playwright test e2e/\PYGZlt{}spec\PYGZhy{}file\PYGZgt{}.spec.ts`}
+
+Apply the \PYG{g+gs}{**RED → GREEN → REFACTOR**} loop:
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**RED**} — the test fails (expected — nothing is implemented yet).
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**GREEN**} — write the minimum code to make it pass. Do not over\PYGZhy{}engineer.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**REFACTOR**} — once green, clean up any duplication or rough edges. Re\PYGZhy{}run after each refactor step to stay green.
+
+\PYG{g+gs}{**Never refactor while RED.**} Get to GREEN first, then clean up.
+
+This is your tracer bullet — it proves the path works end\PYGZhy{}to\PYGZhy{}end. \PYG{g+gs}{**Do not implement remaining tasks until the first test is green.**}
+
+Commit when green.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.6 Implement remaining tasks}
+
+For each remaining task, in priority order, apply the same RED → GREEN → REFACTOR loop:
+
+\PYG{k}{1.} Add \PYG{l+s+sb}{`data\PYGZhy{}testid`} attributes to the React component if missing.
+\PYG{k}{2.} Create or update the POM page and fixture as needed.
+\PYG{k}{3.} Write or update the test in \PYG{l+s+sb}{`e2e/\PYGZlt{}feature\PYGZgt{}.spec.ts`}.
+\PYG{k}{4.} \PYG{g+gs}{**RED**} — confirm the test fails before implementing.
+\PYG{k}{5.} \PYG{g+gs}{**GREEN**} — write the minimum code to make it pass.
+\PYG{k}{6.} \PYG{g+gs}{**REFACTOR**} — clean up once green, re\PYGZhy{}run to confirm still green.
+\PYG{k}{7.} Commit each task separately.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.7 Verify}
+
+Once all tasks are implemented, run the full spec file:
+
+\PYG{l+s+sb}{```bash}
+\PYG{n+nb}{cd}\PYG{+w}{ }apps/client\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }npx\PYG{+w}{ }playwright\PYG{+w}{ }\PYG{n+nb}{test}\PYG{+w}{ }e2e/\PYGZlt{}spec\PYGZhy{}file\PYGZgt{}.spec.ts
+\PYG{l+s+sb}{```}
+
+Fix any failures and re\PYGZhy{}run until it is green. Only then run the full suite:
+
+\PYG{l+s+sb}{```bash}
+\PYG{n+nb}{cd}\PYG{+w}{ }apps/client\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }npm\PYG{+w}{ }run\PYG{+w}{ }test:e2e
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 2.8 Cycle checklist}
+
+After each test:
+
+\PYG{k}{\PYGZhy{} [ ]} Test describes behaviour, not implementation.
+\PYG{k}{\PYGZhy{} [ ]} Code is minimal for this test — no speculative features.
+\PYG{k}{\PYGZhy{} [ ]} All elements use \PYG{l+s+sb}{`data\PYGZhy{}testid`} locators.
+\PYG{k}{\PYGZhy{} [ ]} No hardcoded credentials, URLs, or route strings.
+\PYG{k}{\PYGZhy{} [ ]} Routes come from \PYG{l+s+sb}{`routes.ts`}.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 3 — Project Structure}
+
+\PYG{l+s+sb}{```markdown}
+playwright/
+├── .auth/                    \PYGZsh{} Generated storageState (gitignored)
+├── e2e/                      \PYGZsh{} Spec files — *.spec.ts
+├── fixtures/                 \PYGZsh{} Fixture definitions — *.fixtures.ts
+├── skill/                    \PYGZsh{} This skill file
+└── support/
+    ├── auth.setup.ts         \PYGZsh{} One\PYGZhy{}time login, saves storageState
+    ├── data/
+    │   ├── constants.ts      \PYGZsh{} Environment variables, static values
+    │   ├── routes.ts         \PYGZsh{} Centralised route constants
+    │   └── sharedTypes.ts    \PYGZsh{} Shared TypeScript types
+    ├── helpers/              \PYGZsh{} Reusable utility functions
+    └── pages/                \PYGZsh{} Page Object classes
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Where each piece goes}
+
+| What | Where | Example |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| Test spec | \PYG{l+s+sb}{`e2e/\PYGZlt{}feature\PYGZgt{}.spec.ts`} | \PYG{l+s+sb}{`e2e/careerpath.spec.ts`} |
+| Fixture | \PYG{l+s+sb}{`fixtures/\PYGZlt{}feature\PYGZgt{}.fixtures.ts`} | \PYG{l+s+sb}{`fixtures/careerPath.fixtures.ts`} |
+| Page object | \PYG{l+s+sb}{`support/pages/\PYGZlt{}feature\PYGZgt{}Page.ts`} | \PYG{l+s+sb}{`support/pages/careerPathPage.ts`} |
+| Helper function | \PYG{l+s+sb}{`support/helpers/\PYGZlt{}name\PYGZgt{}.ts`} | \PYG{l+s+sb}{`support/helpers/loginHelpers.ts`} |
+| Route constants | \PYG{l+s+sb}{`support/data/routes.ts`} | Single file, always |
+| Static constants | \PYG{l+s+sb}{`support/data/constants.ts`} | Single file, always |
+| Shared types | \PYG{l+s+sb}{`support/data/sharedTypes.ts`} | Single file, always |
+
+\PYG{g+gs}{**Rule:**} Spec files must not contain fixture setup, locator definitions, route strings, or reusable
+logic. Move those to the appropriate location above.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 4 — Locators: `data\PYGZhy{}testid` Only}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.1 The rule}
+
+\PYG{g+gs}{**This is a multilingual app. All visible text is translated. Never locate elements by text.**}
+
+The only allowed locator method is:
+
+\PYG{l+s+sb}{```ts}
+\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}feature\PYGZhy{}element\PYGZsq{}}\PYG{p}{)}
+\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+sb}{`feature\PYGZhy{}item\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{dynamicId}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{)}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.2 Adding `data\PYGZhy{}testid` to components}
+
+When writing a test, you MUST also add \PYG{l+s+sb}{`data\PYGZhy{}testid`} to the React component if it\PYGZsq{}s missing.
+
+\PYG{g+gs}{**Naming convention:**}
+
+\PYG{l+s+sb}{```markdown}
+data\PYGZhy{}testid=\PYGZdq{}\PYGZlt{}feature\PYGZgt{}\PYGZhy{}\PYGZlt{}element\PYGZgt{}\PYGZdq{}              // static
+data\PYGZhy{}testid=\PYGZdq{}\PYGZlt{}feature\PYGZgt{}\PYGZhy{}\PYGZlt{}element\PYGZgt{}\PYGZhy{}\PYGZlt{}dynamicId\PYGZgt{}\PYGZdq{}   // list item
+\PYG{l+s+sb}{```}
+
+\PYG{g+gs}{**Example from the codebase:**}
+
+\PYG{l+s+sb}{```tsx}
+\PYG{c+c1}{// Static}
+\PYG{p}{\PYGZlt{}}\PYG{n+nt}{button}\PYG{+w}{ }\PYG{n+na}{data\PYGZhy{}testid}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}career\PYGZhy{}save\PYGZdq{}}\PYG{p}{\PYGZgt{}...\PYGZlt{}/}\PYG{n+nt}{button}\PYG{p}{\PYGZgt{}}
+\PYG{p}{\PYGZlt{}}\PYG{n+nt}{button}\PYG{+w}{ }\PYG{n+na}{data\PYGZhy{}testid}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}career\PYGZhy{}cancel\PYGZdq{}}\PYG{p}{\PYGZgt{}...\PYGZlt{}/}\PYG{n+nt}{button}\PYG{p}{\PYGZgt{}}
+\PYG{p}{\PYGZlt{}}\PYG{n+nt}{div}\PYG{+w}{ }\PYG{n+na}{data\PYGZhy{}testid}\PYG{o}{=}\PYG{l+s}{\PYGZdq{}career\PYGZhy{}past\PYGZhy{}section\PYGZdq{}}\PYG{p}{\PYGZgt{}...\PYGZlt{}/}\PYG{n+nt}{div}\PYG{p}{\PYGZgt{}}
+
+\PYG{c+c1}{// Dynamic — append the unique ID}
+\PYG{p}{\PYGZlt{}}\PYG{n+nt}{tr}\PYG{+w}{ }\PYG{n+na}{data\PYGZhy{}testid}\PYG{o}{=}\PYG{p}{\PYGZob{}}\PYG{l+s+sb}{`people\PYGZhy{}row\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{person}\PYG{p}{.}\PYG{n+nx}{id}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{\PYGZcb{}\PYGZgt{}...\PYGZlt{}/}\PYG{n+nt}{tr}\PYG{p}{\PYGZgt{}}
+\PYG{p}{\PYGZlt{}}\PYG{n+nt}{input}\PYG{+w}{ }\PYG{n+na}{data\PYGZhy{}testid}\PYG{o}{=}\PYG{p}{\PYGZob{}}\PYG{l+s+sb}{`coach\PYGZhy{}settings\PYGZhy{}level\PYGZhy{}checkbox\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{level}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{p}{/\PYGZgt{}}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.3 Rules}
+
+\PYG{k}{1.} Always use \PYG{l+s+sb}{`page.getByTestId()`}.
+\PYG{k}{2.} Add \PYG{l+s+sb}{`data\PYGZhy{}testid`} to the component if missing — never skip this step.
+\PYG{k}{3.} Place \PYG{l+s+sb}{`data\PYGZhy{}testid`} on the actual rendered DOM element, not a wrapper that gets stripped.
+\PYG{k}{4.} Use \PYG{l+s+sb}{`data\PYGZhy{}testid`} strings directly inline in page objects — no separate constants file for test IDs.
+\PYG{k}{5.} IDs must be unique per page for single elements, or follow the \PYG{l+s+sb}{`\PYGZlt{}feature\PYGZgt{}\PYGZhy{}\PYGZlt{}element\PYGZgt{}\PYGZhy{}\PYGZlt{}id\PYGZgt{}`} prefix
+   pattern for lists.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 4.4 Banned locators}
+
+| Method | Why |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| \PYG{l+s+sb}{`getByText(\PYGZsq{}...\PYGZsq{})`} | Text is translated per locale |
+| \PYG{l+s+sb}{`getByRole(\PYGZsq{}...\PYGZsq{}, \PYGZob{} name: \PYGZsq{}...\PYGZsq{} \PYGZcb{})`} | \PYG{l+s+sb}{`name`} matches visible text — same problem |
+| \PYG{l+s+sb}{`getByLabel(\PYGZsq{}...\PYGZsq{})`} | Label text is translated |
+| \PYG{l+s+sb}{`getByPlaceholder(\PYGZsq{}...\PYGZsq{})`} | Placeholder text is translated |
+| \PYG{l+s+sb}{`locator(\PYGZsq{}.css\PYGZhy{}class\PYGZsq{})`} | Breaks when markup changes |
+| XPath | Fragile and unreadable |
+
+\PYG{g+gs}{**Sole exception:**} \PYG{l+s+sb}{`page.getByRole(\PYGZsq{}dialog\PYGZsq{})`} or \PYG{l+s+sb}{`page.getByRole(\PYGZsq{}alert\PYGZsq{})`} (structural role without
+text) for third\PYGZhy{}party components you cannot modify.
+
+\PYG{g+gs}{**If you\PYGZsq{}re reaching for anything other than `getByTestId`, stop and add a `data\PYGZhy{}testid` first.**}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 5 — Authentication}
+
+All feature tests inherit authentication automatically via \PYG{l+s+sb}{`storageState`}.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} How it works}
+
+\PYG{l+s+sb}{`support/auth.setup.ts`} runs once via the \PYG{l+s+sb}{`setup`} project. It logs in and saves browser state to
+\PYG{l+s+sb}{`.auth/user.json`}. The \PYG{l+s+sb}{`chromium`} project depends on \PYG{l+s+sb}{`setup`} and loads that state for every test.
+
+\PYG{l+s+sb}{```ts}
+\PYG{c+c1}{// playwright.config.ts (relevant excerpt)}
+\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{name}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}setup\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{testMatch}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}support/auth.setup.ts\PYGZsq{}}\PYG{+w}{ }\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nx}{name}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}chromium\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nx}{testMatch}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}e2e/**/*.spec.ts\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nx}{testIgnore}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}e2e/login.spec.ts\PYGZsq{}}\PYG{p}{,}
+\PYG{+w}{  }\PYG{n+nx}{dependencies}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}setup\PYGZsq{}}\PYG{p}{],}
+\PYG{+w}{  }\PYG{n+nx}{use}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{storageState}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}playwright/.auth/user.json\PYGZsq{}}\PYG{+w}{ }\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZcb{},}
+\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{name}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}chromium\PYGZhy{}public\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{testMatch}\PYG{o}{:}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}e2e/login.spec.ts\PYGZsq{}}\PYG{+w}{ }\PYG{p}{\PYGZcb{},}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Rules}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**Feature tests**} (everything except \PYG{l+s+sb}{`login.spec.ts`}): Do NOT call login functions. The page is
+  already authenticated.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**`loginHelpers.ts`**} exists only for \PYG{l+s+sb}{`login.spec.ts`} — testing the login/logout flow itself.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{g+gs}{**`auth.fixtures.ts`**} exists only for \PYG{l+s+sb}{`login.spec.ts`}.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Credentials come from \PYG{l+s+sb}{`.env.test`} via \PYG{l+s+sb}{`constants.ts`} — never hardcode them.
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 6 — Fixtures}
+
+Fixtures provide typed test data and per\PYGZhy{}test setup/teardown.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} When to create a fixture}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The test needs feature\PYGZhy{}specific data (IDs, URLs, computed dates).
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Setup or teardown is needed before/after each test.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }The data will be reused across multiple tests in the same file.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Convention}
+
+File: \PYG{l+s+sb}{`fixtures/\PYGZlt{}feature\PYGZgt{}.fixtures.ts`}
+
+\PYG{k}{1.} Define a TypeScript type for the fixture data.
+\PYG{k}{2.} Extend Playwright\PYGZsq{}s \PYG{l+s+sb}{`test`} using \PYG{l+s+sb}{`test.extend\PYGZlt{}T\PYGZgt{}()`}.
+\PYG{k}{3.} Export the extended \PYG{l+s+sb}{`test`} and re\PYGZhy{}export \PYG{l+s+sb}{`expect`}.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Example — from `careerPath.fixtures.ts` (generalised)}
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{+w}{ }\PYG{k+kr}{as}\PYG{+w}{ }\PYG{n+nx}{base}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}@playwright/test\PYGZsq{}}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{APP\PYGZus{}URL}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../support/data/constants\PYGZsq{}}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kr}{type}\PYG{+w}{ }\PYG{n+nx}{FeatureData}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kr}{type}\PYG{+w}{ }\PYG{n+nx}{FeatureFixtures}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nx}{featureData}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{FeatureData}
+\PYG{+w}{  }\PYG{n+nx}{\PYGZus{}featureSetup}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{void}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{base}\PYG{p}{.}\PYG{n+nx}{extend}\PYG{o}{\PYGZlt{}}\PYG{n+nx}{FeatureFixtures}\PYG{o}{\PYGZgt{}}\PYG{p}{(\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nx}{featureData}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}\PYGZcb{},}\PYG{+w}{ }\PYG{n+nx}{use}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{use}\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{APP\PYGZus{}URL}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{},}
+
+\PYG{+w}{  }\PYG{c+c1}{// Auto\PYGZhy{}fixture: runs before each test without being explicitly requested}
+\PYG{+w}{  }\PYG{n+nx}{\PYGZus{}featureSetup}\PYG{o}{:}\PYG{+w}{ }\PYG{p}{[}
+\PYG{+w}{    }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{+w}{ }\PYG{p}{\PYGZcb{},}\PYG{+w}{ }\PYG{n+nx}{use}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{      }\PYG{c+c1}{// Setup: normalise browser state before the test}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{addInitScript}\PYG{p}{(()}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{localStorage}\PYG{p}{.}\PYG{n+nx}{setItem}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}sectionExpanded\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}true\PYGZsq{}}\PYG{p}{)}
+\PYG{+w}{      }\PYG{p}{\PYGZcb{})}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{use}\PYG{p}{()}
+\PYG{+w}{      }\PYG{c+c1}{// Teardown: clean up after the test (optional)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{auto}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{true}\PYG{+w}{ }\PYG{p}{\PYGZcb{},}
+\PYG{+w}{  }\PYG{p}{],}
+\PYG{p}{\PYGZcb{})}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}@playwright/test\PYGZsq{}}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Auto\PYGZhy{}fixtures vs `beforeEach`}
+
+Use \PYG{l+s+sb}{`\PYGZob{} auto: true \PYGZcb{}`} fixtures for automatic setup/teardown. **Do not use \PYG{l+s+sb}{`test.beforeEach()`} at module
+level in fixture files.**
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Composing fixtures}
+
+When a test needs data from two feature fixtures:
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{mergeTests}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}@playwright/test\PYGZsq{}}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{+w}{ }\PYG{k+kr}{as}\PYG{+w}{ }\PYG{n+nx}{featureATest}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}./featureA.fixtures\PYGZsq{}}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{+w}{ }\PYG{k+kr}{as}\PYG{+w}{ }\PYG{n+nx}{featureBTest}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}./featureB.fixtures\PYGZsq{}}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{mergeTests}\PYG{p}{(}\PYG{n+nx}{featureATest}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{featureBTest}\PYG{p}{)}
+\PYG{k}{export}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}@playwright/test\PYGZsq{}}
+\PYG{l+s+sb}{```}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 7 — Page Objects (POM)}
+
+Page objects encapsulate all interactions with a page or feature area.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Convention}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }File: \PYG{l+s+sb}{`support/pages/\PYGZlt{}feature\PYGZgt{}Page.ts`}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }One class per feature page or feature flow.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Constructor receives \PYG{l+s+sb}{`page: Page`}.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Locators are inline in methods (not in a separate file) — most are parameterised by dynamic IDs.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Create a new instance per test — never share across tests.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Example — from `careerPathPage.ts` (generalised)}
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{Page}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}@playwright/test\PYGZsq{}}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{ROUTES}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../data/routes\PYGZsq{}}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k+kd}{class}\PYG{+w}{ }\PYG{n+nx}{FeaturePage}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k+kr}{constructor}\PYG{p}{(}\PYG{k}{private}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{Page}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}\PYGZcb{}}
+
+\PYG{+w}{  }\PYG{c+c1}{// Navigation — go to the feature page}
+\PYG{+w}{  }\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{goTo}\PYG{p}{(}\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}\PYG{p}{)}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{k+kr}{goto}\PYG{p}{(}\PYG{l+s+sb}{`}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{appUrl}\PYG{l+s+si}{\PYGZcb{}\PYGZdl{}\PYGZob{}}\PYG{n+nx}{ROUTES}\PYG{p}{.}\PYG{n+nx}{HR\PYGZus{}PEOPLE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}people\PYGZhy{}row\PYGZhy{}first\PYGZsq{}}\PYG{p}{).}\PYG{n+nx}{click}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}feature\PYGZhy{}tab\PYGZsq{}}\PYG{p}{).}\PYG{n+nx}{click}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}feature\PYGZhy{}section\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{  }\PYG{c+c1}{// Assertion guard — confirm we landed on the right route}
+\PYG{+w}{  }\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{assertOnRoute}\PYG{p}{()}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{).}\PYG{n+nx}{toHaveURL}\PYG{p}{(}\PYG{l+s+sr}{/\PYGZbs{}/feature/}\PYG{p}{)}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{  }\PYG{c+c1}{// Interaction — click a button}
+\PYG{+w}{  }\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{clickSave}\PYG{p}{()}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{btn}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}feature\PYGZhy{}save\PYGZsq{}}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{btn}\PYG{p}{).}\PYG{n+nx}{toBeEnabled}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{btn}\PYG{p}{.}\PYG{n+nx}{click}\PYG{p}{()}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{  }\PYG{c+c1}{// Interaction with dynamic ID}
+\PYG{+w}{  }\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{toggleItem}\PYG{p}{(}\PYG{n+nx}{itemId}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}\PYG{p}{)}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{checkbox}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+sb}{`feature\PYGZhy{}item\PYGZhy{}checkbox\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{itemId}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{checkbox}\PYG{p}{).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{checkbox}\PYG{p}{.}\PYG{n+nx}{click}\PYG{p}{()}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{  }\PYG{c+c1}{// Assertion guard — check element visibility}
+\PYG{+w}{  }\PYG{k}{async}\PYG{+w}{ }\PYG{n+nx}{assertItemChecked}\PYG{p}{(}\PYG{n+nx}{itemId}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}\PYG{p}{)}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{k}{this}\PYG{p}{.}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+sb}{`feature\PYGZhy{}item\PYGZhy{}checkbox\PYGZhy{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{itemId}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{)).}\PYG{n+nx}{toBeChecked}\PYG{p}{()}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} What belongs in a POM method}
+
+| ✅ Include | ❌ Exclude |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| Navigation (\PYG{l+s+sb}{`page.goto`}, tab clicks) | Business assertions (\PYG{l+s+sb}{`expect(value).toBe(...)`}) |
+| Click, fill, select interactions | Data setup / API calls |
+| Navigation guards (\PYG{l+s+sb}{`toBeVisible`} after nav) | Test\PYGZhy{}specific branching logic |
+| State reads (\PYG{l+s+sb}{`sessionStorage`}, \PYG{l+s+sb}{`localStorage`}) | Unrelated page interactions |
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 8 — Helpers}
+
+Helpers are standalone utility functions for actions reused across multiple page objects or specs.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Convention}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }File: \PYG{l+s+sb}{`support/helpers/\PYGZlt{}name\PYGZgt{}.ts`}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Functions must be stateless — no module\PYGZhy{}level variables.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Use a helper when the same multi\PYGZhy{}step action appears in multiple page classes.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Example:}
+
+\PYG{l+s+sb}{```ts}
+\PYG{c+c1}{// support/helpers/loginHelpers.ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{Page}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}@playwright/test\PYGZsq{}}
+
+\PYG{k}{export}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{k+kd}{function}\PYG{+w}{ }\PYG{n+nx}{goToSigninPage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{Page}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{appUrl}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{string}\PYG{p}{)}\PYG{o}{:}\PYG{+w}{ }\PYG{n+nb}{Promise}\PYG{o}{\PYGZlt{}}\PYG{o+ow}{void}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{k+kr}{goto}\PYG{p}{(}\PYG{l+s+sb}{`}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{appUrl}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{/signin`}\PYG{p}{)}
+\PYG{+w}{  }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}cookie\PYGZhy{}consent\PYGZhy{}accept\PYGZsq{}}\PYG{p}{).}\PYG{n+nx}{click}\PYG{p}{()}
+\PYG{p}{\PYGZcb{}}
+\PYG{l+s+sb}{```}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 9 — Data (`support/data/`)}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 9.1 Routes — `routes.ts`}
+
+\PYG{g+gs}{**All route paths MUST come from `support/data/routes.ts`.**}
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{ROUTES}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{ROUTE\PYGZus{}GLOBS}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../support/data/routes\PYGZsq{}}
+
+\PYG{c+c1}{// ✅ Use the constant}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{k+kr}{goto}\PYG{p}{(}\PYG{l+s+sb}{`}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{appUrl}\PYG{l+s+si}{\PYGZcb{}\PYGZdl{}\PYGZob{}}\PYG{n+nx}{ROUTES}\PYG{p}{.}\PYG{n+nx}{HR\PYGZus{}PEOPLE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{`}\PYG{p}{)}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{waitForURL}\PYG{p}{(}\PYG{n+nx}{ROUTE\PYGZus{}GLOBS}\PYG{p}{.}\PYG{n+nx}{HR\PYGZus{}PEOPLE}\PYG{p}{)}
+
+\PYG{c+c1}{// ❌ Never hardcode}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{k+kr}{goto}\PYG{p}{(}\PYG{l+s+sb}{`}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nx}{appUrl}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+sb}{/hr/people`}\PYG{p}{)}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gs}{**Rules:**}
+
+\PYG{k}{1.} Check \PYG{l+s+sb}{`routes.ts`} before writing any navigation. If the route exists, use it.
+\PYG{k}{2.} If the route does \PYG{g+gs}{**not**} exist, \PYG{g+gs}{**ask the user**} for the correct path. Do not guess.
+\PYG{k}{3.} If a route from \PYG{l+s+sb}{`routes.ts`} doesn\PYGZsq{}t work (404, redirect), \PYG{g+gs}{**stop and ask the user**}.
+\PYG{k}{4.} Dynamic segments are assembled at the call site: `` \PYG{l+s+sb}{`\PYGZdl{}\PYGZob{}ROUTES.HR\PYGZus{}PEOPLE\PYGZcb{}/\PYGZdl{}\PYGZob{}personId\PYGZcb{}/career\PYGZhy{}path`} ``
+\PYG{k}{5.} \PYG{l+s+sb}{`ROUTE\PYGZus{}GLOBS`} are for \PYG{l+s+sb}{`waitForURL`} only — never pass to \PYG{l+s+sb}{`page.goto`}.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 9.2 Constants — `constants.ts`}
+
+Environment variables and static values shared across fixtures:
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{APP\PYGZus{}URL}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{VALID\PYGZus{}EMAIL}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{ALL\PYGZus{}LEVELS}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../support/data/constants\PYGZsq{}}
+\PYG{l+s+sb}{```}
+
+Never read \PYG{l+s+sb}{`process.env`} directly in specs or page objects — access it through \PYG{l+s+sb}{`constants.ts`}.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 9.3 Shared types — `sharedTypes.ts`}
+
+TypeScript types used across multiple files:
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{ExpertiseLevel}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../support/data/sharedTypes\PYGZsq{}}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 9.4 Dates — use `date\PYGZhy{}fns`}
+
+Always use \PYG{l+s+sb}{`date\PYGZhy{}fns`} for date manipulation. Never use raw \PYG{l+s+sb}{`Date`} arithmetic.
+
+\PYG{l+s+sb}{```ts}
+\PYG{c+c1}{// ✅ Correct}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{addDays}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{format}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{startOfToday}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}date\PYGZhy{}fns\PYGZsq{}}
+\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{endDate}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nx}{addDays}\PYG{p}{(}\PYG{n+nx}{startOfToday}\PYG{p}{(),}\PYG{+w}{ }\PYG{l+m+mf}{14}\PYG{p}{)}
+
+\PYG{c+c1}{// ❌ Wrong}
+\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{endDate}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nb}{Date}\PYG{p}{(}\PYG{n+nb}{Date}\PYG{p}{.}\PYG{n+nx}{now}\PYG{p}{()}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mf}{14}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{l+m+mf}{86400000}\PYG{p}{)}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} 9.5 Test\PYGZhy{}created data — prefix with `E2E\PYGZus{}`}
+
+Any data persisted to the database must start with \PYG{l+s+sb}{`E2E\PYGZus{}`} so it can be identified and cleaned up.
+
+\PYG{l+s+sb}{```ts}
+\PYG{c+c1}{// ✅ Identifiable}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}plan\PYGZhy{}title\PYGZhy{}input\PYGZsq{}}\PYG{p}{).}\PYG{n+nx}{fill}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}E2E\PYGZus{}Test Career Plan\PYGZsq{}}\PYG{p}{)}
+
+\PYG{c+c1}{// ❌ Indistinguishable from real data}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}plan\PYGZhy{}title\PYGZhy{}input\PYGZsq{}}\PYG{p}{).}\PYG{n+nx}{fill}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Career Plan\PYGZsq{}}\PYG{p}{)}
+\PYG{l+s+sb}{```}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 10 — API Strategy}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Real API only}
+
+| Test level | API | Why |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| Unit / Component | Mock | Speed, isolation |
+| \PYG{g+gs}{**E2E (this skill)**} | \PYG{g+gs}{**Real staging API**} | Validates end\PYGZhy{}to\PYGZhy{}end data flow, auth, business logic |
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Do not use \PYG{l+s+sb}{`graphqlMock.ts`} or \PYG{l+s+sb}{`buildDevPlanWizardHandlers`} in new tests.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Tests run against the staging environment configured in \PYG{l+s+sb}{`.env.test`}.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Use real entity IDs from the staging database. Store them in \PYG{l+s+sb}{`constants.ts`} or fixtures.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Exception — third\PYGZhy{}party services}
+
+Mock external services you don\PYGZsq{}t control (analytics, payments) to avoid flakiness:
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{route}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}**/analytics.thirdparty.com/**\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{route}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{n+nx}{route}\PYG{p}{.}\PYG{n+nx}{fulfill}\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{status}\PYG{o}{:}\PYG{+w}{ }\PYG{k+kt}{200}\PYG{+w}{ }\PYG{p}{\PYGZcb{}))}
+\PYG{l+s+sb}{```}
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 11 — Writing Tests}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} File naming}
+
+\PYG{l+s+sb}{`e2e/\PYGZlt{}featureName\PYGZgt{}.spec.ts`} — name after the feature, not the component.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Structure}
+
+\PYG{l+s+sb}{```ts}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{test}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../fixtures/careerPath.fixtures\PYGZsq{}}
+\PYG{k}{import}\PYG{+w}{ }\PYG{p}{\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{CareerPathPage}\PYG{+w}{ }\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k+kr}{from}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}../support/pages/careerPathPage\PYGZsq{}}
+
+\PYG{n+nx}{test}\PYG{p}{.}\PYG{n+nx}{describe}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Career Path\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{()}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nx}{test}\PYG{p}{.}\PYG{n+nx}{describe}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Page render\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{()}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}loads the career path page via the Career tab\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{careerPath}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{      }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nx}{CareerPathPage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{)}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{goToCareerPath}\PYG{p}{(}\PYG{n+nx}{careerPath}\PYG{p}{.}\PYG{n+nx}{appUrl}\PYG{p}{)}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{assertOnCareerPathRoute}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{})}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{})}
+
+\PYG{+w}{  }\PYG{n+nx}{test}\PYG{p}{.}\PYG{n+nx}{describe}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Current job section\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{()}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}enters edit mode and shows the sticky footer\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}\PYG{+w}{ }\PYG{n+nx}{page}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nx}{careerPath}\PYG{+w}{ }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{      }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nx}{CareerPathPage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{)}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{goToCareerPath}\PYG{p}{(}\PYG{n+nx}{careerPath}\PYG{p}{.}\PYG{n+nx}{appUrl}\PYG{p}{)}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{startEditingCurrentJob}\PYG{p}{()}
+\PYG{+w}{      }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{careerPage}\PYG{p}{.}\PYG{n+nx}{assertStickyFooterVisible}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{})}
+\PYG{+w}{  }\PYG{p}{\PYGZcb{})}
+\PYG{p}{\PYGZcb{})}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Test isolation}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Each test is independently runnable.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }No shared state between tests via module\PYGZhy{}level variables.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }No reliance on test execution order.
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Clean up any data your test creates (use fixture teardown or \PYG{l+s+sb}{`E2E\PYGZus{}`} prefix for manual cleanup).
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }When a test mutates shared staging records, make setup idempotent: remove or reset prior test\PYGZhy{}created
+  residue before the mutation, then verify teardown returns the record to its baseline.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Assertions — visibility, state, and values only}
+
+\PYG{g+gs}{**Never assert on text content**} — this is a multilingual app. Text changes by language. Assert on visibility, enabled state, checked state, and input values instead.
+
+\PYG{l+s+sb}{```ts}
+\PYG{c+c1}{// ✅ Safe — visibility and state (multilingual\PYGZhy{}compatible)}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}career\PYGZhy{}save\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeVisible}\PYG{p}{()}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}career\PYGZhy{}save\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{not}\PYG{p}{.}\PYG{n+nx}{toBeVisible}\PYG{p}{()}\PYG{+w}{  }\PYG{c+c1}{// After cancel, footer hides}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}career\PYGZhy{}save\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeEnabled}\PYG{p}{()}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}coach\PYGZhy{}settings\PYGZhy{}level\PYGZhy{}checkbox\PYGZhy{}EXPERT\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toBeChecked}\PYG{p}{()}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}coach\PYGZhy{}settings\PYGZhy{}level\PYGZhy{}checkbox\PYGZhy{}BEGINNER\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{not}\PYG{p}{.}\PYG{n+nx}{toBeChecked}\PYG{p}{()}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}career\PYGZhy{}past\PYGZhy{}start\PYGZhy{}month\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toHaveValue}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}3\PYGZsq{}}\PYG{p}{)}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{).}\PYG{n+nx}{toHaveURL}\PYG{p}{(}\PYG{l+s+sr}{/\PYGZbs{}/career\PYGZhy{}path/}\PYG{p}{)}
+
+\PYG{c+c1}{// ❌ Breaks in other languages — never do this}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}result\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toHaveText}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Success\PYGZsq{}}\PYG{p}{)}
+\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{.}\PYG{n+nx}{getByTestId}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}message\PYGZsq{}}\PYG{p}{)).}\PYG{n+nx}{toContainText}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Saved successfully\PYGZsq{}}\PYG{p}{)}
+\PYG{l+s+sb}{```}
+
+\PYG{g+gs}{**Safe assertions in your codebase:**}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toBeVisible()`} / \PYG{l+s+sb}{`not.toBeVisible()`} — element visible or hidden on screen
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toBeEnabled()`} / \PYG{l+s+sb}{`not.toBeEnabled()`} — button/input clickable or disabled
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toBeChecked()`} / \PYG{l+s+sb}{`not.toBeChecked()`} — checkbox checked or unchecked
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toHaveValue(...)`} — input/select value
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toHaveURL(...)`} — current page URL
+
+\PYG{g+gs}{**Why the negatives matter:**}
+Test that UI elements disappear after actions, not just that they appear before. For example:
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }After cancel → footer should be \PYG{g+gs}{**not.toBeVisible()**}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }After uncheck → checkbox should be \PYG{g+gs}{**not.toBeChecked()**}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }Before form is valid → button should be \PYG{g+gs}{**not.toBeEnabled()**}
+
+\PYG{g+gs}{**Unsafe assertions (never use):**}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toHaveText()`} — relies on visible text (language\PYGZhy{}dependent)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`toContainText()`} — substring in visible text (language\PYGZhy{}dependent)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`getByText()`} / \PYG{l+s+sb}{`getByLabel()`} / \PYG{l+s+sb}{`getByPlaceholder()`} — all text\PYGZhy{}based locators
+
+\PYGZhy{}\PYGZhy{}\PYGZhy{}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{} 12 — Environment \PYGZam{} Config}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} `.env.test`}
+
+| Variable | Purpose |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| \PYG{l+s+sb}{`VITE\PYGZus{}APP\PYGZus{}URL`} | Base URL for the staging app |
+| \PYG{l+s+sb}{`VALID\PYGZus{}USERNAME`} | Test user email |
+| \PYG{l+s+sb}{`VALID\PYGZus{}PASSWORD`} | Test user password |
+| \PYG{l+s+sb}{`DEV\PYGZus{}PLAN\PYGZus{}PERSON\PYGZus{}ID`} | Staging person ID for dev plan tests |
+
+Never hardcode these in test files. Access them through \PYG{l+s+sb}{`constants.ts`}.
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} `playwright.config.ts` — key settings}
+
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`testDir: \PYGZsq{}./playwright\PYGZsq{}`}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`fullyParallel: true`}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`workers: 2`} (local) / \PYG{l+s+sb}{`1`} (CI)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`retries: 2`} (CI) / \PYG{l+s+sb}{`0`} (local)
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`trace: \PYGZsq{}retain\PYGZhy{}on\PYGZhy{}failure\PYGZhy{}and\PYGZhy{}retries\PYGZsq{}`}
+\PYG{k}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+s+sb}{`expect.timeout: 15000`}
+
+\PYG{g+gu}{\PYGZsh{}\PYGZsh{}\PYGZsh{} Projects}
+
+| Project | Matches | Auth | Purpose |
+|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|\PYGZhy{}\PYGZhy{}\PYGZhy{}|
+| \PYG{l+s+sb}{`setup`} | \PYG{l+s+sb}{`support/auth.setup.ts`} | — | One\PYGZhy{}time login, saves storageState |
+| \PYG{l+s+sb}{`chromium`} | \PYG{l+s+sb}{`e2e/**/*.spec.ts`} (excl. login) | \PYG{l+s+sb}{`storageState`} | All feature tests |
+| \PYG{l+s+sb}{`chromium\PYGZhy{}public`} | \PYG{l+s+sb}{`e2e/login.spec.ts`} | — | Login/logout/auth tests |
+\end{MintedVerbatim}

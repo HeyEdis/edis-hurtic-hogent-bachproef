@@ -45,4 +45,19 @@
 
 \chapter*{\IfLanguageName{dutch}{Samenvatting}{Abstract}}
 
-\lipsum[1-4]
+Talentguide is een SaaS-platform dat personeelsgegevens omzet naar competentieprofielen, validatieflows en ontwikkelingsinzichten. Fouten in die flows kunnen rechtstreeks invloed hebben op wat een gebruiker in het platform ziet of beslist. In de bestaande React/Node.js-codebase was er geen vaste E2E-testaanpak. Problemen kwamen daardoor pas aan het licht in de productieomgeving.
+\bigskip
+\\
+De centrale onderzoeksvraag luidt: \textit{hoe kan een geautomatiseerd end-to-end testsysteem worden opgezet dat het product continu meet, zodat kwaliteit is verankerd in het ontwikkelingsproces en ervoor zorgt dat ontwikkelaars geen kostbare tijd moeten nemen om volledig nieuwe testen te schrijven?} Hiervoor is een AI-ondersteunde workflow uitgewerkt die routes van talentguide omzet naar controleerbare Playwright-testen.
+\bigskip
+\\
+Het onderzoek vertrekt vanuit een nulmeting van bestaande kwaliteitsproblemen. Daaruit kwamen terugkerende foutclusters naar voren, onder meer rond inputvalidatie, autorisatie, sessies, null- en undefined-referenties, databaseconsistentie, Azure ML-integratie en ontbrekende clientobservability. Daarna zijn de richtlijnen en benodigheden onderzocht geweest voor deze workflow. Op basis daarvan is een proof of concept gebouwd. Dit hield in dat routes eerst naar user stories worden omgezet, daarna naar kleine taken in \texttt{plan.json}, en vervolgens via de Ralph-loop worden uitgevoerd. De gegenereerde testen volgen vaste Playwright- en E2E-richtlijnen, zoals \texttt{data-testid}-locators, Page Object Models, fixtures, \texttt{storageState}, routeconstanten en progresslogs.
+\bigskip
+\\
+De evaluatie gebeurde op drie routes: \texttt{evaluation-wizard}, \texttt{people} en \texttt{coach-settings}. \texttt{evaluation-wizard} behaalde Excellent met 95\%, omdat de route uitvoerbaar was, voldoende functionele dekking had en goed terug te volgen was via plan- en progressinformatie. \texttt{people} behaalde 89\%, maar bleef finaal Acceptable. De afzonderlijke testen waren bruikbaar, maar een volledige happy-flowtest in één doorlopende test ontbrak. \texttt{coach-settings} behaalde 64\% en bleef ook Acceptable. De testcode controleerde relevant gedrag, zoals het bewaren van instellingen na reload, maar zonder plan- en progressbestand was de uitvoering minder goed te controleren.
+\bigskip
+\\
+De resultaten tonen dat de workflow bruikbare Playwright-testen kan opleveren wanneer de tussenstappen duidelijk zijn. Vooral user stories, \texttt{plan.json}, progresslogs en evaluatiecriteria maken zichtbaar waarom een test bestaat en wat al gecontroleerd is. Een werkende test alleen is dus niet genoeg. De output moet ook terug te koppelen zijn naar de gebruikersflow, de taak, de technische richtlijnen en de uitgevoerde verificatie.
+\bigskip
+\\
+AI-ondersteunde E2E-testgeneratie is voor talentguide haalbaar als ondersteunende workflow. De workflow kan ontwikkelaars helpen om sneller van gebruikersflow naar reviewbare Playwright testen te gaan. Menselijke review blijft nodig voor scope, minimumcriteria, testdata, richtlijnconformiteit en opname in de codebase.

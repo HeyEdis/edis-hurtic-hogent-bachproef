@@ -1,0 +1,5 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nv}{STORY\PYGZus{}NAME}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}basename\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}PLAN}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }.json\PYG{k}{)}
+\PYG{n+nv}{PROGRESS}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{PLANS\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{STORY\PYGZus{}NAME}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{.progress.md\PYGZdq{}}
+\PYG{n+nv}{USER\PYGZus{}STORY\PYGZus{}RAW}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}grep\PYG{+w}{ }\PYGZhy{}o\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}\PYGZdq{}user\PYGZus{}story\PYGZdq{}[[:space:]]*:[[:space:]]*\PYGZdq{}[\PYGZca{}\PYGZdq{}]*\PYGZdq{}\PYGZsq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}PLAN}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }head\PYG{+w}{ }\PYGZhy{}1\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }cut\PYG{+w}{ }\PYGZhy{}d\PYG{l+s+s1}{\PYGZsq{}\PYGZdq{}\PYGZsq{}}\PYG{+w}{ }\PYGZhy{}f4\PYG{+w}{ }\PYG{o}{||}\PYG{+w}{ }\PYG{n+nb}{true}\PYG{k}{)}
+\end{MintedVerbatim}

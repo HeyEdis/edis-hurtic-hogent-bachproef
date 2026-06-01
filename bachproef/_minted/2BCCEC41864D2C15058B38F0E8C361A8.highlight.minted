@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nv}{PROMPT}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}cat\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}PROMPT\PYGZus{}FILE}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}
+\PYG{n+nv}{CONTEXT}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}@}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{PLAN}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ @}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{PROGRESS}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{k}{if}\PYG{+w}{ }\PYG{o}{[[}\PYG{+w}{ }\PYGZhy{}n\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}USER\PYGZus{}STORY}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYGZhy{}f\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}USER\PYGZus{}STORY}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{o}{]]}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{n+nv}{CONTEXT}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}@}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{USER\PYGZus{}STORY}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ }\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CONTEXT}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{k}{fi}
+
+run\PYGZus{}codex\PYGZus{}exec\PYG{+w}{ }\PYG{n+nv}{\PYGZdl{}CODEX\PYGZus{}FLAGS}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}CONTEXT}\PYG{l+s+s2}{ }\PYG{n+nv}{\PYGZdl{}PROMPT}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{o}{||}\PYG{+w}{ }\PYG{n+nb}{true}
+\end{MintedVerbatim}

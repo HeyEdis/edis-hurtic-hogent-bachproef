@@ -1,0 +1,21 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nx}{test}\PYG{p}{.}\PYG{n+nx}{describe}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Search\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{()}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n+nx}{test}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}filters people by name and restores the full list when cleared\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{async}\PYG{+w}{ }\PYG{p}{(\PYGZob{}}
+\PYG{+w}{        }\PYG{n+nx}{page}\PYG{p}{,}
+\PYG{+w}{        }\PYG{n+nx}{peopleData}\PYG{p}{,}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{})}\PYG{+w}{ }\PYG{p}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o+ow}{new}\PYG{+w}{ }\PYG{n+nx}{PeoplePage}\PYG{p}{(}\PYG{n+nx}{page}\PYG{p}{)}
+
+\PYG{+w}{        }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{p}{.}\PYG{n+nx}{goTo}\PYG{p}{(}\PYG{n+nx}{peopleData}\PYG{p}{.}\PYG{n+nx}{appUrl}\PYG{p}{)}
+\PYG{+w}{        }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{initialRowCount}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{p}{.}\PYG{n+nx}{countRows}\PYG{p}{()}
+\PYG{+w}{        }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{p}{.}\PYG{n+nx}{searchByName}\PYG{p}{(}\PYG{n+nx}{peopleData}\PYG{p}{.}\PYG{n+nx}{searchPersonName}\PYG{p}{)}
+\PYG{+w}{        }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{filteredRowCount}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{p}{.}\PYG{n+nx}{countRows}\PYG{p}{()}
+\PYG{+w}{        }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{p}{.}\PYG{n+nx}{clearSearch}\PYG{p}{()}
+\PYG{+w}{        }\PYG{k+kd}{const}\PYG{+w}{ }\PYG{n+nx}{restoredRowCount}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{await}\PYG{+w}{ }\PYG{n+nx}{peoplePage}\PYG{p}{.}\PYG{n+nx}{countRows}\PYG{p}{()}
+
+\PYG{+w}{        }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{filteredRowCount}\PYG{p}{).}\PYG{n+nx}{toBeGreaterThan}\PYG{p}{(}\PYG{l+m+mf}{0}\PYG{p}{)}
+\PYG{+w}{        }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{restoredRowCount}\PYG{p}{).}\PYG{n+nx}{toBeGreaterThan}\PYG{p}{(}\PYG{n+nx}{filteredRowCount}\PYG{p}{)}
+\PYG{+w}{        }\PYG{n+nx}{expect}\PYG{p}{(}\PYG{n+nx}{restoredRowCount}\PYG{p}{).}\PYG{n+nx}{toBeGreaterThanOrEqual}\PYG{p}{(}\PYG{n+nx}{initialRowCount}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{})}
+\PYG{p}{\PYGZcb{})}
+\end{MintedVerbatim}

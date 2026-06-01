@@ -1,0 +1,18 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{p+pIndicator}{\PYGZhy{}}\PYG{+w}{ }\PYG{n+nt}{name}\PYG{p}{:}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{Create client test env file}
+\PYG{n+nt}{run}\PYG{p}{:}\PYG{+w}{ }\PYG{p+pIndicator}{|}
+\PYG{l+lScalar+lScalarPlain}{printf \PYGZsq{}\PYGZpc{}s\PYGZbs{}n\PYGZsq{} \PYGZbs{}}
+\PYG{l+s}{\PYGZsq{}VITE\PYGZus{}APP\PYGZus{}ENV=testing\PYGZsq{}}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{\PYGZbs{}}
+\PYG{l+s}{\PYGZsq{}CI=true\PYGZsq{}}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{\PYGZbs{}}
+\PYG{l+s}{\PYGZsq{}VITE\PYGZus{}APP\PYGZus{}URL=https://\PYGZdl{}\PYGZob{}\PYGZob{}}\PYG{n+nv}{ }\PYG{l+s}{vars.CLIENT\PYGZus{}BASE\PYGZus{}URL\PYGZus{}DEVELOPMENT}\PYG{n+nv}{ }\PYG{l+s}{\PYGZcb{}\PYGZcb{}\PYGZsq{}}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{\PYGZbs{}}
+\PYG{l+s}{\PYGZsq{}BASE\PYGZus{}URL=https://\PYGZdl{}\PYGZob{}\PYGZob{}}\PYG{n+nv}{ }\PYG{l+s}{vars.CLIENT\PYGZus{}BASE\PYGZus{}URL\PYGZus{}DEVELOPMENT}\PYG{n+nv}{ }\PYG{l+s}{\PYGZcb{}\PYGZcb{}\PYGZsq{}}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{\PYGZbs{}}
+\PYG{l+s}{\PYGZsq{}VALID\PYGZus{}USERNAME=\PYGZdl{}\PYGZob{}\PYGZob{}}\PYG{n+nv}{ }\PYG{l+s}{vars.VALID\PYGZus{}USERNAME}\PYG{n+nv}{ }\PYG{l+s}{\PYGZcb{}\PYGZcb{}\PYGZsq{}}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{\PYGZbs{}}
+\PYG{l+s}{\PYGZsq{}VALID\PYGZus{}PASSWORD=\PYGZdl{}\PYGZob{}\PYGZob{}}\PYG{n+nv}{ }\PYG{l+s}{secrets.VALID\PYGZus{}SEEDED\PYGZus{}TEST\PYGZus{}USER\PYGZus{}PASSWORD}\PYG{n+nv}{ }\PYG{l+s}{\PYGZcb{}\PYGZcb{}\PYGZsq{}}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{\PYGZbs{}}
+\PYG{p+pIndicator}{\PYGZgt{}}\PYG{err}{ apps/client/.env.test}
+
+\PYG{p+pIndicator}{\PYGZhy{}}\PYG{+w}{ }\PYG{n+nt}{name}\PYG{p}{:}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{Run changed Playwright tests}
+\PYG{n+nt}{run}\PYG{p}{:}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{npm run test:e2e \PYGZhy{}\PYGZhy{}workspace=apps/client \PYGZhy{}\PYGZhy{} \PYGZhy{}\PYGZhy{}only\PYGZhy{}changed=origin/\PYGZdl{}GITHUB\PYGZus{}BASE\PYGZus{}REF}
+
+\PYG{p+pIndicator}{\PYGZhy{}}\PYG{+w}{ }\PYG{n+nt}{name}\PYG{p}{:}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{Run Playwright tests}
+\PYG{n+nt}{run}\PYG{p}{:}\PYG{+w}{ }\PYG{l+lScalar+lScalarPlain}{npm run test:e2e \PYGZhy{}\PYGZhy{}workspace=apps/client \PYGZhy{}\PYGZhy{}}
+\end{MintedVerbatim}

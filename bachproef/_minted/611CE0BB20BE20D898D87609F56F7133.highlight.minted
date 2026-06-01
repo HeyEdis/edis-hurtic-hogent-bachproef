@@ -1,0 +1,20 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n+nv}{ITERATIONS}\PYG{o}{=}\PYG{l+m}{5}
+\PYG{n+nv}{STORY}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}\PYGZdq{}}
+\PYG{n+nv}{HITL}\PYG{o}{=}\PYG{n+nb}{false}
+\PYG{n+nv}{AFK}\PYG{o}{=}\PYG{n+nb}{false}
+\PYG{n+nv}{SANDBOX}\PYG{o}{=}\PYG{n+nb}{false}
+\PYG{n+nv}{YOLO}\PYG{o}{=}\PYG{n+nb}{false}
+
+\PYG{k}{while}\PYG{+w}{ }\PYG{o}{[[}\PYG{+w}{ }\PYG{n+nv}{\PYGZdl{}\PYGZsh{}}\PYG{+w}{ }\PYGZhy{}gt\PYG{+w}{ }\PYG{l+m}{0}\PYG{+w}{ }\PYG{o}{]]}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{k}{case}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}1}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{k}{in}
+\PYGZhy{}\PYGZhy{}hitl\PYG{o}{)}\PYG{+w}{ }\PYG{n+nv}{HITL}\PYG{o}{=}true\PYG{p}{;}\PYG{+w}{ }\PYG{n+nv}{ITERATIONS}\PYG{o}{=}\PYG{l+m}{1}\PYG{+w}{ }\PYG{p}{;;}
+\PYGZhy{}\PYGZhy{}afk\PYG{o}{)}\PYG{+w}{ }\PYG{n+nv}{AFK}\PYG{o}{=}true\PYG{p}{;}\PYG{+w}{ }\PYG{n+nv}{YOLO}\PYG{o}{=}\PYG{n+nb}{true}\PYG{+w}{ }\PYG{p}{;;}
+\PYGZhy{}\PYGZhy{}sandbox\PYG{o}{)}\PYG{+w}{ }\PYG{n+nv}{SANDBOX}\PYG{o}{=}\PYG{n+nb}{true}\PYG{+w}{ }\PYG{p}{;;}
+\PYGZhy{}\PYGZhy{}yolo\PYG{o}{)}\PYG{+w}{ }\PYG{n+nv}{YOLO}\PYG{o}{=}\PYG{n+nb}{true}\PYG{+w}{ }\PYG{p}{;;}
+\PYGZhy{}\PYGZhy{}story\PYG{o}{=}*\PYG{o}{)}\PYG{+w}{ }\PYG{n+nv}{STORY}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{1}\PYG{p}{\PYGZsh{}*=}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{;;}
+\PYG{o}{[}\PYG{l+m}{0}\PYGZhy{}9\PYG{o}{]}*\PYG{o}{)}\PYG{+w}{ }\PYG{n+nv}{ITERATIONS}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}1}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{;;}
+\PYG{k}{esac}
+\PYG{n+nb}{shift}
+\PYG{k}{done}
+\end{MintedVerbatim}

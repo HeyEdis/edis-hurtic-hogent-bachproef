@@ -18,7 +18,7 @@ Deze profielen vormen de basis voor verdere inzichten binnen het platform. Talen
 Het grote probleem is dat er nu geen metingen zijn uitgevoerd op de productkwaliteit, waardoor er geen maatstaf is om te zien hoe groot of klein problemen zijn. Dit komt door het gebrek aan E2E testen in de huidige React/Node.js codebase. Dit leidt ertoe dat releases naar de productieomgeving breken en een slechte gebruikerservaring opleveren.
 \bigskip
 \\
-Om deze productkwaliteit te verankeren zonder de snelheid van het ontwikkelingsteam te belemmeren is de integratie van Artificiële Intelligentie (AI) onderzocht. Hierbij staat de inzet van een geoptimaliseerd skill bestand centraal. Door AI-agents via dit bestand te voorzien van technische richtlijnen over de codebase en de structuur van volwaardige testen, kan de drempel voor het genereren van testen worden verlaagd. Deze geautomatiseerde testen zijn vervolgens verankerd in het ontwikkelingsproces door die te integreren binnen de CI/CD pijplijn van de GitHub omgeving. Hierdoor wordt bij elke oplevering van nieuwe functionaliteiten direct gevalideerd, wat een continue terugkoppeling tussen ontwikkeling en kwaliteit garandeert.
+Om deze productkwaliteit te verankeren zonder de snelheid van het ontwikkelingsteam te belemmeren is de integratie van Artificiële Intelligentie (AI) onderzocht. Hierbij staat de inzet van een geoptimaliseerd vaardigheidsbestand centraal. Door AI-agents via dit bestand te voorzien van technische richtlijnen over de codebase en de structuur van volwaardige testen, kan de drempel voor het genereren van testen worden verlaagd. Deze geautomatiseerde testen zijn vervolgens verankerd in het ontwikkelingsproces door die te integreren binnen de CI/CD pijplijn van de GitHub omgeving. Hierdoor wordt bij elke oplevering van nieuwe functionaliteiten direct gevalideerd, wat een continue terugkoppeling tussen ontwikkeling en kwaliteit garandeert.
 \bigskip
 \\
 Ondanks de efficiëntievoordelen brengt het gebruik van Large Language Models (LLMs) in Quality Assurance (QA) processen specifieke risico's met zich mee, zoals gehallucineerd gebruikersgedrag waarbij de AI foutieve scenario’s genereert om het successtadium te bereiken. Bovendien kan de AI gegenereerde code het debuggen bemoeilijken, waarbij de analyse van testfouten transformeert van het lezen van code naar ingewikkeld "detectivewerk".
@@ -109,7 +109,7 @@ Vervolgens zal het Sentry dashboard kritisch worden onderzocht, omdat dit platfo
 \\
 Na deze fase is er inzicht in de tekortkomingen in de huidige opzet, wat als basis dient voor het ontwerpen van een oplossing die is toegespitst op de geïdentificeerde noden.
 
-\subsection{Fase 2: Requirements-analyse}
+\subsection{Fase 2: Richtlijnen en benodigheden}
 Deze fase geeft verduidelijking op de volgende deelvragen:
 \begin{itemize}
     \item Hoe kan kwaliteitscontrole een deel worden van het ontwikkelingsproces?
@@ -117,15 +117,11 @@ Deze fase geeft verduidelijking op de volgende deelvragen:
     \item Welke tools bestaan er om E2E testen te automatiseren?
 \end{itemize}
 
-Nadat de oorzaken voor de huidige kwaliteit tekortkomingen zijn geïdentificeerd, richt deze fase zich op de requirements analyse van de AI testworkflow. 
-Het doel hiervan is het opstellen van de nodige functionele en niet functionele vereisten die als technische richtlijnen zullen dienen van het skill bestand. Dit waarborgt dat de AI output artefacten oplevert die kunnen integreren in de codebase van talentguide.
-Deze eisen pakken zijn niet alleen gericht om de huidige incidenten aan te pakken, maar garanderen ook de schaalbaarheid en toekomstbestendigheid van de workflow. In overleg met de IT lead en de copromotor is besloten om Playwright te gebruiken als het testing raamwerk voor de oplossing.
+Nadat de oorzaken voor de huidige kwaliteit tekortkomingen zijn geïdentificeerd, richt deze fase zich op de richtlijnen en benodigdheden te definiëren. van de AI testworkflow. Het doel hiervan is het opstellen van de nodige ricthlijnen voor elk vaardigheidsbestand, hoe de keten samenwerkt, wat de test coverage niveaus zijn en de functionele en non-functionele technische richtlijnen voor elk vaardigheidsbestand. Dit waarborgt dat de AI output artefacten oplevert die kunnen integreren in de codebase van talentguide.
+Deze eisen garanderen de schaalbaarheid en toekomstbestendigheid van de workflow. In overleg met de IT lead en de copromotor is besloten om Playwright te gebruiken als het testing raamwerk voor de oplossing.
 \bigskip
 \\
-Om de prioriteiten van de behoeften te bepalen zal de MoSCoW methode worden toegepast op de verzamelde eisen. Daarnaast worden de succescriteria gedefinieerd voor de evaluatie van LLM modellen in de latere fase.
-\bigskip
-\\
-Na deze fase is er een lijst met vereisten en kwaliteitsnormen die als basis dienen voor de ontwikkeling van het prototype.
+Na deze fase zijn er tabellen met vereisten en kwaliteitsnormen die als basis dienen voor de ontwikkeling van het prototype.
 
 
 \subsection{Fase 3: Opzet van het prototype}
@@ -135,13 +131,13 @@ Deze fase geeft verduidelijking op de volgende deelvragen:
     \item Welke procedures kunnen opgezet worden om de productkwaliteit te verhogen
 \end{itemize}
 
-In deze fase zal er een proof-of-concept woorden ontwikkeld volgens de richtlijnen die zijn vastgesteld in de requirement analyse. Dit prototype bestaat uit een geautomatiseerde testingworkflow die integreert met de ontwikkelingscyclus van Talentguide. De opzet start met het invoeren van het Playwright framework, waarbij de configuratie zal worden afgestemd op de eisen van de repository en CI/CD pijplijn.
+In deze fase zal er een proof-of-concept woorden ontwikkeld volgens de richtlijnen die zijn vastgesteld in de vorige fase. Dit prototype bestaat uit een geautomatiseerde testingworkflow die integreert met de ontwikkelingscyclus van talentguide. De opzet start met het invoeren van het Playwright framework, waarbij de configuratie zal worden afgestemd op de eisen van de repository en CI/CD pijplijn.
 \bigskip
 \\
 Bij het schrijven van de testen worden de beste praktijken van Playwright gebruikt. Hier zal worden gebruikgemaakt van het Page Object Model (POM). Hierbij zullen de interacties met de gebruikersinterface worden geabstraheerd in afzonderlijke klassen. Daarnaast zal er worden gewerkt met fixtures en een centrale support folder voor mockdata, constanten en helper methodes. Voor de authenticatie zal de officiële Playwright auth-setup geïmplementeerd worden, hierdoor kan de inlog sessie gedeeld worden over de volledige testsuite.
 \bigskip
 \\
-Ook is een noodzakelijk onderdeel van deze automatisering het ontwikkelen van een robuust skill bestand. Dit document dient als technische richtlijnen voor de AI agents om met minimale tussenkomst van de ontwikkelaar end-to-end testen te kunnen generen. Door deze toevoeging zal de drempel van Test Driven Development (TDD) verlaagd worden en wordt de objectieve meting van d productkwaliteit gefaciliteerd.
+Ook is een noodzakelijk onderdeel van deze automatisering het ontwikkelen van robuuste vaardigheidsbestanden. Dit document dient als technische richtlijnen voor de AI agents om met minimale tussenkomst van de ontwikkelaar end-to-end testen te kunnen generen. Door deze toevoeging zal de drempel van Test Driven Development (TDD) verlaagd worden en wordt de objectieve meting van d productkwaliteit gefaciliteerd.
 \bigskip
 \\
 Na deze fase is er een praktische blauwdruk voor toekomstige uitvoering met een coding agent.
@@ -149,10 +145,7 @@ Na deze fase is er een praktische blauwdruk voor toekomstige uitvoering met een 
 
 \subsection{Fase 4: Evaluatie}
 
-Deze fase richt zich op de beoordeling van het prototype door het skill bestand in te zetten als een objectieve maatstaf voor de kwaliteitsborging. Hier zal de toepasbaarheid worden afgetoetst van de technische richtlijnen door verschillende LLM modellen hetzelfde testscenario te laten genereren. De evaluatie vindt plaats op basis van drie kernpunten.
-\bigskip
-\\
-Ten eerste in welke mate zullen de testen volgens de gedefinieerde architectuur gegenereerd worden. Ten tweede zal er worden onderzocht of de testen direct en zonder menselijke tussenkomst volledig functioneel zijn. Ten slotte zal de impact op de gevonden incidenten uit fase 1 geverifieerd worden als de testsuite daadwerkelijk deze opvangt in de development omgeving. 
+Deze fase richt zich op de beoordeling van het prototype door het evaluatie vaardigheidsbestand in te zetten als een objectieve maatstaf voor de kwaliteitsborging. Hierbij is het kwaliteitsniveau toegekend a.d.h.v minimale criteria en de toepasbaarheid van de technische richtlijnen.
 \bigskip
 \\
 Na deze fase kan een conclusie gevormd worden als de ontwikkelde aanpak de productkwaliteit daadwerkelijk kan verbeteren.
@@ -161,8 +154,8 @@ Na deze fase kan een conclusie gevormd worden als de ontwikkelde aanpak de produ
 \section{Verwacht resultaat, conclusie}%
 \label{sec:verwachte_resultaten}
 
-Het verwachte resultaat van dit onderzoek is het identificeren waar de laagste productkwaliteit zich bevindt, om vervolgens een structurele oplossing in te voeren die de foutmarge binnen het platform verlaagt. Dit proces vertrekt vanuit een grondige analyse van de vijf meest voorkomende incidenten in Sentry. Het opgeleverde artefact is een werkend prototype van een geautomatiseerde end-to-end testingworkflow aangedreven door Playwright en ondersteund door een AI-gestuurde workflow. De kern van deze automatisering bestaat uit een skill bestand die de nodige technische richtlijnen bevat voor de generatie van testen.
-De centrale hypothese is dat de integratie van dit skill bestand de drempel voor Test Driven Development (TDD) verlaagt, waardoor AI-agents in staat zijn om met minimale menselijke tussenkomst kwalitatieve testen te genereren. Daarnaast zal het prototype meetbare data opleveren over de feedbackloop van de CI/CD pijplijn en de kostenefficiëntie van de gekozen methode.
+Het verwachte resultaat van dit onderzoek is het identificeren waar de laagste productkwaliteit zich bevindt, om vervolgens een structurele oplossing in te voeren die de foutmarge binnen het platform verlaagt. Dit proces vertrekt vanuit een grondige analyse van de vijf meest voorkomende incidenten in Sentry. Het opgeleverde artefact is een werkend prototype van een geautomatiseerde end-to-end testingworkflow aangedreven door Playwright en ondersteund door een AI-gestuurde workflow. De kern van deze automatisering bestaat uit een vaardigheidsbestand die de nodige technische richtlijnen bevat voor de generatie van testen.
+De centrale hypothese is dat de integratie van deze vaardigheidsbestanden de drempel voor Test Driven Development (TDD) verlaagt, waardoor AI-agents in staat zijn om met minimale menselijke tussenkomst kwalitatieve testen te genereren. Daarnaast zal het prototype meetbare data opleveren over de feedbackloop van de CI/CD pijplijn en de kostenefficiëntie van de gekozen methode.
 
 \subsection{Conclusie}
 
